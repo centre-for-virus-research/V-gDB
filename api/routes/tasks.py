@@ -26,11 +26,11 @@ def run_sequence_alignment(request):
     params = dict(request.GET.items())
     query = params.get("query")
 
-    tasks = Tasks(database=database)
+    tasks = Tasks(database=database, query=query)
 
     try:
         queue = django_rq.get_queue('default')
-        job = queue.enqueue(tasks.run_sequence_alignment(query))  # Submit task to queue
+        job = queue.enqueue(tasks.run_sequence_alignment)  # Submit task to queue
         return Response(job.id)
     except ConnectionError as e:
         print(f"Error: {e}")

@@ -10,8 +10,8 @@ def get_features(request):
 
     database = request.headers.get('database', 'default')
 
-    features_helper = Features(database=database)
-    features = features_helper.get_features()
+    features = Features(database=database)
+    features = features.get_features()
 
     return Response(features)
 

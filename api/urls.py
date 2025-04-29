@@ -7,7 +7,7 @@ from api.routes import statistics
 from api.routes import features
 from api.routes import genes
 from api.routes import tasks
-from api.routes import filters
+from api.routes import search
 
 # MAIN API endpoints! 
 # Virus Web Resource GUI will 
@@ -64,10 +64,10 @@ urlpatterns = [
 
 
     # FILTERS
-    path('filters/search_isolate_ids/<str:query>', filters.search_isolate_ids, name='search_isolate_ids'),
-    path('filters/search_pubmed_ids/<str:query>', filters.search_pubmed_ids, name='search_pubmed_ids'),
-    path('filters/search_hosts/<str:query>', filters.search_hosts, name='search_hosts'),
-    path('filters/search_primary_accession_ids/<str:query>', filters.search_primary_accession_ids, name='search_primary_accession_ids'),
+    path('filters/search_isolate_ids/<str:query>', search.search_isolate_ids, name='search_isolate_ids'),
+    path('filters/search_pubmed_ids/<str:query>', search.search_pubmed_ids, name='search_pubmed_ids'),
+    path('filters/search_hosts/<str:query>', search.search_hosts, name='search_hosts'),
+    path('filters/search_primary_accession_ids/<str:query>', search.search_primary_accession_ids, name='search_primary_accession_ids'),
 
 
 

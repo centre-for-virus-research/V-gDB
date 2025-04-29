@@ -4,17 +4,6 @@ from django.db import connections
 
 from models.helpers import dictfetchall  # Ensure this function is imported
 
-@api_view(['GET'])
-def get_primary_accession_ids(request):
-
-    database = request.headers.get('database', 'default')
-
-    with connections[database].cursor() as cursor:
-
-        cursor.execute("SELECT DISTINCT(primary_accession) FROM meta_data;")
-        data = dictfetchall(cursor)
-
-    return Response(data)
 
 @api_view(['GET'])
 def search_primary_accession_ids(request, query):

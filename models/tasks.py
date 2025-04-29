@@ -1,16 +1,7 @@
-from django.db import connections
-import time
 import logging
-import django_rq
-import django
-from itertools import groupby
 import rq
-
 import os
-import sys
-
 from os.path import join
-
 from pathlib import Path
 
 
@@ -18,8 +9,9 @@ logger = logging.getLogger(__name__)
 
 # ALL OF THESE USE redis server to work
 class Tasks:
-    def __init__(self, database):
+    def __init__(self, database, query):
         self.database = database  
+        self.query = query
 
     @staticmethod
     def path_to_basename(file_path):
@@ -33,12 +25,12 @@ class Tasks:
         os.makedirs(join("jobs",job), exist_ok=True)
 
     # OFFICEAL SEQUENCE ALIGNMNET TASK CODE
-    def run_sequence_alignment(self, query):
+    def run_sequence_alignment(self):
         # Add in sequence alignment logic here
         logger.info(f"Starting sequence alignment")
-        print(query)
         job = rq.get_current_job()
-        job.meta['status'] = "running"
+        job.meta['status'] = "done"
+        job.save_meta()
 
         return job.meta
 

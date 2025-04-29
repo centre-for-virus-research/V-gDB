@@ -11,6 +11,8 @@ from models.features import Features
 
 # ----------------------------------------------------------------------
 # View to enqueue a sequence alignment job
+#     # redis-server IN THE COMMAND LINE
+#     # python manage.py rqworker default MUST RUN THIS TO GET IT TO WORK
 # ----------------------------------------------------------------------
 @api_view(['GET'])
 def run_sequence_alignment(request):

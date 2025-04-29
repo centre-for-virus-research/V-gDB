@@ -60,25 +60,3 @@ def download_alignments(request):
     return response
 
 
-
-
-    
-    
-
-    # query = "/Users/dana/CVR/backend/models/mt862689.fa"
-    # ref_seq = "/Users/dana/CVR/backend/models/ef437215.fa"
-    # tmp_folder = "/Users/dana/CVR/backend/models/tmp/"
-    # output_file = "query_tophits.tsv"
-    # master_acc = "EF437215"
-    # processor = BlastAlignment(query, ref_seq, tmp_folder, output_file, master_acc)
-    # processor.run_makeblastdb()
-    # processor.run_blastn()
-    # # processor.process_non_segmented_virus()
-    # print("done")
-
-    # with open('/Users/dana/CVR/backend/models/tmp/query_tophits.tsv', 'r') as file:
-    #     response = HttpResponse(file, content_type='text')
-    #     response['Content-Disposition'] = 'attachment; filename=blast_results.tsv'
-    #     # os.remove('my_fasta.fasta')
-    return Response(job.id)
-

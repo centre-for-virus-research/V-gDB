@@ -1,0 +1,7 @@
+__pycache__/
+jobs/
+.DS_Store
+analysis/
+models/alignment/gB_matrix_raw.tsv
+dump.rdb
+V_gDB

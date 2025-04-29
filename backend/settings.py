@@ -94,15 +94,6 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     
     'RABV': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'GLUE_TOOLS',
-        'USER': 'gluetools',
-        'PASSWORD': 'glue12345',
-        'HOST': 'localhost',
-        'PORT':'3306',
-    },
-
-    'RABV_NEW': {
         'ENGINE': 'django.db.backends.sqlite3',
         # 'NAME': '/Users/danaallen/CVR/databases/rabv-gdb.db',
         # 'NAME': '/Users/dana/CVR/databases/rabv_apr0825.db',
@@ -120,29 +111,9 @@ DATABASES = {
         'PASSWORD': 'glue12345',
         'HOST': 'localhost',
         'PORT':'3306',
-        # 'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': 'GLUE_TOOLS_HCV',
-        # 'USER': 'gluetools',
-        # 'PASSWORD': 'glue12345',
-        # 'HOST': 'localhost',
-        # 'PORT':'3306',
+
     },
-    # 'BTV': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'GLUE_TOOLS_BTV',
-    #     'USER': 'gluetools',
-    #     'PASSWORD': 'glue12345',
-    #     'HOST': 'localhost',
-    #     'PORT':'3306',
-    # },
-    #     'HBV': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'GLUE_TOOLS_HBV',
-    #     'USER': 'gluetools',
-    #     'PASSWORD': 'glue12345',
-    #     'HOST': 'localhost',
-    #     'PORT':'3306',
-    # }
+
 }
 
 

@@ -61,7 +61,7 @@ def get_sequences_meta_data_by_filters(request):
 @api_view(['GET'])
 def download_sequences_meta_data(request):
 
-    database = request.headers.get('database', 'RABV_NEW')
+    database = request.headers.get('database', 'default')
     params = dict(request.GET.items())
 
     sequences = Sequences(database=database, filters=params)
@@ -122,7 +122,7 @@ def get_host_species(request):
 
 @api_view(['GET'])
 def advanced_filter(request, query):
-    database = request.headers.get('database', 'RABV_NEW')
+    database = request.headers.get('database', 'default')
     query="SELECT * FROM meta_data WHERE"+query
 
     with connections[database].cursor() as cursor:

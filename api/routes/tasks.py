@@ -87,7 +87,7 @@ def get_alignment_results(request, job_id):
     primary_seq = sequences[0]["seq"]
     aligned_sequences = sequences[1:]
 
-    features_helper = Features(database='RABV_NEW')
+    features_helper = Features(database='RABV')
     features = features_helper.get_feature(primary_accession)
 
     result = [{

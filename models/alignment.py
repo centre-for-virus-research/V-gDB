@@ -58,7 +58,7 @@ class Alignment:
             reader = csv.reader(file, delimiter="\t")
             for row in reader:
                 sequence_id = row[1]  # Extract the second column (DB search key)
-                sequences_helper = Sequences(database='RABV_NEW')
+                sequences_helper = Sequences(database='RABV')
                 data = sequences_helper.get_sequence_meta_data(sequence_id)
                 # Append metadata to the row
                 row.append(data["meta_data"]["length"])

@@ -19,7 +19,7 @@ import json
 @api_view(['GET'])
 def download_alignments(request):
 
-    database = request.headers.get('database', 'RABV_NEW')
+    database = request.headers.get('database', 'default')
 
     
     params = dict(request.GET.items())

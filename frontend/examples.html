@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}  <!-- ✅ Load static files here -->
+{% block title %}Viral Genome Database{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/examples.css' %}">
+{% endblock %}
+
+
+{% block content %}
+    <div class="container-examples">
+        <h1>V-gDB Example API Scripts</h1>
+
+        <p>
+            To help users integrate V-gDB into their workflow, we provide a collection of example 
+            scripts demonstrating how to make API requests in different programming languages. 
+            Whether you're using Python, JavaScript, R, or another language, these samples offer 
+            a quick and easy way to interact with the database. Each script showcases essential API 
+            calls, from retrieving viral genome data to filtering results, so you can get started 
+            with minimal setup.
+        </p>
+
+        <h2>Two Ways to Use V-gDB: Hosted API or Local Installation</h2>
+        <p>V-gDB offers two flexible ways to access viral genome data, depending on your needs:</p>
+        <ol>
+            <li> 
+                <h3>Hosted API Access</h3>
+                <ul>
+                    <li>Use the predefined V-gDB API endpoint to directly connect to our curated viral genome dataset 
+                    through simple API requests. </li>
+                    <li>This option requires no setup — just make your requests to our 
+                    server and start retrieving data right away.</li>
+            </ul>
+                    
+            </li>
+            <li> 
+                <h3>Local Installation with Custom Datasets</h3>
+                <ul>
+                    <li>Install the V-gDB app locally to run the API on your own machine via localhost:8000.</li> 
+                    <li>This option allows you to use your own viral genome dataset, giving you full control 
+                    over the data and environment for custom analyses.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p>
+            Both methods offer the same functionality, with the freedom to choose between convenience or 
+            customization based on your project needs.
+        </p>
+
+
+        <h2>API Endpoint Examples</h2>  
+        <p>
+            Below are some basic examples on how to setup and use the V-gDB API. For more advanced examples, 
+            download the V-gDB codebase and view the scripts inside the 
+            <a class="text-code">/templates/example_code_scripts/</a>.
+        </p>
+        <div class="language-selector">
+            <button class="btn-api" onclick="showCode('python')">Python</button>
+            <button class="btn-api" onclick="showCode('javascript')">JavaScript</button>
+            <button class="btn-api" onclick="showCode('java')">Java</button>
+            <button class="btn-api" onclick="showCode('ruby')">Ruby</button>
+            <button class="btn-api" onclick="showCode('r')">R</button>
+            <button class="btn-api" onclick="showCode('perl')">Perl</button>
+        </div>
+        
+        <div class="code-container">
+            <pre><code id="code-snippet"></code></pre>
+        </div>
+        
+        
+    </div>
+
+    <script src="/static/javascript/examples.js"></script>
+
+{% endblock %}

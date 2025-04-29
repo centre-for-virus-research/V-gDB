@@ -1,0 +1,177 @@
+.development-banner {
+    background-color: #fff3cd;  /* Light yellow background */
+    border: 2px solid #ffc107;  /* Yellow border */
+    color: #856404 !important;             /* Dark yellowish text color */
+    
+}
+
+
+.container-home {
+    
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.title {
+    text-align: center;
+}
+h1 {
+    color: #333;
+}
+.card-container {
+    display: flex;
+    /* justify-content: center; */
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+.card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 250px;
+    text-align: center;
+    padding: 15px;
+    transition: transform 0.3s ease-in-out;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.card i {
+    color:#008cba;
+}
+
+.card-tools {
+    color:#008cba;
+}
+.card h2 {
+    font-size: 20px;
+    margin: 10px 0;
+    color: #333;
+}
+.card p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+.card a {
+    display: inline-block;
+    padding: 8px 12px;
+    
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+.rabv {
+    background: #006e2c;
+}
+.card a:hover {
+    background: #008cba;
+}
+
+
+.db-status {
+    padding: 20px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.db-status.success {
+    background-color: #d4edda;
+    border: 2px solid #28a745;
+    color: #155724;
+}
+
+.db-status.failure {
+    background-color: #f8d7da;
+    border: 2px solid #dc3545;
+    color: #721c24;
+}
+
+
+#recheck-db-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #008cba; /* Bootstrap primary blue */
+    color: white;
+    border: 1px solid #008cba;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#recheck-db-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    border-color: #0056b3;
+}
+
+#recheck-db-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5); /* Optional: Blue focus ring */
+}
+
+/* Styling for the table */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: transparent;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table tbody + tbody {
+    border-top: 2px solid #dee2e6;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f9f9f9;
+}
+
+.table-bordered {
+    border: 1px solid #dee2e6;
+}
+
+.table-bordered th, .table-bordered td {
+    border: 1px solid #dee2e6;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Optional: Styling for links inside table */
+.table a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.table a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Optional: Custom font size for table */
+.table-font {
+    font-size: 1rem;
+    font-family: Arial, sans-serif;
+}

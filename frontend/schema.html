@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}  <!-- ✅ Load static files here -->
+{% block title %}Welcome to My App{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container-home">
+        <h1 class="title">Core Database Schema</h1>
+        <p>
+            A rich dataset can be constructed around virus nucleotide data. The data 
+            within a V-gDB project is structured according to the Core Schema; a fixed set of object types and 
+            relationships.
+        </p>
+        <p> 
+            The V-gDB database is generated using the Viral Genome Toolkit. 
+        </p>
+
+        <h2>meta_data</h2>
+        <p>The meta_data table contains XX</p>
+
+        <h2>sequences</h2>
+        <p>The sequences table contains XX</p>
+
+        <h2>features</h2>
+        <p>The features table contains XX</p>
+
+        <h2>genes</h2>
+        <p>The genes table contains XX</p>
+
+
+
+        
+    </div>
+    {% endblock %}

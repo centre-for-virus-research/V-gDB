@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}  <!-- ✅ Load static files here -->
+{% block title %}Viral Genome Database{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/installation.css' %}">
+{% endblock %}
+
+
+{% block content %}
+    <div class="container-installation">
+        <h1>V-gDB Python Tools</h1>
+
+        <p>
+            The V-gDB python tools are a series of scripts that allows you to access the database 
+            without using an API request. These tools only work on a local verson of V-gDB.
+        </p>
+
+        <h2>Install V-gDB</h2>
+        <p>
+            Follow the steps in the V-gDB <a href="/installation">installation guide</a> to download
+            and install the V-gDB project and connect your database. 
+        </p>
+        <p>
+            Note: the python tools still run within a Django framework. The python tools allow you to access
+            all the functions of the API without running a django server. 
+        </p>
+
+        <h2>Link V-gDB to python scripts</h2>
+        <p>
+            Within your own python scripts, you need to link the V-gDB django project to access
+            the V-gDB models and functions.
+        </p>
+
+        <pre><code>
+            import os
+            import sys
+            import django
+
+            # Example
+            #TODO: you MUST add your absoulte local path to the base directory of V-gdb/backend
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'backend'))
+            sys.path.insert(0, project_root)
+
+
+            sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+            os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+
+            # Initialize Django
+            django.setup()
+
+            # Now you can import the V-gDB helper classes
+            from models.alignment_helper import Alignment
+        </code></pre>
+
+        <h2>Run your python code</h2>
+        <pre><code>$ python</code></pre>
+
+
+
+
+    </div>
+
+{% endblock %}

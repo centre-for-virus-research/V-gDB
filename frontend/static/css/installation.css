@@ -1,0 +1,68 @@
+.container-installation {
+    /* max-width: 800px; */
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex: 1; /* Allow containers to take up equal space */
+    /* max-width: 48%; Prevent them from being too wide */
+}
+.row {
+    display: flex; 
+    justify-content: space-between; /* Space between the two containers */
+    align-items: flex-start; /* Align to the top */
+    gap: 20px; /* Space between the divs */
+}
+
+h1 {
+    text-align: center;
+}
+pre {
+    background: #2d2d2d;
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+code {
+    font-family: "Courier New", monospace;
+}
+
+.text-code {
+    padding: 2px 4px;
+    color: #c7254e;
+    background-color: #f9f2f4;
+    border-radius: 0;
+
+}
+
+.installation-image {
+    width: 100%; /* Ensures it fits within the container */
+    max-width: 600px; /* Prevents it from getting too large */
+    height: auto; /* Maintains aspect ratio */
+    display: block; /* Avoids extra spacing */
+    /* margin: 20px auto; Centers the image */
+    border-radius: 10px; /* Optional: Adds rounded corners */
+}
+
+/* Ensuring the image is responsive */
+.formatted {
+    max-width: 100%;  /* Ensures the image won't overflow the container */
+    height: auto;     /* Keeps the aspect ratio intact */
+    display: block;   /* Makes the image a block element */
+    margin: 20px auto; /* Centers the image horizontally and adds vertical spacing */
+}
+
+/* Optionally, you can also add specific styling for larger screens */
+@media (min-width: 768px) {
+    .formatted {
+        max-width: 80%;  /* Adjust the image size for larger screens */
+    }
+}
+
+/* For smaller images or specific use cases */
+@media (max-width: 480px) {
+    .formatted {
+        max-width: 95%; /* Makes the image a bit smaller on mobile devices */
+    }
+}

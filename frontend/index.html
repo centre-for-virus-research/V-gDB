@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}  <!-- ✅ Load static files here -->
+{% block title %}Viral Genome Database{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <!-- Add Bootstrap CSS in your <head> section -->
+    <!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> -->
+
+{% endblock %}
+
+
+{% block content %}
+    <div class="container-home">
+        <div class="development-banner">
+            <h1 class="title"><b>Development Version</b></h1>
+        </div>
+        
+        <h1 class="title">Welcome to the Viral Genome Database API!</h1>
+        <p>
+            The V-gDB API provides seamless access to a comprehensive, curated database of viral genomes. Designed for researchers, bioinformaticians, and developers, 
+            this API delivers structured, high-quality viral data processed through a specialized curation toolkit (V-gTK). Users can query genomic metadata,  
+            alignments, phylogenetic relationships, and other key virological insights with ease. Whether you're analyzing varations, mutations, 
+            or developing bioinformatics tools, V-gDB API ensures reliable and efficient access to the data you need. 
+        </p>
+
+        {% if debug %}
+            <p>This is the development version of the V-gDB.</p>
+            <h2>Database Connection</h2>
+            <p>
+                To begin using V-gDB, you need to connect your database. Read the <a href="/installation#database">installation guide</a> for instructions to connect a database to V-gdb.
+            </p>
+            <p>
+                For local development, you can: 
+                <ul>
+                    <li>curate your own viral database using the <a href="/installation">V-gTK pipeline</a> or </li> 
+                    <li>download and connect one of our pre-curated <a href="/installation"> viral databases</a></li>
+                </ul>
+                
+            </p>
+            <p>Once your database is successfully connect, you can begin using the V-gDB API!</p>
+            <div class="db-status {% if db_connected %}success {% else %}failure {% endif %}">
+            <p>You are trying to connect to <b>{{ db_name }}</b></p>
+
+            
+                {% if db_connected %}
+                    <p>The database is <b>connected!</b></p>
+                {% else %}
+                    <p>The database connection has <b>failed.</b></p>
+                    <p>Please check your database settings in backend/settings.py.</p>
+                {% endif %}
+                <button id="recheck-db-btn"><i class="fa-solid fa-arrows-rotate"></i> Recheck Database Connection</button>
+            </div>            
+
+            <h2>Connecting API to V-gDB Web Resource GUI</h2>
+            <p>
+                For users who prefer a graphical interface, we’ve developed a template GUI that makes 
+                interacting with V-gDB even more accessible. This prebuilt interface allows you to fetch, 
+                explore, and visualize viral genome data without writing API requests or scripts. 
+                Designed for flexibility, the GUI can be customized to fit specific research or analysis 
+                needs, providing an intuitive way to navigate the database and interpret results 
+                effortlessly.
+            </p>
+            <ul>
+                <li>A basic template for a GUI can be found here.</li>
+                <li>The GUI installation guide can be found here.</li>
+            </ul>
+
+
+            <h2>Connecting API to local scripts</h2>
+            <p>
+                To help users integrate V-gDB into their workflow, we provide a collection of example 
+                scripts demonstrating how to make API requests in different programming languages. 
+                Whether you're using Python, JavaScript, R, or another language, these samples offer 
+                a quick and easy way to interact with the database. Each script showcases essential API 
+                calls, from retrieving viral genome data to filtering results, so you can get started 
+                with minimal setup.
+            </p>
+
+            <h2>Accessing V-gDB: Python Tools</h2>
+            <p>
+                The V-gDB API allows users to retrieve curated viral genome data through structured API 
+                requests within a Django-based framework. For those who prefer a more seamless integration, 
+                we also provide dedicated Python scripts that interact with the database without requiring 
+                direct API calls. These scripts enable users to access all available functions 
+                programmatically within their own Python environment, simplifying data retrieval and 
+                analysis. Whether using standard API requests or leveraging our prebuilt scripts, 
+                V-gDB ensures flexible and efficient access to vital viral genome information.
+            </p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        {% else %}
+            <h2>Explore the available virus genome database resources that use V-gDB:</h2>
+
+            <div class="card-container">
+                <div class="card">
+                    <img src="http://localhost:3000/virusStructure.jpg" alt="API 1">
+                    <h2>RABV-gDB</h2>
+                    <p>Genome database for Rabies Virus</p>
+                    <a class="rabv" href="http://localhost:3000/">Go to RABV-gDB</a>
+                </div>
+
+                <!-- <div class="card">
+                    <img src="https://via.placeholder.com/250x150" alt="API 2">
+                    <h2>HCV-gDB</h2>
+                    <p>Genome database for Hepatitis C</p>
+                    <a href="/api/posts/">Go to HCV-gDB</a>
+                </div>
+
+                <div class="card">
+                    <img src="https://via.placeholder.com/250x150" alt="API 3">
+                    <h2>Flu-gDB</h2>
+                    <p>Genome database for Flu</p>
+                    <a href="/api/products/">Go to Flu-gDB</a>
+                </div> -->
+            </div>
+
+            <h2>V-gDB Tools:</h2>
+            <p>Along with querying sequence information, V-gDB offers various tools for more advanced viral interpretation.</p>
+            <div class="card-container card-tools">
+                <div class="card">
+                    <i class="fa-solid fa-dna fa-4x"></i>
+                    <h2>Mutations</h2>
+                    <p>Genome database for Rabies Virus</p>
+                
+                </div>
+                <div class="card">
+                    <i class="fa-solid fa-sitemap fa-4x"></i>
+                    <h2>Phylogenetic Tree Assignment</h2>
+                    <p>Genome database for Rabies Virus</p>
+                </div>
+            </div>
+
+            
+            <p>The source code for V-gDB is available at <a href="https://github.com/dana-allen/backend">https://github.com/dana-allen/backend/</a> </p>
+            <p>
+                You can find detailed instructions on how to install and run V-gDB locally: 
+                <a href="/installation">Installation Guide</a>
+            </p>
+
+        {% endif %}
+        
+    </div>
+{% endblock %}
+
+
+<script>
+    console.log("loaded")
+    // Wait for the DOM to be fully loaded before adding the event listener
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById("recheck-db-btn").addEventListener("click", function() {
+            console.log("Button clicked");
+
+            // Clear the status message before sending the request
+            const dbStatus = document.querySelector('.db-status');
+            dbStatus.innerHTML = "Checking...";
+
+            // Make the AJAX request to check the DB connection
+            fetch('/check-db-connection/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        dbStatus.innerHTML = "Database is connected!";
+                        dbStatus.style.color = "green";
+                    } else {
+                        dbStatus.innerHTML = "Database connection failed!";
+                        dbStatus.style.color = "red";
+                    }
+                })
+                .catch(error => {
+                    dbStatus.innerHTML = "Error occurred while checking the database.";
+                    dbStatus.style.color = "red";
+                });
+        });
+    });
+</script>

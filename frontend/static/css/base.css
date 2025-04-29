@@ -1,0 +1,119 @@
+body {
+    font-family: 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+margin: 0 10%; /* Adds 40px margin to left & right */
+padding-top: 60px;  /* Prevents content from being covered by the navbar */
+    background-color: #f4f4f4;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+        font-weight: 300 !important;
+        line-height: 1.1 !important;
+        color: inherit; 
+}
+
+/* .container {
+    margin: 20px;
+} */
+
+/* ✅ Make the navbar fixed at the top */
+.navbar {
+    position: fixed;  /* Keeps it at the top */
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #008cba;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    z-index: 1000; /* Ensures navbar is above other content */
+}
+
+.navbar:hover {
+    color: black;
+}
+/* ✅ Style for navbar links */
+.navbar a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 18px;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: #ffdd57;
+    min-width: 160px;
+    z-index: 1;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    border: 2px solid #f4c842;
+}
+
+.dropdown-content a {
+    padding: 10px;
+    display: block;
+    color: #333;
+    text-align: left;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.container-footer {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+
+/* Container for the footer */
+.container {
+    max-width: 1200px; /* Max width of content */
+    margin: 0 auto; /* Centering the container */
+    padding: 0 15px; /* Padding for spacing */
+}
+
+/* Footer container (using Grid layout) */
+.footer-row {
+    display: grid; /* Enable grid layout */
+    grid-template-columns: 1fr 3fr; /* Create 2 columns: 1 for the logo (1 fraction), 1 for the text (3 fractions) */
+    gap: 20px; /* Space between columns */
+    align-items: center; /* Vertically center content */
+}
+
+/* Styling for each footer column */
+.footer-col {
+    padding: 10px;
+}
+
+.footer-logo img {
+    max-width: 100%; /* Make sure image is responsive */
+    height: auto;
+}
+
+/* Footer text */
+.footer-text {
+    text-align: left; /* Left align the text */
+}
+
+/* Styling for the footer */
+.footer {
+    /* background-color: #f8f8f8; Light background color */
+    padding: 40px 0; /* Padding for top and bottom */
+    border-top: 1px solid #ddd; /* Optional border at the top */
+}
+
+

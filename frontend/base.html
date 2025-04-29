@@ -1,0 +1,61 @@
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Viral Genome Database{% endblock %}</title>
+
+    <!-- ✅ Load Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header>
+        <!-- ✅ Navbar Section -->
+        <div class="navbar">
+            <a href="/">V-gDB</a>
+            <a href="/installation/">Installation</a>
+            <a href="/api">API Docs</a>
+            <a href="/schema">Schema</a>
+            <a href="/mutations">Mutations</a>
+            <a href="/examples">Examples</a>
+            <a href="/python_tools">Python Tools</a>
+            <a href="/about">About</a>
+        </div>
+    </header>
+    
+
+    <!-- ✅ Content Block -->
+     <main>
+    <div>
+        {% block content %}
+        {% endblock %}
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-row">
+            <div class="footer-col footer-logo">
+                <a href="http://www.gla.ac.uk/researchinstitutes/iii/cvr/">
+                    <img src="/static/images/cvrBioinformatics.png" alt="CVR logo"/>
+                </a>
+            </div>
+            <div class="footer-col footer-text">
+                <p>Copyright (c) 2015-2020 The University of Glasgow.</p>
+                <p>V-gDB is developed and maintained by the MRC-University of Glasgow Centre for Virus Research.</p>
+                <p>For enquiries please contact Web-Resource Support.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+
+</body>
+</html>
+
+

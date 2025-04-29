@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}  <!-- ✅ Load static files here -->
+{% block title %}Viral Genome Database{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock %}
+
+
+{% block content %}
+    <div class="container-home">
+        <h1 class="title">Explore available V-gDB API endpoints</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Endpoint</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for endpoint in endpoints %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><a href="{{ endpoint }}">{{ endpoint }}</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,48 @@
+.container-examples {
+    /* max-width: 800px; */
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    flex: 1; /* Allow containers to take up equal space */
+    /* max-width: 48%; Prevent them from being too wide */
+}
+.language-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-api {
+    background-color: #008cba; /* Yellow */
+    border: 2px solid #008cba; /* Darker yellow border */
+    padding: 10px 20px;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.btn-api:hover {
+    background-color: #008cba;
+    color: #fff;
+}
+
+.code-container {
+    background-color: #f4f4f4;
+    padding: 20px;
+    border: 2px solid #e0ac00;
+    border-radius: 10px;
+    white-space: pre-wrap;
+    font-family: "Courier New", monospace;
+    font-size: 0.9em;
+}
+
+.text-code {
+    padding: 2px 4px;
+    color: #c7254e;
+    background-color: #f9f2f4;
+    border-radius: 0;
+
+}

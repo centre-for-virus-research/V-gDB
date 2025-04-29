@@ -1,6 +1,6 @@
 from django.db import connections
 from collections import Counter
-from models.helper_functions import dictfetchall  # Ensure this function is imported
+from models.helpers import dictfetchall  # Ensure this function is imported
 
 class Statistics:
     def __init__(self, database):

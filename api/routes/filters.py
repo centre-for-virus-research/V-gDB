@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db import connections
 
-from models.helper_functions import dictfetchall  # Ensure this function is imported
+from models.helpers import dictfetchall  # Ensure this function is imported
 
 @api_view(['GET'])
 def get_primary_accession_ids(request):

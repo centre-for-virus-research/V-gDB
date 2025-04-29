@@ -1,5 +1,5 @@
 from django.db import connections
-from models.helper_functions import dictfetchall  # Ensure this function is imported
+from models.helpers import dictfetchall  # Ensure this function is imported
 
 class Features:
     def __init__(self, database):

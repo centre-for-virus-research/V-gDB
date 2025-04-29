@@ -10,7 +10,7 @@ def get_genes_tree(request):
 
     database = request.headers.get('database', 'RABV_NEW')
 
-    genes_helper = Genes(database=database)
-    data = genes_helper.get_genes_tree()
+    genes = Genes(database=database)
+    data = genes.get_genes_tree()
 
     return Response(data)

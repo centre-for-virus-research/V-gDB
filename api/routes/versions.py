@@ -1,11 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db import connections
-from models.helper_functions import *
-from django.http import HttpResponse
-from models.helper_functions import *
-from models.codon_labeling import get_kuiken2006_codon_labeling
-import os
+from models.helpers import *
+
+from models.helpers import *
+
 
 @api_view(['GET'])
 def get_vgt_version(request):

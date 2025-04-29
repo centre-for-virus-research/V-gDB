@@ -1,243 +1,181 @@
 from django.db import connections
 import csv
-from models.helper_functions import dictfetchall  # Ensure this function is imported
+from models.helpers import *
 
 class Sequences:
-    def __init__(self, database, primary_accession=None, filters=None):
+    """
+    A class to handle operations related to sequence metadata, alignments, 
+    and filtered retrieval from a database in a Django project.
+    """
+
+    def __init__(self, database, filters=None):
+        """
+        Initialize the Sequences instance.
+
+        Args:
+            database (str): The name of the database alias to connect to.
+            primary_accession (str, optional): Identifier for a specific sequence. Defaults to None.
+            filters (dict, optional): Dictionary of filters for querying metadata. Defaults to None.
+        """
         self.database = database  
-        self.primary_accession = primary_accession
         self.filters = filters
 
     def get_sequences_meta_data(self):
-        
+        """
+        Retrieve all sequence metadata records from the database.
+
+        Returns:
+            list: A list of dictionaries containing metadata records.
+        """
         with connections[self.database].cursor() as cursor:
             cursor.execute('SELECT * FROM meta_data ORDER BY create_date DESC;')
-            result = dictfetchall(cursor) 
+            result = dictfetchall(cursor)
+        
         return result
     
-    def get_sequence_meta_data(self):
+    def get_sequence_meta_data(self, primary_accession):
+        """
+        Retrieve metadata and alignment details for a specific sequence, 
+        including insertions, features, and reference sequence.
 
+        Returns:
+            dict: A dictionary containing metadata and alignment details.
+
+        Raises:
+            ValueError: If `primary_accession` is not provided or not found in the database.
+        """
         result = {}
 
-        if not self.primary_accession:
+        if not primary_accession:
             raise ValueError("Primary accession can not be blank")
 
         with connections[self.database].cursor() as cursor:
 
-            cursor.execute("SELECT * FROM meta_data WHERE primary_accession = %s;", [self.primary_accession] )
+            # Get main metadata
+            cursor.execute("SELECT * FROM meta_data WHERE primary_accession = %s;", [primary_accession])
             sequence = dictfetchall(cursor)
             
             if not sequence:
-                raise ValueError("Sequence with primary_accession {} not found".format(self.primary_accession))
+                raise ValueError(f"Sequence with primary_accession {primary_accession} not found")
             
-            else:
-                result["meta_data"] = sequence[0]
-                cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id=%s", [self.primary_accession])
-                alignment = dictfetchall(cursor)
-                
-                if (alignment):
-                    result["alignment"] = alignment[0]
+            result["meta_data"] = sequence[0]
 
-                    cursor.execute("SELECT * FROM insertions WHERE accession = %s", [self.primary_accession])
-                    result["alignment"]["insertions"] = dictfetchall(cursor)
-                    
-                    
-                    cursor.execute("SELECT * \
-                                FROM features \
-                                WHERE accession = %s \
-                                ORDER BY cds_start", ['EF437215'])
-                    result["alignment"]["features"] = dictfetchall(cursor)
+            # Get alignment information
+            cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id=%s", [primary_accession])
+            alignment = dictfetchall(cursor)
 
-                    # cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [result["alignment"]["alignment_name"]])
-                    # result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
+            if alignment:
+                result["alignment"] = alignment[0]
 
-                    cursor.execute("SELECT sequence FROM sequences WHERE header = %s", [result["alignment"]["alignment_name"]])
-                    result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["sequence"]
+                # Add insertions
+                cursor.execute("SELECT * FROM insertions WHERE accession = %s", [primary_accession])
+                result["alignment"]["insertions"] = dictfetchall(cursor)
 
-                if (result["meta_data"]["country"]):
-                    cursor.execute("SELECT * FROM m49_country WHERE full_name=%s", [result["meta_data"]["country"].split(':')[0]])
+                # Add features (hardcoded accession in original code)
+                cursor.execute("SELECT * FROM features WHERE accession = %s ORDER BY cds_start", ['EF437215'])
+                result["alignment"]["features"] = dictfetchall(cursor)
 
-                    country = dictfetchall(cursor)
-                    if(country):
-                        result["meta_data"]["region"] = country[0]
+                # Get reference sequence
+                cursor.execute("SELECT sequence FROM sequences WHERE header = %s", [result["alignment"]["alignment_name"]])
+                result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["sequence"]
+
+            # Get regional info if country exists
+            if result["meta_data"].get("country"):
+                cursor.execute(
+                    "SELECT * FROM m49_country WHERE full_name=%s",
+                    [result["meta_data"]["country"].split(':')[0]]
+                )
+                country = dictfetchall(cursor)
+                if country:
+                    result["meta_data"]["region"] = country[0]
 
         return result
 
     def get_sequences_meta_data_by_filters(self):
+        """
+        Retrieve metadata based on filters defined in the `filters` dictionary.
 
-        # If there are no filters inputted
+        Returns:
+            list: A list of dictionaries matching the filter criteria.
+        """
         if not self.filters:
-            result = self.get_sequences_meta_data()
+            # No filters provided, return all metadata
+            return self.get_sequences_meta_data()
 
-        else:
+        where_clauses = []
+        params = []
 
-            where_clauses = []
-            params = []
-            country_clauses = []
-            country_params = []
+        def add_filter_clause(key, value, operator='='):
+            """Add WHERE clause for numeric or comparison-based filters."""
+            where_clauses.append(f"{key} {operator} %s")
+            params.append(value)
 
-            def add_filter_clause(key, value, operator='='):
-                """Helper function to add a clause and its parameters to the query."""
-                where_clauses.append(f"{key} {operator} %s")
-                params.append(value)
+        def add_filter_in_clause(key, value):
+            """Add simple equality filter for strings/other fields."""
+            where_clauses.append(f"{key} = %s")
+            params.append(value)
 
-            def add_filter_in_clause(key, value):
-                where_clauses.append(f"{key} = %s")
-                params.append(value)
-                # where_clauses.append(f"{key} IN ({','.join(['%s'] * len(value))})")
-                # params.extend(value)
-            print(self.filters.items())
-            for key, value in self.filters.items():
+        for key, value in self.filters.items():
+            if key == 'length_lower':
+                add_filter_clause('length', value, operator='>=')
+            elif key == 'length_upper':
+                add_filter_clause('length', value, operator='<=')
+            else:
+                add_filter_in_clause(key, value)
 
-                if key == 'length_lower':
-                    add_filter_clause('length', value, operator='>=')
-                elif key == 'length_upper':
-                    add_filter_clause('length', value, operator='<=')
+        where_str = ' AND '.join(where_clauses)
+        query = f"SELECT * FROM meta_data WHERE {where_str} ORDER BY create_date DESC;"
 
-                else:
-                    add_filter_in_clause(key, value)
-
-            where_str = ' AND '.join(where_clauses)
-            query = f"SELECT * FROM meta_data WHERE {where_str} ORDER BY create_date DESC;"
-            print(query, params)
-
-            with connections[self.database].cursor() as cursor:
-                cursor.execute(query, params)
-                result = dictfetchall(cursor)
+        with connections[self.database].cursor() as cursor:
+            cursor.execute(query, params)
+            result = dictfetchall(cursor)
 
         return result
 
-
-    def download_sequences_meta_data(self):
+    def get_reference_sequences_meta_data(self):
 
         with connections[self.database].cursor() as cursor:
-            cursor.execute("SELECT * FROM meta_data")
-            sequences = dictfetchall(cursor)
+            cursor.execute("SELECT * FROM meta_data WHERE primary_accession IN (SELECT alignment_name FROM sequence_alignment)")
 
-        return sequences
+            references = dictfetchall(cursor)
 
+        return references
 
-    def build_meta_data_csv_file(self, data):
+    def get_reference_sequence(self, primary_accession):
 
-        with open("tmp_file.csv", "w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow(data[0].keys())
-            for i in data:
-                w.writerow(i.values())
-            f.close()
+        result = {}
 
+        with connections[self.database].cursor() as cursor:
+            cursor.execute("SELECT * FROM features WHERE accession = %s", [primary_accession])
 
+            features = dictfetchall(cursor)
+        
+        if not features:
+            raise ValueError("Reference sequence with primary_accession {primary_accession} not found")
+        
+        with connections[self.database].cursor() as cursor:
+            cursor.execute("SELECT length FROM meta_data WHERE primary_accession = %s", [primary_accession])
+            max_whole_genome = cursor.fetchone()[0]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # database = request.headers.get('database', 'default')
-    # where_clauses = []
-    # params = []
-    # country_clauses = []
-    # country_params = []
-
-    # print(dict(request.GET.items()))
-    # params = dict(request.GET.items())
-    # for key, value in params.items():
-    #     print("HERE")
-    #     params[key] = value.split(',') if ',' in value else value
-    # print("DONE")
-    # print(params)
-    # for key, value in params.items():
-    #     new_value = value
-    #     # new_value = value.split(',') if ',' in value else value
-    #     # new_value = value
-
-    #     if key == 'gb_length_lower':
-    #         where_clauses.append(f"length >= %s ")
-    #         params.append(new_value)
-    #     elif key == 'gb_length_upper':
-    #         where_clauses.append(f"length <= %s ")
-    #         params.append(new_value)
-
-    #     elif key == 'gb_update_date_lower':
-    #         where_clauses.append(f"YEAR(update_date) >= %s ")
-    #         params.append(new_value)
-    #     elif key == 'gb_update_date_upper':
-    #         where_clauses.append(f"YEAR(update_date) <= %s ")
-    #         params.append(new_value)
-
-    #     elif key == 'creation_year_lower':
-    #         where_clauses.append(f"YEAR(create_date) >= %s ")
-    #         params.append(new_value)
-    #     elif key == 'creation_year_upper':
-    #         where_clauses.append(f"YEAR(create_date) <= %s ")
-    #         params.append(new_value)
-
-    #     elif key == 'collection_year_lower':
-    #         where_clauses.append(f'STRFTIME("%Y", collection_date) >= %s ')
-    #         params.append(new_value)
-    #     elif key == 'collection_year_upper':
-    #         where_clauses.append(f"YEAR(collection_date) <= %s ")
-    #         params.append(new_value)
-
-    #     elif key in ['primary_accession', 'host', 'isolate', 'pubmed_id']:
-    #         new_value = [new_value] if isinstance(new_value, str) else new_value
-    #         where_clauses.append(f"{key} IN ({','.join(["%s"] * len(new_value))})")
-    #         params.extend(new_value)
-
-    #     elif key in ['major_clade', 'minor_clade']:
-    #         where_clauses.append(f"{key} IN %s")
+        
+        for feature in features:
+            codons = get_codon_labeling(feature["cds_start"], feature["cds_end"])
+            feature["codon_start"] = codons[0]
+            feature["codon_end"] = codons[1]
             
-
-
-    #     elif key in ['m49_region_id', 'm49_sub_region_id', 'm49_code', 'development_status']:
-    #         country_clauses.append(f"{key} IN %s")
-    #         country_params.append(new_value)
-
-    #     elif key in ['is_ldc', 'is_lldc', 'is_sids']:
-    #         country_clauses.append(f"{key} = %s")
-    #         country_params.append(True if value == 'true' else False)
-
-
-    # # Country-specific query
-    # if country_clauses:
         
-    #     country_query = f"SELECT DISTINCT(id) FROM m49_country WHERE {' AND '.join(country_clauses)}"
-    #     print(country_query) 
-    #     print(country_params)
-    #     with connections[database].cursor() as cursor:
-    #         cursor.execute(country_query, country_params)
-    #         country_ids = [row[0] for row in cursor.fetchall()]
-    #     if country_ids:
-    #         where_clauses.append("m49_country_id IN %s")
-    #         params.append(country_ids)
+        # features.append({'ref_seq_name':primary_accession, 'feature_name':None, "ref_start":1, "ref_end":max_whole_genome, "product":"Whole Genome", "protein_id":None})
+        result["features"] = features
 
-    # # Main query
-    # where_str = ' AND '.join(where_clauses)
-    # query = f"SELECT * FROM meta_data \
-    #             WHERE {where_str} ORDER BY create_date DESC;" if where_clauses else "SELECT * FROM meta_data"
-    # print(query) 
-    # print(params)
-    # with connections[database].cursor() as cursor:
-    #     cursor.execute(query, params)
-    #     result = dictfetchall(cursor)
+        with connections[self.database].cursor() as cursor:
+            cursor.execute("SELECT * FROM genes")
+            result["genes"] = dictfetchall(cursor)
 
-        
-    # return Response(result)
+            cursor.execute("SELECT * FROM sequence_alignment WHERE alignment_name = %s", [primary_accession])
+            result["aligned_sequences"] = dictfetchall(cursor)
+
+            cursor.execute("SELECT sequence FROM sequences WHERE header=%s", [primary_accession])
+            result["sequence"] = dictfetchall(cursor)[0]
+
+        return result
+

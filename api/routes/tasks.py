@@ -1,96 +1,118 @@
-from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
-from models.helper_functions import *
-
 import django_rq
+from django.http import HttpResponse, Http404
+from Bio import SeqIO
+import os
 
+from models.helpers import *
 from models.tasks import Tasks
-from models.alignment import Alignment
 from models.features import Features
-from django.http import HttpResponse
-from Bio import SeqIO 
 
+# ----------------------------------------------------------------------
+# View to enqueue a sequence alignment job
+# ----------------------------------------------------------------------
 @api_view(['GET'])
-def get_blast_results(request, file_path):
+def run_sequence_alignment(request):
+    """
+    Enqueues a sequence alignment task using RQ (Redis Queue).
+    Requires a 'query' parameter and optionally a 'database' header.
+    Returns:
+        Job ID (str): The ID of the queued job.
+    """
+    database = request.headers.get('database', 'default')
+    params = dict(request.GET.items())
+    query = params.get("query")
 
-    with open("/Users/dana/CVR/backend/jobs/"+file_path+"/blast_results.tsv", 'r') as file:
-        response = HttpResponse(file, content_type='tsv')
+    tasks = Tasks(database=database)
+
+    try:
+        queue = django_rq.get_queue('default')
+        job = queue.enqueue(tasks.run_sequence_alignment(query))  # Submit task to queue
+        return Response(job.id)
+    except ConnectionError as e:
+        print(f"Error: {e}")
+        return HttpResponse(e, status=404)
+
+# ----------------------------------------------------------------------
+# View to download BLAST results as a TSV file
+# ----------------------------------------------------------------------
+@api_view(['GET'])
+def get_blast_results(request, job_id):
+    """
+    Downloads the BLAST results file for a given job ID.
+    Args:
+        job_id (str): ID of the job to retrieve results for.
+    Returns:
+        HttpResponse: File response with TSV data.
+    """
+    file_path = os.path.join('jobs', job_id, 'blast_results.tsv')
+
+    if not os.path.exists(file_path):
+        raise Http404("BLAST results file not found.")
+
+    with open(file_path, 'r') as file:
+        response = HttpResponse(file, content_type='text/tab-separated-values')
         response['Content-Disposition'] = 'attachment; filename=blast_results.tsv'
-    return response
+        return response
 
+# ----------------------------------------------------------------------
+# View to get sequence alignment results in FASTA format
+# ----------------------------------------------------------------------
 @api_view(['GET'])
-def get_nextAlign_results(request, file_path):
-    print("WE ARE STARTING THIS")
+def get_alignment_results(request, job_id):
+    """
+    Parses aligned FASTA sequences and metadata for a given job ID.
+    Args:
+        job_id (str): ID of the job to retrieve alignment results for.
+    Returns:
+        Response: JSON containing primary sequence, aligned sequences, and features.
+    """
     sequences = []
-    file_path = "/Users/dana/CVR/backend/jobs/"+file_path+"/Nextalign/MT862689/MT862689.aligned.fasta"
-    # Read FASTA file and store sequences
+    file_path = os.path.join('jobs', job_id, 'Nextalign', 'MT862689', 'MT862689.aligned.fasta')
+
+    if not os.path.exists(file_path):
+        raise Http404("Alignment file not found.")
+
     with open(file_path, "r") as fasta_file:
         for record in SeqIO.parse(fasta_file, "fasta"):
             sequences.append({"query": record.id, "seq": str(record.seq)})
 
     if not sequences:
-        return None  # Return None if the file is empty
+        return Response([])  # Empty response if no sequences found
 
-    # Extract primary accession (first sequence)
     primary_accession = sequences[0]["query"]
     primary_seq = sequences[0]["seq"]
-
-    # Extract aligned sequences (everything except the first one)
     aligned_sequences = sequences[1:]
 
     features_helper = Features(database='RABV_NEW')
+    features = features_helper.get_feature(primary_accession)
 
-    features = features_helper.get_feature(primary_accession) 
-
-
-    # Construct final JSON output
     result = [{
         "primary_accession": primary_accession,
         "seq": primary_seq,
         "alignedSeq": aligned_sequences,
         "features": features
     }]
-    print("HIHIHI")
-    print(result)
+
     return Response(result)
 
-
-@api_view(['GET'])
-def run_sequence_alignment(request):
-    params = dict(request.GET.items())
-    query = params["query"]
-    alignment_helper = Alignment(database='RABV_NEW', sequences=query)
-
-    try:
-        queue = django_rq.get_queue('default')  # Get the default queue
-        job = queue.enqueue(alignment_helper.runSequenceAlignment)
-        return Response(job.id)
-    except ConnectionError as e:
-        print(f"Error: {e}")
-        return HttpResponse(e, status=404)
-
-
-
+# ----------------------------------------------------------------------
+# View to fetch job logs or metadata for a queued task
+# ----------------------------------------------------------------------
 @api_view(['GET'])
 def get_job_logs(request, job_id):
+    """
+    Retrieves metadata (including status) of a job from the RQ queue.
+    Args:
+        job_id (str): Job ID to fetch logs for.
+    Returns:
+        Response: Job metadata dictionary or empty status if not found.
+    """
     queue = django_rq.get_queue('default')
     job = queue.fetch_job(job_id)
+
     if job and job.meta.get('status'):
         return Response(job.meta)
+
     return Response({"status": []})
-
-@api_view(['GET'])
-def get_job_result(request, job_id):
-    queue = django_rq.get_queue('default')  # Replace 'default' with your queue name if needed
-    job = queue.fetch_job(job_id)
-
-    if job is None:
-        return Response({"error": "Job not found", "status":404})
-
-    if job.is_failed:
-        return Response({"status": "failed", "error": str(job.exc_info)})
-
-    return Response({"status": str(job.get_status()), "result": str(job.result)})
-

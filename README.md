@@ -7,7 +7,6 @@ It contains the logic for the API that interacts with the database
 
 ## Viral Genome Database Structure 
 ``` line_numbers
-
 V-gDB/
 ├── api/            # Contains API Endpoints
 │   ├── routes/     
@@ -29,60 +28,59 @@ V-gDB/
 
 ## Local Development
 
-V-gDB is a 
+If you wish to exapnd upon V-gDB functionality or API, you can download V-gDB and install locally.
 
-### Requirements:
-
-### Installation:
-
-Install pip (if not installed)
+### 1. Installation:
 
 ``` bash
+# clone v-gDB app from CVR Github
+git clone git@github.com:centre-for-virus-research/V-gDB.git 
+```
+``` bash
+cd V-gDB 
+```
+``` bash
 # Creating virtual environment
-
+python3 -m venv V_gDB_env 
 ```
 ``` bash
 # Starting virtual environment
-
-```
-
-In your virtual environment:
-``` bash
-# Install django
-python -m pip install Django
+source V_gDB_env/bin/activate 
 ```
 ``` bash
-# clone v-gDB app from CVR Github
-git clone git@github.com:dana-allen/backend.git
+# Installing V-gDB requirements
+pip3 install -r requirements.txt 
+```
+``` bash
+python3 manage.py migrate 
 ```
 
+### 2. Connecting Database:
+You need to connect your local database to the vDB-backend app. You can download one of V-gDB's pre-compiled databases, or generate your own using the Viral Genome Toolkit.
 
-
-### Settings
-You need to connect your local database to the vDB-backend app. Inside backend/settings.py, update the following lines with your local database information:
+Once you have the .db file, inside backend/settings.py, update the following lines with your local database information:
 
 ``` python line_numbers
-91 DATABASES = {
-92    
-93    'default': {
-94        'ENGINE': 'django.db.backends.mysql', # replace with the type of database
-95        'NAME': 'GLUE_TOOLS', # replace with name of database or location of file
-96        'USER': 'gluetools', # replace with database user
-97        'PASSWORD': 'glue12345', # replace with password
-98        'HOST': 'localhost', # replace with host
-99        'PORT':'3306', # replace with port
-100    }
-101 }
+DATABASES = {
+    'default': {
+    'ENGINE': 'django.db.backends.sqlite3',
+    'NAME': 'db/rabv.db', #Update with local path to local database .db file
+    'HOST': 'localhost', 
+    'PORT':'3306', 
+    }
+}
 ```
 
-## Running the project
+### 3. Starting V-gDB:
+
+If the V-gDB app is installed and the database information has been updated, run this in your V-gDB directory:
 ``` bash
-cd vDB-backend # cd into main vDB-backend directory
-py manage.py runserver 
+# Starting V-gDB server
+python3 manage.py runserver
 ```
+Navigate to https://localhost:8000. If you see the following screen, you have successfully installed V-gDB!
 
-
-
+![success](frontend/static/images/success_install.png?raw=true)
 
 ## Modules Structure 
 
@@ -96,35 +94,6 @@ API contains all the vDB endpoints available to access the database from a web r
 
 2. apps.py
 
-3. routes
-
-    1. urls.py
-        All the url endpoints available. If you are adding more endpoints, each one must be declared in this file. 
-
-        example:
-    ``` python
-    path('sequences/get_sequences_meta_data/', sequences.get_sequences_meta_data, name='get_sequences_meta_data')
-
-    equivalent to 
-
-    localhost:8000/api/sequences/get_sequences_meta_data/
-    ```
-
-
-### Backend
-1. settings.py
-
-
-``` python line_numbers
-61 CORS_ALLOWED_ORIGINS = [
-62     "http://localhost:3000",  # Adjust based on your frontend URL
-63 ]
-```
-
-
-
-
-2. urls.py
 
 ### Models
 

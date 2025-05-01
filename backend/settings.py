@@ -105,8 +105,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': '/Users/dana/CVR/databases/rabv-gdb.db',
-        'USER': 'gluetools',
-        'PASSWORD': 'glue12345',
+        # 'USER': 'gluetools',
+        # 'PASSWORD': 'glue12345',
         'HOST': 'localhost',
         'PORT':'3306',
 

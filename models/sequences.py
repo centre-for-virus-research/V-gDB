@@ -72,12 +72,12 @@ class Sequences:
                 result["alignment"]["insertions"] = dictfetchall(cursor)
 
                 # Add features (hardcoded accession in original code)
-                cursor.execute("SELECT * FROM features WHERE accession = %s ORDER BY cds_start", ['EF437215'])
+                cursor.execute("SELECT * FROM features WHERE accession = %s ORDER BY cds_start", [result["alignment"]["alignment_name"]])
                 result["alignment"]["features"] = dictfetchall(cursor)
 
                 # Get reference sequence
-                cursor.execute("SELECT sequence FROM sequences WHERE header = %s", [result["alignment"]["alignment_name"]])
-                result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["sequence"]
+                cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [result["alignment"]["alignment_name"]])
+                result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
 
             # Get regional info if country exists
             if result["meta_data"].get("country"):
@@ -141,8 +141,45 @@ class Sequences:
             references = dictfetchall(cursor)
 
         return references
-
+    
     def get_reference_sequence(self, primary_accession):
+
+        result = {}
+
+        # Grabbing reference features
+        with connections[self.database].cursor() as cursor:
+            cursor.execute("SELECT * FROM features WHERE accession = %s", [primary_accession])
+
+            features = dictfetchall(cursor)
+        
+        if not features:
+            raise ValueError("Reference sequence with primary_accession {primary_accession} not found")
+        
+        
+        for feature in features:
+            codons = get_codon_labeling(feature["cds_start"], feature["cds_end"])
+            feature["codon_start"] = codons[0]
+            feature["codon_end"] = codons[1]
+            
+        result["ref_features"] = features
+
+        with connections[self.database].cursor() as cursor:
+            cursor.execute("select * from sequence_alignment join features on sequence_alignment.sequence_id = features.accession WHERE sequence_alignment.alignment_name = %s", [primary_accession])
+            cursor.execute("select * from sequence_alignment where alignment_name = %s", [primary_accession])
+            result["aligned_sequences"] = dictfetchall(cursor)
+
+            for i in range(0,len(result["aligned_sequences"])):
+                cursor.execute("SELECT * FROM features WHERE accession = %s", [result["aligned_sequences"][i]["sequence_id"]])
+                result["aligned_sequences"][i]["features"] = dictfetchall(cursor)
+
+
+            # cursor.execute("SELECT sequence FROM sequences WHERE header=%s", [primary_accession])
+            cursor.execute("SELECT alignment from sequence_alignment where sequence_id=%s", [primary_accession])
+            result["ref_sequence"] = dictfetchall(cursor)[0]["alignment"]
+
+        return result
+
+    def get_reference_sequence_old(self, primary_accession):
 
         result = {}
 
@@ -175,8 +212,9 @@ class Sequences:
             cursor.execute("SELECT * FROM sequence_alignment WHERE alignment_name = %s", [primary_accession])
             result["aligned_sequences"] = dictfetchall(cursor)
 
-            cursor.execute("SELECT sequence FROM sequences WHERE header=%s", [primary_accession])
-            result["sequence"] = dictfetchall(cursor)[0]
+            # cursor.execute("SELECT sequence FROM sequences WHERE header=%s", [primary_accession])
+            cursor.execute("SELECT alignment from sequence_alignment where sequence_id=%s", [primary_accession])
+            result["sequence"] = dictfetchall(cursor)[0]["alignment"]
 
         return result
 

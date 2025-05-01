@@ -49,7 +49,7 @@ def download_alignments(request):
 
     with open(file_name, 'r') as file:
         response = HttpResponse(file, content_type='text')
-        response['Content-Disposition'] = 'attachment; filename='+file_name
+        response['Content-Disposition'] = f'attachment; filename="{file_name}"'
         os.remove(file_name)
 
     return response

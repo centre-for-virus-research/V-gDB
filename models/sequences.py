@@ -98,10 +98,11 @@ class Sequences:
         Returns:
             list: A list of dictionaries matching the filter criteria.
         """
+        print("STARTING")
         if not self.filters:
             # No filters provided, return all metadata
             return self.get_sequences_meta_data()
-
+        print(self.filters)
         where_clauses = []
         params = []
 
@@ -125,7 +126,7 @@ class Sequences:
 
         where_str = ' AND '.join(where_clauses)
         query = f"SELECT * FROM meta_data WHERE {where_str} ORDER BY create_date DESC;"
-
+        print(query, params)
         with connections[self.database].cursor() as cursor:
             cursor.execute(query, params)
             result = dictfetchall(cursor)

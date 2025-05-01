@@ -8,8 +8,8 @@ class Features:
     def get_features(self):
 
         with connections[self.database].cursor() as cursor:
-            cursor.execute('SELECT name FROM genes WHERE parent_name IS NOT NULL;')
-
+            # cursor.execute('SELECT name FROM genes WHERE parent_name IS NOT NULL;')
+            cursor.execute('SELECT product FROM features where accession=%s', ['NC_001542'])
             features = dictfetchall(cursor)
 
         return features

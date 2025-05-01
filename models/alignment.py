@@ -63,8 +63,8 @@ class Alignment:
         results= []
         if not self.start_coordinate and not self.end_coordinate:  # Use the full region coordinates
 
-            ref_start = master_alignment[0]["ref_start"]
-            ref_end = master_alignment[0]["ref_end"]
+            ref_start = master_alignment[0]["cds_start"]
+            ref_end = master_alignment[0]["cds_end"]
 
             if self.nucleotide_or_codon == "codon":  # User wants a codon
                 codon_start, codon_end = get_codon_labeling(ref_start, ref_end)
@@ -74,8 +74,8 @@ class Alignment:
             ref_end = int(self.end_coordinate)
 
             if self.nucleotide_or_codon == "codon":  # User wants a codon
-                ref_start = master_alignment[0]["ref_start"]
-                ref_end = master_alignment[0]["ref_end"]
+                ref_start = master_alignment[0]["cds_start"]
+                ref_end = master_alignment[0]["cds_end"]
                 codon_start = int(self.start_coordinate)
                 codon_end = int(self.end_coordinate)
 
@@ -95,8 +95,7 @@ class Alignment:
     def __get_alignments(self):
 
         placeholders = ', '.join(['%s'] * len(self.sequences))  
-        query = f'SELECT s.* FROM sequence s WHERE s.sequence_id IN ({placeholders});'
-
+        query = f'SELECT s.* FROM sequence_alignment s WHERE s.sequence_id IN ({placeholders});'
         with connections[self.database].cursor() as cursor:
             cursor.execute(query, self.sequences)
             alignments = dictfetchall(cursor)
@@ -105,7 +104,7 @@ class Alignment:
     
     def __get_master_alignment(self):
         with connections[self.database].cursor() as cursor:
-            cursor.execute("SELECT ref_start, ref_end FROM features WHERE ref_seq_name=%s AND feature_name='CDS' AND product=%s", [self.reference_sequence, self.region])
+            cursor.execute("SELECT cds_start, cds_end FROM features WHERE accession=%s AND product=%s", [self.reference_sequence, self.region])
             master_alignment = dictfetchall(cursor)
 
         return master_alignment

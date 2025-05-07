@@ -58,11 +58,13 @@ def get_sequences_meta_data_by_filters(request):
 
     return Response(data)
 
-@api_view(['GET'])
+@api_view(['POST'])
 def download_sequences_meta_data(request):
 
     database = request.headers.get('database', 'default')
-    params = dict(request.GET.items())
+    # params = dict(request.GET.items())
+    params = request.data.copy()
+    print(params)
 
     sequences = Sequences(database=database, filters=params)
     if params:

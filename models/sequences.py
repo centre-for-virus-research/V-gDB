@@ -71,11 +71,15 @@ class Sequences:
                 cursor.execute("SELECT * FROM insertions WHERE accession = %s", [primary_accession])
                 result["alignment"]["insertions"] = dictfetchall(cursor)
 
-                # Add features (hardcoded accession in original code)
+                # Add features
                 cursor.execute("SELECT * FROM features WHERE accession = %s ORDER BY cds_start", [result["alignment"]["alignment_name"]])
                 result["alignment"]["features"] = dictfetchall(cursor)
-
+                # cursor.execute("SELECT cds_info FROM meta_data where primary_accession = %s", [result["alignment"]["alignment_name"]])
+                # result["alignment"]["features"] = dictfetchall(cursor)[0]["cds_info"]
                 # Get reference sequence
+                # cursor.execute("SELECT sequence FROM sequences WHERE header = %s", [result["alignment"]["alignment_name"]])
+                # result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["sequence"]
+
                 cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [result["alignment"]["alignment_name"]])
                 result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
 

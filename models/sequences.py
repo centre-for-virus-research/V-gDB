@@ -137,6 +137,18 @@ class Sequences:
 
         return result
 
+    def filter_by_reference_sequences(self, data):
+        formatted_data = ', '.join(['%s'] * len(data))
+        query = f""" SELECT * FROM meta_data 
+                    WHERE primary_accession IN (
+                    SELECT alignment_name FROM sequence_alignment)
+                    AND primary_accession IN ({formatted_data})
+                """
+        with connections[self.database].cursor() as cursor:
+            cursor.execute(query, data) 
+            references = dictfetchall(cursor)
+
+        return references
     def get_reference_sequences_meta_data(self):
 
         with connections[self.database].cursor() as cursor:

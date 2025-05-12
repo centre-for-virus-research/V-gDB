@@ -18,11 +18,13 @@ urlpatterns = [
     # SEQUENCES
     path('sequences/get_sequences_meta_data/', sequences.get_sequences_meta_data, name='get_sequences_meta_data'),
     path('sequences/get_sequence_meta_data/<str:primary_accession>', sequences.get_sequence_meta_data, name='get_sequence_meta_data'),
-    path('alignments/get_reference_sequences_meta_data/', sequences.get_reference_sequences_meta_data, name='get_reference_sequences_meta_data'),
+    path('sequences/get_reference_sequences_meta_data/', sequences.get_reference_sequences_meta_data, name='get_reference_sequences_meta_data'),
     path('alignments/get_reference_sequence/<str:primary_accession>', sequences.get_reference_sequence, name='get_reference_sequence'),
     
     
     path('sequences/get_sequences_meta_data_by_filters/', sequences.get_sequences_meta_data_by_filters, name='get_sequences_meta_data_by_filters'),
+    path('sequences/get_filtered_reference_sequences/', sequences.get_filtered_reference_sequences, name='get_filtered_reference_sequences'),
+    
     path('sequences/download_sequences_meta_data/', sequences.download_sequences_meta_data, name='download_sequences_meta_data'),
 
 

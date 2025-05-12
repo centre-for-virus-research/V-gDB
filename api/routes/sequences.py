@@ -33,7 +33,10 @@ def get_sequence_meta_data(request, primary_accession):
     try:
         data = sequences.get_sequence_meta_data(primary_accession)
     except ValueError as e:
-        return HttpResponse(e, status=404)
+        print("HI")
+        print(str(e))
+        return Response({'message': str(e)}, status=404)
+
 
     return Response(data)
 
@@ -90,6 +93,27 @@ def get_reference_sequences_meta_data(request):
     database = request.headers.get('database', 'default')
     alignment = Sequences(database=database)
     data = alignment.get_reference_sequences_meta_data()
+
+    return Response(data)
+
+@api_view(['GET'])
+def get_filtered_reference_sequences(request):
+
+    database = request.headers.get('database', 'default')
+    params = dict(request.GET.items())
+
+    for key, value in params.items():
+        params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
+
+    try:
+        data = sequences.get_sequences_meta_data_by_filters()
+        primary_accessions = [d["primary_accession"] for d in data if "primary_accession" in d]
+        data = sequences.filter_by_reference_sequences(primary_accessions)
+    except ValueError as e:
+        print(f"Error: {e}")
+        return HttpResponse(e, status=404)
 
     return Response(data)
 

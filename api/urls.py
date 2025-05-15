@@ -38,12 +38,22 @@ urlpatterns = [
     path('mutations/get_mutations/', mutations.get_mutations, name='get_mutations'),
     path('mutations/get_mutation_regions_and_codons', mutations.get_mutation_regions_and_codons, name='get_mutations_regions_and_codons'),
     
+
+
     
     # TASKS
     path('tasks/run_sequence_alignment/', tasks.run_sequence_alignment, name='run_sequence_alignment'),
     path('tasks/get_blast_results/<str:job_id>', tasks.get_blast_results, name='get_blast_results'),
+    
+    
     path('tasks/get_alignment_results/<str:job_id>', tasks.get_alignment_results, name='get_alignment_results'),
+    
+    
+    
     path('tasks/get_job_logs/<str:job_id>', tasks.get_job_logs, name='get_job_logs'),
+
+
+
 
 
 

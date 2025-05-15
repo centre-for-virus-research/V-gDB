@@ -35,28 +35,7 @@ def run_sequence_alignment(request):
     except ConnectionError as e:
         print(f"Error: {e}")
         return HttpResponse(e, status=404)
-
-# ----------------------------------------------------------------------
-# View to download BLAST results as a TSV file
-# ----------------------------------------------------------------------
-@api_view(['GET'])
-def get_blast_results(request, job_id):
-    """
-    Downloads the BLAST results file for a given job ID.
-    Args:
-        job_id (str): ID of the job to retrieve results for.
-    Returns:
-        HttpResponse: File response with TSV data.
-    """
-    file_path = os.path.join('jobs', job_id, 'blast_results.tsv')
-
-    if not os.path.exists(file_path):
-        raise Http404("BLAST results file not found.")
-
-    with open(file_path, 'r') as file:
-        response = HttpResponse(file, content_type='text/tab-separated-values')
-        response['Content-Disposition'] = 'attachment; filename=blast_results.tsv'
-        return response
+    
 
 # ----------------------------------------------------------------------
 # View to get sequence alignment results in FASTA format
@@ -70,16 +49,19 @@ def get_alignment_results(request, job_id):
     Returns:
         Response: JSON containing primary sequence, aligned sequences, and features.
     """
+    print("HI WE WANT TO BE HERE")
     sequences = []
-    file_path = os.path.join('jobs', job_id, 'Nextalign', 'MT862689', 'MT862689.aligned.fasta')
-
+    file_path = os.path.join('jobs', job_id, 'analysis','query_ref_alignment')
+    print(file_path)
     if not os.path.exists(file_path):
         raise Http404("Alignment file not found.")
-
-    with open(file_path, "r") as fasta_file:
-        for record in SeqIO.parse(fasta_file, "fasta"):
-            sequences.append({"query": record.id, "seq": str(record.seq)})
-
+    for f in os.listdir(file_path):
+        print(f)
+        with open(os.path.join(file_path, f), "r") as fasta_file:
+            for record in SeqIO.parse(fasta_file, "fasta"):
+                print(record.id)
+                sequences.append({"query": record.id, "seq": str(record.seq)})
+    print(sequences)
     if not sequences:
         return Response([])  # Empty response if no sequences found
 
@@ -98,6 +80,30 @@ def get_alignment_results(request, job_id):
     }]
 
     return Response(result)
+
+# ----------------------------------------------------------------------
+# View to download BLAST results as a TSV file
+# ----------------------------------------------------------------------
+@api_view(['GET'])
+def get_blast_results(request, job_id):
+    """
+    Downloads the BLAST results file for a given job ID.
+    Args:
+        job_id (str): ID of the job to retrieve results for.
+    Returns:
+        HttpResponse: File response with TSV data.
+    """
+    file_path = os.path.join('jobs', job_id, 'analysis', 'query_tophits_uniq.tsv')
+
+    if not os.path.exists(file_path):
+        raise Http404("BLAST results file not found.")
+
+    with open(file_path, 'r') as file:
+        response = HttpResponse(file, content_type='text/tab-separated-values')
+        response['Content-Disposition'] = 'attachment; filename=blast_results.tsv'
+        return response
+
+
 
 # ----------------------------------------------------------------------
 # View to fetch job logs or metadata for a queued task

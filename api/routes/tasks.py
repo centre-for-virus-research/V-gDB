@@ -49,19 +49,19 @@ def get_alignment_results(request, job_id):
     Returns:
         Response: JSON containing primary sequence, aligned sequences, and features.
     """
-    print("HI WE WANT TO BE HERE")
+
     sequences = []
     file_path = os.path.join('jobs', job_id, 'analysis','query_ref_alignment')
-    print(file_path)
+
     if not os.path.exists(file_path):
         raise Http404("Alignment file not found.")
     for f in os.listdir(file_path):
-        print(f)
+
         with open(os.path.join(file_path, f), "r") as fasta_file:
             for record in SeqIO.parse(fasta_file, "fasta"):
-                print(record.id)
+
                 sequences.append({"query": record.id, "seq": str(record.seq)})
-    print(sequences)
+
     if not sequences:
         return Response([])  # Empty response if no sequences found
 

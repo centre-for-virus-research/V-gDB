@@ -61,6 +61,9 @@ class Sequences:
             result["meta_data"] = sequence[0]
 
             # Get alignment information
+            cursor.execute("SELECT sequence FROM sequences WHERE header=%s", [primary_accession])
+            result["sequence"] = dictfetchall(cursor)[0]["sequence"]
+            # Get alignment information
             cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id=%s", [primary_accession])
             alignment = dictfetchall(cursor)
 

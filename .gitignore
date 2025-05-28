@@ -7,3 +7,4 @@ dump.rdb
 V_gDB
 tests/
 db/
+backend/settings.py

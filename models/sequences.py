@@ -66,7 +66,7 @@ class Sequences:
             # Get alignment information
             cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id=%s", [primary_accession])
             alignment = dictfetchall(cursor)
-
+            print(alignment)
             if alignment:
                 result["alignment"] = alignment[0]
 
@@ -75,7 +75,7 @@ class Sequences:
                 result["alignment"]["insertions"] = dictfetchall(cursor)
 
                 # Add features
-                cursor.execute("SELECT * FROM features WHERE accession = %s ORDER BY cds_start", [result["alignment"]["alignment_name"]])
+                cursor.execute("SELECT * FROM features WHERE accession=%s and reference_accession = %s ORDER BY cds_start", [primary_accession, result["alignment"]["alignment_name"]])
                 result["alignment"]["features"] = dictfetchall(cursor)
                 # cursor.execute("SELECT cds_info FROM meta_data where primary_accession = %s", [result["alignment"]["alignment_name"]])
                 # result["alignment"]["features"] = dictfetchall(cursor)[0]["cds_info"]
@@ -195,6 +195,7 @@ class Sequences:
             # cursor.execute("SELECT sequence FROM sequences WHERE header=%s", [primary_accession])
             cursor.execute("SELECT alignment from sequence_alignment where sequence_id=%s", [primary_accession])
             result["ref_sequence"] = dictfetchall(cursor)[0]["alignment"]
+            result["aligned_sequences"]
 
         return result
 

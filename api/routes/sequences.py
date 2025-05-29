@@ -61,12 +61,12 @@ def get_sequences_meta_data_by_filters(request):
 
     return Response(data)
 
-@api_view(['POST'])
+@api_view(['GET'])
 def download_sequences_meta_data(request):
-
+    print("starting")
     database = request.headers.get('database', 'default')
-    # params = dict(request.GET.items())
-    params = request.data.copy()
+    params = dict(request.GET.items())
+
     print(params)
 
     sequences = Sequences(database=database, filters=params)
@@ -76,10 +76,10 @@ def download_sequences_meta_data(request):
         data = sequences.get_sequences_meta_data()
     
     
-
+    print("ending")
     file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_meta_data.csv'
     build_csv_file(data, file_name)
-
+    print("THIS IS THE FOWNLOAD")
     with open(file_name, 'r') as file:
         response = HttpResponse(file, content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename='+file_name

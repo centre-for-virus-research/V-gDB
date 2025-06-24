@@ -8,20 +8,21 @@ import glob
 import shutil
 import sqlite3
 import requests
-import read_file
+import models.sequence_alignment.read_file as read_file
 import subprocess
 from Bio import SeqIO
 from time import sleep
 from Bio.Seq import Seq
 from os.path import join
 from argparse import ArgumentParser
+from django.db import connections
 #from PadAlignment import PadAlignment
 # from GffToDictionary import GffDictionary
 #from FeatureCalculator  import FeatureCordCalculator 
 
 
 class GenBankSequenceSubmitter:
-	def __init__(self, sequence_dir, tmp_dir, output_dir, metadata, ncbi_submission_template, gff_file, db, gaps_to_ignore):
+	def __init__(self, sequence_dir, tmp_dir, output_dir, metadata, ncbi_submission_template, gff_file, db, gaps_to_ignore, analysis_dir):
 		self.sequence_dir = sequence_dir
 		self.tmp_dir = tmp_dir
 		self.output_dir = output_dir
@@ -34,7 +35,7 @@ class GenBankSequenceSubmitter:
 		self.db = db
 		self.gaps_to_ignore = gaps_to_ignore
 		#self.feature_cords = FeatureCordCalculator()
-		self.analysis_dir = str(uuid.uuid4())
+		self.analysis_dir = analysis_dir
 
 	@staticmethod
 	def path_to_basename(file_path):
@@ -158,33 +159,37 @@ class GenBankSequenceSubmitter:
 
 	def extract_ref_seq(self):
 		db_path = join(self.tmp_dir, "analysis", self.analysis_dir, "DB")
+		print(db_path)
+		print(self.db)
 		os.makedirs(db_path, exist_ok=True)
 		write_file = open(join(db_path, "db.fa"), 'w')
-		conn = sqlite3.connect(self.db)
-		cursor = conn.cursor()
+		# conn = sqlite3.connect(self.db)
+		# cursor = conn.cursor()
+		with connections[self.db].cursor() as cursor:
+			cursor.execute("SELECT primary_accession, accession_type FROM meta_data where accession_type='reference' OR accession_type = 'master'")
+			ref_accs = cursor.fetchall()
+			ref_accs_list = [(item[0], item[1]) for item in ref_accs]
+			for each_acc, accession_type in ref_accs_list:
+				cursor.execute("SELECT sequence FROM sequences WHERE header = %s", [each_acc])
+				if each_acc == "NC_001542": accession_type="master"
+				result = cursor.fetchone()
+				if result:
+					sequence = result[0]
+					acc_type = "|" + accession_type
+					write_file.write(">" + each_acc + acc_type)
+					write_file.write("\n")
+					write_file.write(sequence)
+					write_file.write("\n")
+			write_file.close()
 
-		cursor.execute("SELECT primary_accession, accession_type FROM meta_data where accession_type='reference' OR accession_type = 'master'")
-		ref_accs = cursor.fetchall()
-		ref_accs_list = [(item[0], item[1]) for item in ref_accs]
-		for each_acc, accession_type in ref_accs_list:
-			cursor.execute("SELECT sequence FROM sequences WHERE header = ?", (each_acc,))
-			if each_acc == "NC_001542": accession_type="master"
-			result = cursor.fetchone()
-			if result:
-				sequence = result[0]
-				acc_type = "|" + accession_type
-				write_file.write(">" + each_acc + acc_type)
-				write_file.write("\n")
-				write_file.write(sequence)
-				write_file.write("\n")
-		write_file.close()
+			
 
 	def blast_analysis(self):
 
 		values = {}
 		records = {}
 
-		query_path = join(self.tmp_dir, "analysis", self.analysis_dir, "query.fa")
+		query_path = join(self.tmp_dir, "input.fasta")
 		ref_path = join(self.tmp_dir, "analysis", self.analysis_dir, "ref.fa")
 		db_path = join(self.tmp_dir, "analysis", self.analysis_dir, "DB", "db.fa")
 		query_tophits = join(self.tmp_dir, "analysis", self.analysis_dir, "query_tophits.tsv")
@@ -341,7 +346,10 @@ class GenBankSequenceSubmitter:
 	def mafft_query_sequences(self, query_file, ref_alignment_file, output_dir):
 		output_file = self.path_to_basename(ref_alignment_file) + "_aln.fasta"
 		output_path = join(output_dir, output_file)
+		print("WE ARE STARTING THIS STUFF")
+		print(output_path)
 		ref_alignment_file = ref_alignment_file.split('.')[0] + "_aln.fasta"
+		print(ref_alignment_file)
 		try:
 			with open(output_path, 'w') as out_f:
 				subprocess.run(['mafft', '--add', query_file, '--keeplength', ref_alignment_file], stdout=out_f, check=True)

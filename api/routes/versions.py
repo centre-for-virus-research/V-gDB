@@ -16,7 +16,7 @@ def get_vgt_version(request):
     database = request.headers.get('database', 'default')
 
     with connections[database].cursor() as cursor:
-        cursor.execute('SELECT * FROM project_settings where name LIKE "PROJECT_VERSION" or name LIKE "%EXTENSION_BUILD_DATE%";')
+        cursor.execute("SELECT * FROM project_settings;")
         result = dictfetchall(cursor)
         
     return Response(result)

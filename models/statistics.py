@@ -7,24 +7,61 @@ class Statistics:
     A class to retrieve and process statistical information from a specified database.
     """
 
-    def __init__(self, database):
+    def __init__(self, database, filters=None):
         """
         Initialize with the target database name.
         """
-        self.database = database  
+        self.database = database
+        self.filters = filters  
 
     def get_global_distribution_of_sequences(self):
         """
         Returns a list of unique countries (with m49 codes) and the number of sequences per country.
         """
-        with connections[self.database].cursor() as cursor:
-            # Get country values from metadata
-            cursor.execute('SELECT country FROM meta_data WHERE country IS NOT NULL')
-            metadata_countries = dictfetchall(cursor)
 
-            # Get reference m49_country data
-            cursor.execute('SELECT display_name, id, m49_code FROM m49_country')
-            m49_country_data = cursor.fetchall()
+        if not self.filters:
+           with connections[self.database].cursor() as cursor:
+                # Get country values from metadata
+                cursor.execute('SELECT country FROM meta_data WHERE country IS NOT NULL')
+                metadata_countries = dictfetchall(cursor)
+
+                # Get reference m49_country data
+                cursor.execute('SELECT display_name, id, m49_code FROM m49_country')
+                m49_country_data = cursor.fetchall()
+        else:
+            where_clauses = []
+            params = []
+
+            def add_filter_clause(key, value, operator='='):
+                """Add WHERE clause for numeric or comparison-based filters."""
+                where_clauses.append(f"{key} {operator} %s")
+                params.append(value)
+
+            def add_filter_in_clause(key, value):
+                """Add simple equality filter for strings/other fields."""
+                where_clauses.append(f"{key} = %s")
+                params.append(value)
+
+            for key, value in self.filters.items():
+                if key == 'length_lower':
+                    add_filter_clause('length', value, operator='>=')
+                elif key == 'length_upper':
+                    add_filter_clause('length', value, operator='<=')
+                else:
+                    add_filter_in_clause(key, value)
+
+            where_str = ' AND '.join(where_clauses)
+            query = f"SELECT country FROM meta_data WHERE {where_str} AND country IS NOT NULL"
+            print(query, params)
+            with connections[self.database].cursor() as cursor:
+                cursor.execute(query, params)
+                metadata_countries = dictfetchall(cursor)
+                # Get reference m49_country data
+                cursor.execute('SELECT display_name, id, m49_code FROM m49_country')
+                m49_country_data = cursor.fetchall()
+                print(m49_country_data)
+
+            
 
         # Clean, merge and process country metadata with m49 reference data
         parsed_data = self.__parse_and_combine_country_data(metadata_countries, m49_country_data)
@@ -104,6 +141,7 @@ class Statistics:
             List of unique countries with sequence counts.
         """
         # Count how many times each m49_code appears
+        print(meta_data)
         m49_codes = [entry["m49_code"] for entry in meta_data]
         m49_code_counts = Counter(m49_codes)
 

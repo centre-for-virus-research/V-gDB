@@ -105,7 +105,6 @@ class Sequences:
         Returns:
             list: A list of dictionaries matching the filter criteria.
         """
-        print("STARTING")
         if not self.filters:
             # No filters provided, return all metadata
             return self.get_sequences_meta_data()

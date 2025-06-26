@@ -12,8 +12,12 @@ from models.statistics import Statistics
 def get_global_distribution_of_sequences(request):
 
     database = request.headers.get('database', 'default')
+    params = dict(request.GET.items())
 
-    statistics = Statistics(database=database)
+    for key, value in params.items():
+        params[key] = value.split(',') if ',' in value else value
+
+    statistics = Statistics(database=database, filters=params)
 
     try:
         data = statistics.get_global_distribution_of_sequences()

@@ -122,6 +122,7 @@ class SequenceAlignment:
 	def extract_ref_seq(self):
 		db_path = join(self.tmp_dir, "analysis", "DB")
 		print(db_path)
+		print(self.db)
 		os.makedirs(db_path, exist_ok=True)
 		write_file = open(join(db_path, "db.fa"), 'w')
 		# conn = sqlite3.connect(self.db)

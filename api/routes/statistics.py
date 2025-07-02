@@ -45,5 +45,3 @@ def get_statistics(request):
     # data["max_length"] = min_max_length[1]
 
     return Response(data)
-
-

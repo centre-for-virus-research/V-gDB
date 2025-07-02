@@ -104,8 +104,13 @@ class Alignment:
     
     def __get_master_alignment(self):
         with connections[self.database].cursor() as cursor:
-            cursor.execute("SELECT cds_start, cds_end FROM features WHERE accession=%s AND product=%s", [self.reference_sequence, self.region])
-            master_alignment = dictfetchall(cursor)
+            if(self.region != 'entirety'):
+                cursor.execute("SELECT cds_start, cds_end FROM features WHERE accession=%s AND product=%s", [self.reference_sequence, self.region])
+                master_alignment = dictfetchall(cursor)
+            else:
+                cursor.execute("SELECT length FROM meta_data WHERE primary_accession=%s", [self.reference_sequence])
+                tmp = dictfetchall(cursor)
+                master_alignment = [{"cds_start": 1, "cds_end":tmp[0]["length"]}]
 
         return master_alignment
     

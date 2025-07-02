@@ -23,6 +23,7 @@ def download_alignments(request):
 
     
     params = dict(request.GET.items())
+    print(params)
     filters = json.loads(unquote(params["filters"])) if params["filters"] != 'undefined' else None
     sequences_helper = Sequences(database=database, filters=filters)
     data = sequences_helper.get_sequences_meta_data_by_filters()
@@ -35,10 +36,10 @@ def download_alignments(request):
 
     alignment = Alignment(database=database,
                           sequences=sequences,
-                        region=region, 
-                        nucleotide_or_codon=nucleotide_or_codon, 
-                        start_coordinate=start_coordinate, 
-                        end_coordinate=end_coordinate)
+                            region=region, 
+                            nucleotide_or_codon=nucleotide_or_codon, 
+                            start_coordinate=start_coordinate, 
+                            end_coordinate=end_coordinate)
     
     data = alignment.get_alignments()
     

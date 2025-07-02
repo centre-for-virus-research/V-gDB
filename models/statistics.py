@@ -68,6 +68,16 @@ class Statistics:
         sequence_counts = self.__count_sequence_occurance_by_country(parsed_data)
 
         return sequence_counts
+    
+    def get_pipeline_last_run(self):
+        """
+        Returns the total number of sequences in the database.
+        """
+        with connections[self.database].cursor() as cursor:
+            cursor.execute("SELECT Version FROM project_settings WHERE Software='Time of creation'")
+            last_run = cursor.fetchone()
+
+        return last_run[0]
 
     def get_sequences_count(self):
         """
@@ -85,9 +95,8 @@ class Statistics:
         """
         with connections[self.database].cursor() as cursor:
             cursor.execute("""
-                SELECT count(primary_accession) 
-                FROM meta_data 
-                WHERE primary_accession IN (SELECT alignment_name FROM sequence)
+                SELECT count(distinct(alignment_name))
+                FROM sequence_alignment 
             """)
             sequences_count = cursor.fetchone()
 

@@ -46,6 +46,7 @@ class Mutations:
         self.region = region
 
         alignments = self.__get_alignments()
+        print(len(alignments))
 
         mutations = self.__parse_mutations(alignments)
         return mutations
@@ -115,11 +116,11 @@ class Mutations:
             WHERE m.host IN ({formatted_hosts}) 
             AND f.product = '{self.region}';
         '''
-
+        print(query, self.hosts)
         with connections[self.database].cursor() as cursor:
             cursor.execute(query, self.hosts)
             alignments = dictfetchall(cursor)
-        print(alignments)
+
         return alignments
 
     def __get_master_reference(self):
@@ -132,12 +133,12 @@ class Mutations:
         with connections[self.database].cursor() as cursor:
             if hasattr(self, 'region'):
                 cursor.execute(
-                    "SELECT cds_start, cds_end FROM features WHERE master_ref_accession=%s AND product=%s",
+                    "SELECT product, cds_start, cds_end FROM features WHERE accession=%s AND product=%s",
                     [self.reference_sequence, self.region]
                 )
             else:
                 cursor.execute(
-                    "SELECT * FROM features WHERE master_ref_accession=%s",
+                    "SELECT product, cds_start, cds_end FROM features WHERE accession=%s",
                     [self.reference_sequence]
                 )
             master_reference = dictfetchall(cursor)

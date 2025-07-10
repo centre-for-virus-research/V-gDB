@@ -111,6 +111,16 @@ class Statistics:
             max_min = cursor.fetchone()
             
         return max_min
+    
+    def get_recent_collection_year(self):
+        """
+        Returns the minimum and maximum sequence lengths from the database.
+        """
+        with connections[self.database].cursor() as cursor:
+            cursor.execute("SELECT MAX(collection_year)FROM meta_data;")
+            max_min = cursor.fetchone()
+            
+        return max_min
 
     def __parse_and_combine_country_data(self, meta_data, m49_data):
         """

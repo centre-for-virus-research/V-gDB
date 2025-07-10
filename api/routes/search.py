@@ -56,3 +56,15 @@ def search_hosts(request, query):
 
     return Response(data)
 
+@api_view(['GET'])
+def search_country(request, query):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(m49_code), display_name FROM m49_country WHERE display_name LIKE %s;", [f"%{query}%"])
+        data = dictfetchall(cursor)
+
+    return Response(data)
+

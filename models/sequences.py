@@ -66,7 +66,7 @@ class Sequences:
             # Get alignment information
             cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id=%s", [primary_accession])
             alignment = dictfetchall(cursor)
-            print(alignment)
+
             if alignment:
                 result["alignment"] = alignment[0]
 
@@ -83,6 +83,7 @@ class Sequences:
                 # cursor.execute("SELECT sequence FROM sequences WHERE header = %s", [result["alignment"]["alignment_name"]])
                 # result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["sequence"]
 
+                # Add reference sequence
                 cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [result["alignment"]["alignment_name"]])
                 result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
 
@@ -127,6 +128,10 @@ class Sequences:
                 add_filter_clause('length', value, operator='>=')
             elif key == 'length_upper':
                 add_filter_clause('length', value, operator='<=')
+            elif key == 'collection_year_lower':
+                add_filter_clause('collection_year', value, operator='>=')
+            elif key == 'collection_year_upper':
+                add_filter_clause('collection_year', value, operator='<=')
             else:
                 add_filter_in_clause(key, value)
 

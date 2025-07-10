@@ -37,10 +37,12 @@ def get_statistics(request):
     pipeline_last_run = statistics.get_pipeline_last_run()
     sequences_count = statistics.get_sequences_count()
     reference_sequences_count = statistics.get_reference_sequences_count()
+    recent_collection_year = statistics.get_recent_collection_year()
     # min_max_length = statistics.get_max_min_sequence_length
     data["pipeline_last_run"] = pipeline_last_run
     data["sequences_count"] = sequences_count
     data["reference_sequences_count"] = reference_sequences_count
+    data["recent_collection_year"] = recent_collection_year
     # data["min_length"] = min_max_length[0]
     # data["max_length"] = min_max_length[1]
 

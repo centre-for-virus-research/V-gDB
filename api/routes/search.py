@@ -68,3 +68,14 @@ def search_country(request, query):
 
     return Response(data)
 
+@api_view(['GET'])
+def search_region(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(m49_region_id) as display_name FROM m49_country where m49_region_id IS NOT NULL")
+        data = dictfetchall(cursor)
+
+    return Response(data)

@@ -80,6 +80,8 @@ urlpatterns = [
     path('filters/search_pubmed_ids/<str:query>', search.search_pubmed_ids, name='search_pubmed_ids'),
     path('filters/search_hosts/<str:query>', search.search_hosts, name='search_hosts'),
     path('filters/search_primary_accession_ids/<str:query>', search.search_primary_accession_ids, name='search_primary_accession_ids'),
+    path('filters/search_country/<str:query>', search.search_country, name='search_country'),
+    path('filters/search_region/', search.search_region, name='search_region'),
 
 
 

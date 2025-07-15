@@ -132,6 +132,9 @@ class Sequences:
                 add_filter_clause('collection_year', value, operator='>=')
             elif key == 'collection_year_upper':
                 add_filter_clause('collection_year', value, operator='<=')
+            elif key =='region':
+                where_clauses.append("primary_accession IN (SELECT m.primary_accession FROM m49_country r JOIN meta_data m on m.country_validated = r.m49_code WHERE r.m49_region_id=%s)")
+                params.append(value)
             else:
                 add_filter_in_clause(key, value)
 

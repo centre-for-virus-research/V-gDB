@@ -5,8 +5,8 @@ from django.urls import get_resolver, get_urlconf
 import importlib
 from django.conf import settings
 from django.http import JsonResponse
-    
-
+from collections import defaultdict
+import json
 def home(request):
     """Renders a styled home page with available API endpoints from api/routes/urls.py."""
     
@@ -82,18 +82,25 @@ def examples(request):
     return render(request, 'examples.html')
 
 def api(request):
-    """Renders apischema."""
+    """Renders API schema grouped by top-level type."""
 
     api_urls_module = importlib.import_module("api.urls")
     url_patterns = getattr(api_urls_module, "urlpatterns", [])
 
-    # Extract endpoint paths
-    endpoints = []
+    # Group endpoints by category
+    endpoints = defaultdict(list)
+
     for pattern in url_patterns:
         if hasattr(pattern, 'pattern') and hasattr(pattern.pattern, '_route'):
-            endpoints.append("/api/"+pattern.pattern._route)
+            route = pattern.pattern._route
+            full_path = "/api/" + route
+            category = route.split('/')[0] if '/' in route else 'uncategorized'
+            endpoints[category].append(full_path)
 
-    return render(request, 'api.html', {'endpoints': endpoints})
+    with open("/Users/dana/CVR/V-gDB_Projects/backend/V-gDB/frontend/static/javascript/openapi_new.json", 'r') as f:
+        data = json.load(f)
+
+    return render(request, 'api.html', {'endpoints': data})
 
 def check_db_connection(request):
     try:

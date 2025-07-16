@@ -4,14 +4,28 @@
     color: #856404 !important;             /* Dark yellowish text color */
     
 }
-
+.banner-gradient-spots {
+    width: 100vw;          /* Full viewport width */
+    height: 100vh;   
+    background: white;
+    background: radial-gradient(circle at 20% 80%, #008cba 0%,  white 80%) ,
+                radial-gradient(circle at 75% 30%,  #008cba 0%, white 30%),   
+                white;
+                
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;    /* To compensate for any container centering */
+    margin-right: -50vw;
+}
 
 .container-home {
     
     background: white;
     padding: 40px;
+    /* padding: 40px;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
 }
 .title {
     text-align: center;
@@ -72,7 +86,11 @@ h1 {
     font-size: 14px;
 }
 .rabv {
-    background: #006e2c;
+    background: #8B0000;
+}
+
+.rabv a:hover{
+    background: #008B8B;
 }
 .card a:hover {
     background: #008cba;
@@ -172,6 +190,6 @@ h1 {
 
 /* Optional: Custom font size for table */
 .table-font {
-    font-size: 1rem;
+    font-size: 12px;
     font-family: Arial, sans-serif;
 }

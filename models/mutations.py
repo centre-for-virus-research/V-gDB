@@ -116,7 +116,7 @@ class Mutations:
             WHERE m.host IN ({formatted_hosts}) 
             AND f.product = '{self.region}';
         '''
-        print(query, self.hosts)
+        print(query, )
         with connections[self.database].cursor() as cursor:
             cursor.execute(query, self.hosts)
             alignments = dictfetchall(cursor)

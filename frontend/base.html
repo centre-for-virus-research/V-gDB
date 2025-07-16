@@ -6,7 +6,7 @@
 
     <!-- ✅ Load Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     
     {% block extra_css %}{% endblock %}
@@ -14,34 +14,73 @@
 
 <body>
     <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">V-gDB</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                    <a class="nav-link" href="/about">About</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Analysis
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/mutations">Mutations</a></li>
+                        <li><a class="dropdown-item" href="/profile">Clade Assignment</a></li>
+                    </ul>
+                    </li>
+                </ul>
+                </div>
+            </div>
+        </nav>
         <!-- ✅ Navbar Section -->
-        <div class="navbar">
+        <!-- <div class="navbar">
             <a href="/">V-gDB</a>
+            <a class="dropdown">
+                <a class="dropbtn">Documentation</a>
+                <div class="dropdown-content">
+                    <a href="/installation/">Installation</a>
+                    <a href="/api">API Docs</a>
+                    <a href="/schema">Schema</a>
+                </div>
+            </a>
+            <div class="dropdown">
+                <a class="dropbtn">Analysis</a>
+                <div class="dropdown-content">
+                    <a href="/mutations">Mutations</a>
+                </div>
+            </div>
+            
             <a href="/installation/">Installation</a>
-            <a href="/api">API Docs</a>
-            <a href="/schema">Schema</a>
-            <a href="/mutations">Mutations</a>
+            
+            
             <a href="/examples">Examples</a>
             <a href="/python_tools">Python Tools</a>
             <a href="/about">About</a>
-        </div>
+        </div> -->
     </header>
     
 
     <!-- ✅ Content Block -->
      <main>
-    <div>
-        {% block content %}
-        {% endblock %}
-    </div>
-</main>
+        <div >
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
 
-<footer class="footer">
+<!-- <footer class="footer">
     <div class="container">
         <div class="footer-row">
             <div class="footer-col footer-logo">
                 <a href="http://www.gla.ac.uk/researchinstitutes/iii/cvr/">
-                    <img src="/static/images/cvrBioinformatics.png" alt="CVR logo"/>
+                    <img src="/images/cvrBioinformatics.png" alt="CVR logo"/>
                 </a>
             </div>
             <div class="footer-col footer-text">
@@ -51,7 +90,7 @@
             </div>
         </div>
     </div>
-</footer>
+</footer> -->
 
 
 

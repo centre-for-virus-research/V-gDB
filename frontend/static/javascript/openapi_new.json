@@ -1,0 +1,495 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "GLUE2",
+      "description": "GLUE2 is a virus database"
+    },
+    "servers": [
+      {
+        "url": "/rabv"
+      }
+    ],
+    "tags":[
+        {
+            "name":"sequences",
+            "display_name":"Sequences",
+            "description":"API endpoints to lookup and retrieve sequences, alignments, and meta-data."
+
+        },
+        {
+          "name":"alignment",
+          "display_name":"Alignments",
+          "description":"API endpoints to lookup and retrieve sequences, alignments, and meta-data."
+
+        },
+        {
+          "name":"mutations",
+          "display_name":"Mutations",
+          "description":"API endpoints to retrieve codon mutations within hosts and clades."
+
+        },
+        {
+          "name":"statistics",
+          "display_name":"Statistics",
+          "description":"API endpoints to retrieve codon mutations within hosts and clades."
+
+        } 
+    ],
+    "paths": {
+      "/api/sequences/get_sequences_meta_data/": {
+        "path_display":"/api/sequences/get_sequences_meta_data/",
+        "path_url":"api_sequences_get_sequences_meta_data",
+        "get": {
+            "tags":["sequences"],
+            "type":"GET",
+          "summary": "Retrieve all NCBI sequences' meta-data",
+          "description": "Retrieve all NCBI sequences' meta-data",
+          "operationId": "get_all_ncbi_sequences__get",
+          "parameters": [
+            
+           
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenbankEntry"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/sequences/get_sequence_meta_data/:primary_accession": {
+        "path_display":"/api/sequences/get_sequence_meta_data/:primary_accession",
+        "path_url":"api_sequences_get_sequence_meta_data",
+        "path_parameters":"/api/sequences/get_sequence_meta_data/",
+        "get": {
+            "tags":["sequences"],
+            "type":"GET",
+          "summary": "Lookup NCBI primary_accession and retrieve corresponding meta-data.",
+          "description": "Get NCBI sequence with specific primary_accession",
+          "operationId": "get_all_ncbi_sequences__get",
+          "parameters": [
+            {
+              "name": "primary_accession",
+              "description":"NCBI primary accession",
+              "in": "query",
+              "required": true,
+              "example":"PP760209",
+              "schema": {
+                "type": "string"
+              }
+            }
+           
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenbankEntry"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/alignment/get_reference_sequences_meta_data/": {
+        "path_display":"/api/alignment/get_reference_sequences_meta_data/",
+        "path_url":"api_alignment_get_reference_sequences",
+        "get": {
+            "tags":["alignment"],
+            "type":"GET",
+          "summary": "Retrieve list of all reference sequences used for alignment",
+          "description": "Retrieve list of all reference sequences used for alignment",
+          "operationId": "get_all_ncbi_sequences__get",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenbankEntry"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/alignment/get_reference_sequence_meta_data/:primary_accession": {
+        "path_display":"/api/alignment/get_reference_sequence_meta_data/:primary_accession",
+        "path_url":"api_alignment_get_reference_sequence_meta_data",
+        "get": {
+            "tags":["alignment"],
+            "type":"GET",
+          "summary": "Lookup and retrieve reference sequence based on NCBI primary accession",
+          "description": "Retrieve reference sequence based on primary accession ID",
+          "operationId": "get_reference_sequence__get",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+           
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenbankEntry"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/get_filtered_sequences/": {
+        "path_display":"/api/get_filtered_sequences/",
+        "path_url":"api_get_filtered_sequences",
+        "get": {
+            "tags":["sequences"],
+            "type":"GET",
+          "summary": "Lookup list of NCBI sequences based on filters applied",
+          "description": "Get NCBI sequences based on list of filters",
+          "operationId": "get_filtered_ncbi_sequences__get",
+          "parameters": [
+            {
+              "name": "gb_length_lower",
+              "in": "query",
+              "description":"Lower sequence length",
+              "example":100,
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_length_upper",
+              "in": "query",
+              "description":"Upper sequence length",
+              "example":"400",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_update_date_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been updated in NCBI",
+              "example":"2001",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_update_date_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been updated in NCBI",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "collection_year_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been collected",
+              "example":"1964",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "collection_year_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been collected",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "creation_year_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been created in NCBI",
+              "example":"1964",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "creation_year_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been created in NCBI",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "major_clade",
+              "in": "query",
+              "description":"An array of major clades",
+              "example":"[Artic, Africa-2]",
+              "required": false,
+              "schema": {
+                "type": "array"
+              }
+            },
+            {
+              "name": "minor_clade",
+              "in": "query",
+              "description":"Array of minor clades. If major clade is included, the minor clades must belong to the major clades.",
+              "example":"[AL1a, AL2, AL3]",
+              "required": false,
+              "schema": {
+                "type": "array"
+              }
+            },
+            {
+              "name": "host",
+              "in": "query",
+              "description":"Host species the sample was collected from",
+              "example":"Canis familiaris",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "m49_region_id",
+              "in": "query",
+              "description":"Retrieve NCBI sequences that come from the corresponding region_id.",
+              "example":"503",
+              "external_link":"/get_m49_region_ids",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "is_ldc",
+              "in": "query",
+              "description":"Is the sequence from a least developed country (LDC)",
+              "example":"false",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "is_lldc",
+              "in": "query",
+              "description":"Is the sequence from a landlocked developing country (LLDC)",
+              "example":"true",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "is_sids",
+              "in": "query",
+              "description":"Is the sequence from a small island developing state (SIDS)",
+              "example":"true",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            }
+           
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenbankEntry"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/statistcs/get_global_distribution_of_sequences/": {
+        "path_display":"/api/get_global_distribution_of_sequences/",
+        "path_url":"api_get_global_distribution_of_sequences",
+        "get": {
+            "tags":["statistics"],
+            "type":"GET",
+          "summary": "Retrieve sequence count for each country",
+          "description": "Retrieve global overview of sequence data",
+          "operationId": "get_global_distribution_of_sequence__get",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenbankEntry"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/statistcs/get_statistics/": {
+        "path_display":"/api/statistics/get_statistics/",
+        "path_url":"api_get_statistics",
+        "get": {
+            "tags":["statistics"],
+            "type":"GET",
+          "summary": "Retrieve overall summary of database",
+          "description": "Retrieve overall summary of database",
+          "operationId": "get_global_distribution_of_sequence__get",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenbankEntry"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/mutations/get_mutations/": {
+        "path_display":"api/mutations/get_mutations/",
+        "path_url":"api_mutations_get_mutations",
+        "get": {
+            "tags":["mutations"],
+            "type":"GET",
+          "summary": "Retrieve meta-data and mutations for specific codons",
+          "description": "Retrieve meta-data and mutations for specific codons",
+          "operationId": "get_global_distribution_of_sequence__get",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenbankEntry"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+  
+

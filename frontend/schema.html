@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}  <!-- ✅ Load static files here -->
-{% block title %}Welcome to My App{% endblock %}
+{% block title %}V-gDB{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
@@ -18,17 +18,48 @@
             The V-gDB database is generated using the Viral Genome Toolkit. 
         </p>
 
-        <h2>meta_data</h2>
-        <p>The meta_data table contains XX</p>
+        <h2>Meta_data</h2>
+        <p>The meta_data table stores descriptive information about each sequence, identified by the NCBI primary_accession
+            number. It contains sequence information such as length, clade assignment, strain. It also contains sample details
+            such as isolate_id, host species, and country of origin. 
+        </p>
 
-        <h2>sequences</h2>
-        <p>The sequences table contains XX</p>
+        <h2>Sequences</h2>
+        <p>The sequences table contains the NCBI primary_accession number and the associated unaligned sequece.</p>
 
-        <h2>features</h2>
-        <p>The features table contains XX</p>
+        <h2>Features</h2>
+        <p>
+            The features table contains the coordinates of each feature in the aligned sequence 
+            with regards to its aligned reference sequence.
 
-        <h2>genes</h2>
-        <p>The genes table contains XX</p>
+            <ul>
+                <li>The <b>cds_start</b> and <b>cds_end</b> are the coordinates of the feature.</li>
+                <li>The <b>aln_start</b> and <b>aln_end</b> are the coordinates of the entire aligned sequence. </li>
+            </ul>
+
+            
+        </p>
+
+        <div class="'row">
+            <div class="col"><img  style="width:100%" src="/frontend/static/images/features_table.png" alt="API 1"></div>
+        <img style="width:100%" src="/frontend/static/images/features_example.png" alt="API 1">
+
+        </div>
+        
+
+        <h2>Sequence_alignment</h2>
+        <p>
+            The sequence_alignment table contains the NCBI primary accession of the sequence and its reference sequence
+            and the aligned sequence. 
+
+            The aligned sequence does not include the insertions. See the insertions table for this information. 
+        </p>
+
+        <h2>Insertions</h2>
+        <p>
+            The insertions table contains the NCBI primary_accession of the sequence and reference and a comma seperated
+            list of the starting nucleotide position and the insertions at that spot.
+        </p>
 
 
 

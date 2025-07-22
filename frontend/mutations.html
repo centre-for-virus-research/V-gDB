@@ -4,6 +4,7 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/installation.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
 
 
@@ -11,7 +12,113 @@
     <div class="container-installation">
         <h1>V-gDB Mutations</h1>
 
+        <p>
+            This guide explains how to access the mutations analaysis functionality. There are two ways to access the 
+            mutations data: 
 
+            <ol>
+                <li>
+                    via API: use the API request for quick and easy access to mutations data. 
+
+                </li>
+
+                <li>via Python Class: use the <code>Mutations</code> Python class to extract codon-level mutations from genetic sequence alignments stored in your SQL database via Django.</li>
+            </ol>
+            
+            
+            
+        </p>
+        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+            <ul class="nav nav-tabs" id="vGenomeTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="api-tab" data-bs-toggle="tab" data-bs-target="#api" type="button" role="tab">Via API</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="python-tab" data-bs-toggle="tab" data-bs-target="#python" type="button" role="tab">Via python Class</button>
+                </li>
+            </ul>
+        </div>
+ <div class="tab-content mt-3">
+        <div class="tab-pane fade" id="api" role="tabpanel">
+
+        </div>
+
+
+        <div class="tab-pane fade" id="python" role="tabpanel">
+            <h2>Overview</h2>
+            
+            <p>
+                The <code>Mutations</code> class connects to a specified database, aligns sequences from specified hosts, 
+                and compares them against a reference sequence to identify mutations at given codon positions within a genomic region.
+            </p>
+
+            <h2>Class Initialization</h2>
+            <p>To create an instance of the <code>Mutations</code> class:</p>
+            <pre><code>from mutations import Mutations
+
+        mutations_obj = Mutations(database='your_database_alias', reference_sequence='NC_001542')</code></pre>
+
+            <h2>Getting Mutations</h2>
+            <p>Call <code>get_mutations</code> with:</p>
+            <ul>
+                <li><strong>hosts</strong>: List of host species to query</li>
+                <li><strong>codons</strong>: List of codon positions to inspect (as integers or strings)</li>
+                <li><strong>region</strong>: Name of the genomic region (e.g., a gene or protein name)</li>
+            </ul>
+
+            <pre><code>hosts = ['Homo sapiens', 'Pan troglodytes']
+    codons = [10, 20, 30]
+    region = 'Spike Protein'
+
+    mutation_data = mutations_obj.get_mutations(hosts, codons, region)</code></pre>
+
+            <h2>Output</h2>
+            <p>The output is a list of alignment records, each annotated with the mutations detected at the specified codon positions.</p>
+
+            <h2>Supporting Methods</h2>
+            <ul>
+                <li><code>get_mutation_regions_and_codons()</code>: Retrieves reference regions annotated with codon start/end positions.</li>
+            </ul>
+
+            <pre><code>mutation_regions = mutations_obj.get_mutation_regions_and_codons()</code></pre>
+
+            <h2>Database Queries</h2>
+            <p>The class internally runs SQL queries to retrieve:</p>
+            <ol>
+                <li>Sequence alignments filtered by host and genomic region</li>
+                <li>Master reference annotations from the <code>features</code> table</li>
+            </ol>
+
+            <h2>Requirements</h2>
+            <p>Ensure the following:</p>
+            <ul>
+                <li>Django is connected to your database via a valid alias.</li>
+                <li>The <code>meta_data</code>, <code>sequence_alignment</code>, and <code>features</code> tables are properly populated.</li>
+                <li>The <code>translateCodon</code> and <code>dictfetchall</code> helper functions are available.</li>
+            </ul>
+
+            <h2>Example Usage</h2>
+            <pre><code>mutations_obj = Mutations(database='default', reference_sequence='NC_001542')
+        mutations = mutations_obj.get_mutations(
+            hosts=['Homo sapiens'],
+            codons=[5, 12, 25],
+            region='Envelope Protein'
+        )
+        print(mutations)</code></pre>
+
+            <h2>Notes</h2>
+            <ul>
+                <li>Always validate that hosts, codons, and region are correctly passed to avoid <code>ValueError</code>.</li>
+                <li>Use the debug <code>print</code> statements or logging to inspect SQL queries if necessary.</li>
+            </ul>
+                </div>
+
+
+        
+
+    
+
+</div>
     </div>
 
 {% endblock %}

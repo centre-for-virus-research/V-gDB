@@ -81,6 +81,11 @@ def examples(request):
 
     return render(request, 'examples.html')
 
+def gui(request):
+    """Renders gui schema."""
+
+    return render(request, 'gui.html')
+
 def api(request):
     """Renders API schema grouped by top-level type."""
 
@@ -97,7 +102,7 @@ def api(request):
             category = route.split('/')[0] if '/' in route else 'uncategorized'
             endpoints[category].append(full_path)
 
-    with open("/Users/dana/CVR/V-gDB_Projects/backend/V-gDB/frontend/static/javascript/openapi_new.json", 'r') as f:
+    with open("/Users/danaallen/CVR/gdb/web-resources/V-gDB/frontend/static/javascript/openapi_new.json", 'r') as f:
         data = json.load(f)
 
     return render(request, 'api.html', {'endpoints': data})

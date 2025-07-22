@@ -24,17 +24,21 @@ h1, h2, h3, h4, h5, h6 {
 
 
 /* ✅ Make the navbar fixed at the top */
- .navbar {
+.navbar {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-
-    background: linear-gradient(135deg, #0a9396, #94d2bd);
+    background: #008cba;
+    /* background: linear-gradient(135deg, #0a9396, #94d2bd); */
     color: white;
 
     text-align: center;
     z-index: 1000; 
+}
+.navbar-color {
+    background: #008cba;
+    color: white;
 }
 /*
 .navbar:hover {
@@ -101,8 +105,8 @@ h1, h2, h3, h4, h5, h6 {
 /* Container for the footer */
 .container {
     max-width: 1200px; /* Max width of content */
-    margin: 0 auto; /* Centering the container */
-    padding: 0 15px; /* Padding for spacing */
+    margin: 15px auto; /* Centering the container */
+    padding: 15px 15px; /* Padding for spacing */
 }
 
 /* Footer container (using Grid layout) */

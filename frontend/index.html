@@ -11,154 +11,111 @@
 
 
 {% block content %}
-<div>
-    <section class="hero-section">
-    <div class="hero-content">
-        <div class="hero-left">
-            <h1>Viral Genome Database (V-gDB)</h1>
-            <p>
-                Seamlessly query viral genomes, mutations, and phylogenetics with our comprehensive API.
-            </p>
-            <div class="hero-buttons">
-                <a href="/api" class="cta-button">Explore the API</a>
-            </div>
-        </div>
-        <div class="hero-right">
-            <div class="hero-circle">
-                <img src="frontend/static/images/hcv.jpg" alt="Viral Genome Visual" />
-            </div>
-        </div>
-    </div>
-</section>
-
-    <div class="hero-section-2">
-    <div class="row">
-
-        <div class="col-4">
-            <h2>Analysis Tools</h2>
-            <p>
-                Along with querying sequence information, V-gDB offers various tools for more advanced viral interpretation.
-            </p>
-        </div>
-
-
-        <div class="col-4">
-            <i class="fa-solid fa-sitemap fa-4x"></i>
-            <h2>Phylogenetic Tree Assignment</h2>
-            <p>Genome database for Rabies Virus</p>
-        </div>
-        <div class="col-4">
-            <i class="fa-solid fa-dna fa-4x"></i>
-            <h2>Mutations</h2>
-            <p>Genome database for Rabies Virus</p>
-        </div>
-        
-    </div>
-
-</div>
-
-<div class="hero-section-3">
-    <div class="row">
-
-        <div class="col-2">
-            <h2>Features</h2>
-        </div>
-
-
-        <div class="col-10">
-        
-            <p>Genome database for Rabies Virus</p>
-        </div>
-    
-        
-    </div>
-    <div class="row">
-        <div class="col-6">
-            <div class="info-item">
-                <div class="info-circle">
-                    <i class="fa-solid fa-sitemap fa-3x"></i>
+    <div>
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-left">
+                    <h1>Viral Genome Database (V-gDB)</h1>
+                    <p>
+                        Seamlessly query viral genomes, mutations, and phylogenetics with our comprehensive API.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="/api" class="cta-button">Explore the API</a>
+                    </div>
                 </div>
-                <h2>Documentation</h2>
-            </div>
-        </div>
-        <div class="col-6">
-        
-             <div class="info-item">
-                <div class="info-circle">
-                    <i class="fa-solid fa-sitemap fa-3x"></i>
-                </div>
-                <h2>Python Tools</h2>
-            </div>
-        </div>
-    </div>
-        <div class="row">
-        <div class="col-6">
-            <div class="info-item">
-                <div class="info-circle">
-                    <i class="fa-solid fa-sitemap fa-3x"></i>
-                </div>
-                <h2>Installation</h2>
-            </div>
-        </div>
-        <div class="col-6">
-        
-            <div class="info-item">
-                <div class="info-circle">
-                    <i class="fa-solid fa-sitemap fa-3x"></i>
-                </div>
-                <h2>About</h2>
-            </div>
-        </div>
-    </div>
-
-
-</div>
-    <!-- <div class="'container-home">
-    
-        <h1 class="title">Welcome to the Viral Genome Database API!</h1>
-        <p>
-            The V-gDB API provides seamless access to a comprehensive, curated database of viral genomes. Designed for researchers, bioinformaticians, and developers, 
-            this API delivers structured, high-quality viral data processed through a specialized curation toolkit (V-gTK). Users can query genomic metadata,  
-            alignments, phylogenetic relationships, and other key virological insights with ease. Whether you're analyzing varations, mutations, 
-            or developing bioinformatics tools, V-gDB API ensures reliable and efficient access to the data you need. 
-        </p>
-
-        
-            <h2>Explore the available virus genome database resources that use V-gDB:</h2>
-
-            <div class="card-container">
-                <div class="card">
-                    <img src="http://localhost:3000/virusStructure.jpg" alt="API 1">
-                    <h2>RABV-gDB</h2>
-                    <p>Genome database for Rabies Virus</p>
-                    <a class="rabv" href="http://localhost:3000/">Go to RABV-gDB</a>
+                <div class="hero-right">
+                    <div class="hero-circle">
+                        <img src="frontend/static/images/hcv.jpg" alt="Viral Genome Visual" />
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <h2>V-gDB Tools:</h2>
-            <p>Along with querying sequence information, V-gDB offers various tools for more advanced viral interpretation.</p>
-            <div class="card-container card-tools">
-                <div class="card">
-                    <i class="fa-solid fa-dna fa-4x"></i>
-                    <h2>Mutations</h2>
-                    <p>Genome database for Rabies Virus</p>
-                
-                </div>
-                <div class="card">
-                    <i class="fa-solid fa-sitemap fa-4x"></i>
+        <div class="row equal-height g-0">
+            <div class="col-5 box box-1" style="flex: 2;">
+                <h2>Analysis Tools</h2>
+                <p>
+                    Along with querying sequence information, V-gDB offers various tools for more advanced viral interpretation.
+                </p>
+            </div>
+            <div class="col-3 box box-2" style="flex: 1;">
+                <i class="fa-solid fa-sitemap fa-4x"></i>
                     <h2>Phylogenetic Tree Assignment</h2>
+                    <button class="btn main-button" href="/api">Explore</button>
+            </div>
+            <div class="col-3 box box-3" style="flex: 1;">
+                <i class="fa-solid fa-dna fa-4x"></i>
+                <h2>Mutations</h2>
+                <button class="btn main-button" href="/api">Explore</button>
+            </div>
+        </div>
+
+
+
+        <div class="container ">
+            <div class="row mb-4">
+                <div class="col-2">
+                    <h2>Features</h2>
+                </div>
+                <div class="col-10">
                     <p>Genome database for Rabies Virus</p>
                 </div>
             </div>
 
-            
-            <p>The source code for V-gDB is available at <a href="https://github.com/dana-allen/backend">https://github.com/dana-allen/backend/</a> </p>
-            <p>
-                You can find detailed instructions on how to install and run V-gDB locally: 
-                <a href="/installation">Installation Guide</a>
-            </p>
-        
-    </div> -->
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="info-item d-flex">
+                        <div class="info-circle me-3">
+                            <i class="fa-solid fa-file fa-3x"></i>
+                        </div>
+                        <div>
+                            <h4>Installation</h4>
+                            <p class="text-muted">Step-by-step instructions to install V-gDB locally on your computer.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-item d-flex">
+                        <div class="info-circle me-3">
+                            <i class="fa-solid fa-database fa-3x"></i>
+                        </div>
+                        <div>
+                            <h4>Database Schema</h4>
+                            <p class="text-muted">Overview of the database schema that powers V-gDB.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="info-item d-flex">
+                        <div class="info-circle me-3">
+                            <i class="fa-solid fa-computer fa-3x"></i>
+                        </div>
+                        <div>
+                            <h4>Web Resources</h4>
+                            <p class="text-muted">Explore the available V-gDB web resources.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="info-item d-flex">
+                        <div class="info-circle me-3">
+                            <i class="fa-solid fa-computer fa-3x"></i>
+                        </div>
+                        <div>
+                            <h4>Functionality</h4>
+                            <p class="text-muted">Learn more about the project and its goals for rabies virus research.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
     </div>
 {% endblock %}
 

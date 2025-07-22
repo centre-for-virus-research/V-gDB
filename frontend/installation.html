@@ -1,94 +1,157 @@
 {% extends 'base.html' %}
-{% load static %}  <!-- ✅ Load static files here -->
-{% block title %}Viral Genome Database{% endblock %}
+{% load static %}
+{% block title %}Viral Genome Database - Installation Guide{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/installation.css' %}">
-{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
+<!-- Bootstrap Bundle JS (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
 
 {% block content %}
+<div class="container-home">
+    <h1>V-gDB Installation Guide</h1>
 
-        <div class="container-installation">
-            <h1>V-gDB Installation Guide</h1>
-            <p>
-                You can install V-gDB to run directly on your system. This allows you to connect 
-                your own viral databases, customize and/or create API requests, develop new features, and 
-                incorporate into your own tools. 
-            </p>
+    <p>
+        The Viral Genome Database (V-gDB) can be installed locally on your system. This allows you to connect 
+        your own viral genome databases, customize API endpoints, and integrate with your tools or GUIs.
+    </p>
 
-            <h2 id="setup">Setup V-gDB Project</h2>
 
-            <p>Create a Virtual Environment</p>
-            <pre><code>python -m venv v-gdb</code></pre>
+    <!-- Nav Tabs -->
+<ul class="nav nav-tabs" id="installationTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="getting-started-tab" data-bs-toggle="tab" data-bs-target="#getting-started" type="button" role="tab">Getting Started</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="setup-tab" data-bs-toggle="tab" data-bs-target="#setup" type="button" role="tab">Setup Project</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="requirements-tab" data-bs-toggle="tab" data-bs-target="#requirements" type="button" role="tab">Install Requirements</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="database-tab" data-bs-toggle="tab" data-bs-target="#database" type="button" role="tab">Connect Database</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="start-server-tab" data-bs-toggle="tab" data-bs-target="#start-server" type="button" role="tab">Start Server</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="next-steps-tab" data-bs-toggle="tab" data-bs-target="#next-steps" type="button" role="tab">Next Steps</button>
+      </li>
+  </ul>
+  
+  <!-- Tab Content -->
+  <div class="tab-content mt-3" id="installationTabContent">
+  
+    <div class="tab-pane fade show active" id="getting-started" role="tabpanel">
+      <h2>Getting Started</h2>
+      <ol>
+        <li>Follow the steps below to install and run V-gDB on your computer.</li>
+        <li>After installation, you can either:
+            <ul>
+                <li>Download a sample viral database</li>
+                <li>Or create your own database using the <strong>Viral Genome Toolkit (V-gTK)</strong>.</li>
+            </ul>
+        </li>
+        <li>Once connected, you can query the database via the API, Python tools, or connect it to our frontend GUI system.</li>
+    </ol>
+    </div>
+  
+    <div class="tab-pane fade" id="setup" role="tabpanel">
+      <h2>Setup V-gDB Project</h2>
+      <p>Create and activate a Python virtual environment:</p>
 
-            <p>Activate the Virtual Environment</p>
-            <pre><code>
-                # On Windows
-                v-gdb\Scripts\activate
+      <pre><code># Create virtual environment
+  python -m venv v-gdb
+  
+  # Activate on Windows
+  v-gdb\Scripts\activate
+  
+  # Activate on macOS/Linux
+  source v-gdb/bin/activate
+      </code></pre>
+      
+    </div>
+  
+    <div class="tab-pane fade" id="requirements" role="tabpanel">
 
-                # On macOS/Linux
-                source v-gdb/bin/activate
-            </code></pre>
+        <h2>Install Core Requirements</h2>
 
-            <h2 id="requirements">Install Core Requirements</h2>
-            <p>
-                The V-gDB API allows users to retrieve curated viral genome data through structured API 
-                requests within a Django-based framework. Django must be installed for the API to run correctly.
-            </p>
-            <pre><code>$ python -m pip install Django</code></pre>
+        <p>Install Django (required for the V-gDB API):</p>
+        <pre><code>pip install Django</code></pre>
 
-            <p>To chek if Django installed properly:</p>
-            <pre><code>$ django-admin --version</code></pre>
-            <p>If correctly install, the terminal output should be:</p>
-            <pre><code>$ 5.0.7</code></pre>
-        
-            <p>Download V-gDB codebase</p>
-            <pre><code>$ git clone git@github.com:dana-allen/backend.git</code></pre>
+        <p>Clone the V-gDB repository:</p>
+        <pre><code>git clone https://github.com/centre-for-virus-research/V-gDB</code></pre>
 
-            
-            <h2>3. Install Dependencies</h2>
-            <pre><code>cd V-gDB 
-            pip install -r requirements.txt
-            </code></pre>
+        <p>Install project requirements:</p>
 
-            <h2 id="database">4. Connect SQlite Database</h2>
-            <p>
-                For local development, you can: 
-                <ul>
-                    <li>curate your own viral database using the <a href="/installation">V-gTK pipeline</a> or </li> 
-                    <li>download and connect one of our pre-curated <a href="/installation"> viral databases</a></li>
-                </ul>
-            </p>
-            <p>
-                Once you have your database, update the <a class="text-code">backend/settings.py</a> for your database. The 
-                <a class="text-code">NAME</a> field should be the path to your local version of <a class="text-code">your-name.db</a> file.
-            </p>
+        <pre><code>cd V-gDB 
+            pip install -r requirements.txt</code></pre>
 
-            <pre><code>
-                91 DATABASES = {
-                92    
-                93    'default': {
-                94        'ENGINE': 'django.db.backends.sqlite3'', # replace with the type of database
-                95        'NAME': '/Users/dana/CVR/databases/rabv-gdb.db', # replace with name of database or location of file
-                96        'USER': 'gluetools', # replace with database user
-                97        'PASSWORD': 'glue12345', # replace with password
-                98        'HOST': 'localhost', # replace with host
-                99        'PORT':'3306', # replace with port
-                100    }
-                101 }
-            </code></pre>
+    </div>
 
-            <h2 id="start_server">5. Start the Server</h2>
-            <pre><code>
-                # While you are in the V-gDB main directory
-                python manage.py runserver
-            </code></pre>
-            <p>Navigate to <a href="http://localhost:8000/">http://localhost:8000/</a> to explore V-gDB API.</p>
-            <p>If you see the following image, you have successfully installed V-gDB!</p>
-            <img src="{% static 'images/success_install.png' %}" alt="Successful Installation" class="installation-image">
+    
+  
+    <div class="tab-pane fade" id="database" role="tabpanel">
+      <h2>Connect SQLite Database</h2>
+      <p>
+        For development, you can:
+    </p>
+    <ul>
+        <li>Curate your own viral database using the <a href="/installation">V-gTK pipeline</a></li>
+        <li>Or download a pre-curated <a href="/installation">viral database</a></li>
+    </ul>
 
-        </div>
+    <p>Once you have a database, update <code>backend/settings.py</code> to configure the database connection. Edit the <code>DATABASES</code> section with the path to your database:</p>
 
+    <pre><code>
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/path/to/your-database.db',  # Replace with your DB file path
+        'USER': 'gluetools',                 # Replace if using another DB engine
+        'PASSWORD': 'glue12345',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
+    </code></pre>
+    </div>
+  
+    <div class="tab-pane fade" id="start-server" role="tabpanel">
+      <h2>Start the Server</h2>
+      <pre><code>python manage.py runserver</code></pre>
+      <pre><code>python manage.py runserver</code></pre>
+
+      <p>Then navigate to <a href="http://localhost:8000/">http://localhost:8000/</a> in your browser.</p>
+  
+      <p>If installed successfully, you will see:</p>
+      <img src="{% static 'images/success_install.png' %}" alt="Successful Installation" class="installation-image">
+  
+      <h2>Next Steps</h2>
+      <ul>
+          <li>Start building custom API endpoints.</li>
+          <li>Connect the GUI frontend for visualization.</li>
+          <li>Integrate with your research tools and pipelines.</li>
+      </ul>
+    </div>
+
+    <div class="tab-pane fade" id="next-steps" role="tabpanel">
+    
+        <h2>Next Steps</h2>
+        <ul>
+            <li>Explore pre-defined <a href="/api">API endpoints</a>.</li>
+            <li><a href="/gui">Connect the GUI frontend</a> for visualization.</li>
+            <li>Integrate with your research tools and pipelines.</li>
+        </ul>
+      </div>
+  
+  </div>
+   
+   
+</div>
 {% endblock %}
-

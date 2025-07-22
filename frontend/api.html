@@ -5,7 +5,7 @@
 
 {% block extra_css %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <link rel="stylesheet" href="{% static 'css/index2.css' %}">
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
@@ -22,124 +22,100 @@
 
                     {% if details.get.tags and tag.name in details.get.tags %}
                         
-                    <table class="table  table-bordered table-font">
-                            <thead>
-                                <tr>
-                                    <th>path</th>
-                                    <td><a href="/{{path}}">{{path}}</a></td>
-                                </tr>
-                                <tr>
-                                    <th>description</th>
-                                    <td>{{details.get.summary}}</td>
-                                </tr>
-                            </thead>
-                             {% if details.get.parameters %}
-                                <thead>
-                                    <tr>
-                                        <th style="float: top;">params</th>
-                                        
-                                        <td>
-                                            <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#paramsTable{{ loop.index }}">
-                                                View Params
-                                            </button>
-
-                                            <div id="paramsTable{{ loop.index }}" class="collapse mt-2">
-                                                <table class="table table-striped table-font">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Parameter</th>
-                                                            <th>Description</th>
-                                                            <th>Required?</th>
-                                                            <th>Type</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {% for parameter in details.get.parameters %}
-                                                        <tr>
-                                                            <td>{{ parameter.name }}</td>
-                                                            <td>{{ parameter.description }}</td>
-                                                            <td>
-                                                                <span class="{% if parameter.required %}text-success{% endif %}">
-                                                                    {% if parameter.required %}Required{% else %}Optional{% endif %}
-                                                                </span>
-                                                            </td>
-                                                            <td>{{ parameter.schema.type }}</td>
-                                                        </tr>
-                                                        {% endfor %}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </thead>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">{{ details.get.type }}</th>
+                                <th style="width: 30%;"><b><a href="/{{ path }}">{{ path }}</a></b></th>
+                                <td style="width: 25%;">{{ details.get.summary }}</td>
+                                <td style="width: 20%; text-align: right;">
+                                    {% if details.get.parameters %}
+                                        <button class="btn btn-sm cta-button" data-bs-toggle="collapse" data-bs-target="#paramsTable{{ forloop.counter }}">
+                                            View Params
+                                        </button>
+                                    {% else %}
+                                        &nbsp;
+                                    {% endif %}
+                                    <button class="btn btn-sm main-button" data-bs-toggle="collapse" data-bs-target="#exampleTable{{ forloop.counter }}">
+                                        View Example
+                                    </button>
+                                </td>
+                                
+                            
+                                <!-- <th style="width: 10%;">
+                                    
+                                </th> -->
+                            </tr>
+                        </thead>
+                        
+                        <tbody>
+                            {% if details.get.parameters %}
+                            <tr class="collapse" id="paramsTable{{ forloop.counter }}">
+                                <td colspan="5">
+                                    <table class="table table-striped table-font">
+                                        <thead>
+                                            <tr>
+                                                <th>Parameter</th>
+                                                <th>Description</th>
+                                                <th>Required?</th>
+                                                <th>Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for parameter in details.get.parameters %}
+                                            <tr>
+                                                <td>{{ parameter.name }}</td>
+                                                <td>{{ parameter.description }}</td>
+                                                <td>
+                                                    <span class="{% if parameter.required %}text-success{% else %}text-muted{% endif %}">
+                                                        {% if parameter.required %}Required{% else %}Optional{% endif %}
+                                                    </span>
+                                                </td>
+                                                <td>{{ parameter.schema.type }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
                             {% endif %}
-                        </table>
+                            <tr class="collapse" id="exampleTable{{ forloop.counter }}">
+                                <td colspan="5">
+                                    <table class="table table-striped table-font">
+                                        <thead>
+                                            <tr>
+                                                <th>Parameter</th>
+                                                <th>Description</th>
+                                                <th>Required?</th>
+                                                <th>Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for parameter in details.get.parameters %}
+                                            <tr>
+                                                <td>{{ parameter.name }}</td>
+                                                <td>{{ parameter.description }}</td>
+                                                <td>
+                                                    <span class="{% if parameter.required %}text-success{% else %}text-muted{% endif %}">
+                                                        {% if parameter.required %}Required{% else %}Optional{% endif %}
+                                                    </span>
+                                                </td>
+                                                <td>{{ parameter.schema.type }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                        
+                    </table>
+                    
                     {% endif %}
                 {% endfor %}
+                <br></br>
             {% endfor %}
         </div>
-
-        <!-- <div>
-           {% for tag in endpoints.tags %}
-            <h2>{{ tag.display_name }}</h2>
-            <p>{{ tag.description }}</p>
-            <ul>
-                <table class="table table-striped table-bordered table-font">
-                    <thead>
-                <tr>
-                    <th>parameter</th>
-                    <th>description</th>
-                    <th>required?</th>
-                    <th>type</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for path, details in endpoints.paths.items %}
-
-                {% if details.get.tags and tag.name in details.get.tags %}
-                    <tr>
-                         - {{ details.get.summary }}
-                    </tr>
-                    {% for parameter in details.get.parameters %}
-                    <tr>
-                        <td>{{parameter.name}}</td>
-                        <td>{{parameter.description}}</td>
-                        <td><i>{{parameter.required}}</i></td>
-                        <td>{{parameter.schema.type}}</td>
-
-                    </tr>
-{% endfor %}
-                {% endif %}
-            {% endfor %}
-            </tbody>
-
-                </table>
-
-            </ul>
-            <hr>
-        {% endfor %}
-        </div> -->
-        <!-- <table class="table table-striped table-bordered table-font">
-            <thead>
-                <tr>
-                    <th>Category</th>
-                    <th>Endpoints</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for category, paths in endpoints.items %}
-                    <tr>
-                        <td>{{ category|capfirst }}</td>
-                        <td>
-                            {% for path in paths %}
-                                <a href="{{ path }}">{{ path }}</a><br>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table> -->
-
     </div>
 
 

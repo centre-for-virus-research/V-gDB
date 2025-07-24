@@ -36,7 +36,40 @@ def run_sequence_alignment(request):
         print(f"Error: {e}")
         return HttpResponse(e, status=404)
     
+def parse_tbl(file_path):
+    cds_entries = []
+    current_start = None
+    current_end = None
+    inside_cds = False
+    current_product = None
 
+    with open(file_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+
+            if not line or line.startswith('>Feature'):
+                continue
+
+            parts = line.split()
+
+            # CDS line
+            if len(parts) >= 3 and parts[2] == 'CDS':
+                current_start = parts[0].lstrip('<>')
+                current_end = parts[1].lstrip('<>')
+                inside_cds = True
+                current_product = None
+
+            # Product line (can have spaces in name)
+            elif inside_cds and len(parts) >= 2 and parts[0] == 'product':
+                current_product = ' '.join(parts[1:])
+                cds_entries.append({
+                    'start': current_start,
+                    'end': current_end,
+                    'name': current_product
+                })
+                inside_cds = False  # Done with this CDS block
+
+    return cds_entries
 # ----------------------------------------------------------------------
 # View to get sequence alignment results in FASTA format
 # ----------------------------------------------------------------------
@@ -69,14 +102,17 @@ def get_alignment_results(request, job_id):
     primary_seq = sequences[0]["seq"]
     aligned_sequences = sequences[1:]
 
-    features_helper = Features(database='RABV')
-    features = features_helper.get_feature(primary_accession)
+    # features_helper = Features(database='RABV')
+    # features = features_helper.get_feature(primary_accession)
+
+    cds_list = parse_tbl(os.path.join('jobs', job_id, 'analysis','Table2asn/tmp', primary_accession+'.tbl'))
+    print(cds_list)
 
     result = [{
         "primary_accession": primary_accession,
         "seq": primary_seq,
         "alignedSeq": aligned_sequences,
-        "features": features
+        "features": cds_list
     }]
 
     return Response(result)

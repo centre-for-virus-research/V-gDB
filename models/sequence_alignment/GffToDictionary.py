@@ -15,6 +15,7 @@ class GffDictionary:
 		with open(self.gff_file) as f:
 			for each_line in f:
 				if not each_line.startswith('#'):
+					print(each_line)
 					seqid,source,feature,start,end,score,strand,phase,attributes = each_line.strip().split('\t')
 					match = re.search(r'product=([^;]+)', attributes)
 					product = match.group(1) if match else None

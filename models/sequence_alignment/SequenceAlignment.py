@@ -298,7 +298,30 @@ class SequenceAlignment:
 		for each_ref in os.listdir(ref_seq_dir):
 			os.system('cat ' + master_fasta + ' ' + f'{join(ref_seq_dir, each_ref)}' + ' >' f'{join(master_and_reference_merged, each_ref)}') 
 			print(f"Merging complete {join(master_and_reference_merged, each_ref)}") 
+	def table2asn_coordinates(self, gff_dict, start, end, tolerance=10):
+		for cds_entry in gff_dict['CDS']:
+			cds_start = int(cds_entry['start'])
+			cds_end = int(cds_entry['end'])
+			product = cds_entry['product']
 
+			# Check if given coordinates fall within tolerance range of the actual CDS
+			if (cds_start - tolerance) <= start <= (cds_start + tolerance) and \
+				(cds_end - tolerance) <= end <= (cds_end + tolerance):
+
+				# Determine 5' and 3' partial status
+				if start < cds_start:
+					start_str = f"<{start}"  # 5' partial
+				else:
+					start_str = str(start)
+
+				if end > cds_end:
+					end_str = f">{end}"  # 3' partial
+				else:
+					end_str = str(end)
+
+				return [start_str, end_str, product]
+
+		return None  # No match within tolerance
 	def mafft_ref_sequences(self, ref_acc_file, output_dir):
 		output_file = self.path_to_basename(ref_acc_file) + "_aln.fasta"
 		output_path = join(output_dir, output_file)
@@ -393,27 +416,27 @@ class SequenceAlignment:
 		data = []
 
 		unique_acc_list = []
-		meta_data = self.load_metadata()
+		# meta_data = self.load_metadata()
 
 		for record in SeqIO.parse(fasta_file, "fasta"):
-			if record.id in meta_data:
-				if record.id not in unique_acc_list:
-					unique_acc_list.append(record.id)
+			# if record.id in meta_data:
+			if record.id not in unique_acc_list:
+				unique_acc_list.append(record.id)
 
-					sequence = str(record.seq)
-					gaps = self.get_gap_ranges(sequence)
+				sequence = str(record.seq)
+				gaps = self.get_gap_ranges(sequence)
 
-					# Calculate start offset: just after the first gap
-					if gaps and gaps[0][0] == 1:
-						start_offset = gaps[0][1] + 1
-					else:
-						start_offset = 1
+				# Calculate start offset: just after the first gap
+				if gaps and gaps[0][0] == 1:
+					start_offset = gaps[0][1] + 1
+				else:
+					start_offset = 1
 
-					adjusted = self.recalculate_cds_coordinates(record.id, gaps, cds_list, start_offset)
+				adjusted = self.recalculate_cds_coordinates(record.id, gaps, cds_list, start_offset)
 
-					#print(f">{record.id}")
-					#print(adjusted)
-					data.append([record.id, adjusted, sequence])
+				#print(f">{record.id}")
+				#print(adjusted)
+				data.append([record.id, adjusted, sequence])
 		return data
     
 

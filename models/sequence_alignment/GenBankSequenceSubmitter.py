@@ -16,6 +16,7 @@ from Bio.Seq import Seq
 from os.path import join
 from argparse import ArgumentParser
 from django.db import connections
+from models.sequence_alignment.GffToDictionary import GffDictionary
 #from PadAlignment import PadAlignment
 # from GffToDictionary import GffDictionary
 #from FeatureCalculator  import FeatureCordCalculator 
@@ -97,7 +98,7 @@ class GenBankSequenceSubmitter:
 	def load_metadata(self):
 		headers = self.metadata_header() 
 		df = {}
-		with open(self.metadata, mode="r", encoding="utf-8") as file:
+		with open("/Users/dana/CVR/V-gDB_Projects/backend/V-gDB/models/sequence_alignment/metadata.tsv", mode="r", encoding="utf-8") as file:
 			reader = csv.DictReader(file, delimiter="\t")
 
 			missing_headers = [col for col in headers if col not in reader.fieldnames]
@@ -520,27 +521,27 @@ class GenBankSequenceSubmitter:
 		data = []
 
 		unique_acc_list = []
-		meta_data = self.load_metadata()
+		# meta_data = self.load_metadata()
 
 		for record in SeqIO.parse(fasta_file, "fasta"):
-			if record.id in meta_data:
-				if record.id not in unique_acc_list:
-					unique_acc_list.append(record.id)
+			# if record.id in meta_data:
+			if record.id not in unique_acc_list:
+				unique_acc_list.append(record.id)
 
-					sequence = str(record.seq)
-					gaps = self.get_gap_ranges(sequence)
+				sequence = str(record.seq)
+				gaps = self.get_gap_ranges(sequence)
 
-					# Calculate start offset: just after the first gap
-					if gaps and gaps[0][0] == 1:
-						start_offset = gaps[0][1] + 1
-					else:
-						start_offset = 1
+				# Calculate start offset: just after the first gap
+				if gaps and gaps[0][0] == 1:
+					start_offset = gaps[0][1] + 1
+				else:
+					start_offset = 1
 
-					adjusted = self.recalculate_cds_coordinates(record.id, gaps, cds_list, start_offset)
+				adjusted = self.recalculate_cds_coordinates(record.id, gaps, cds_list, start_offset)
 
-					#print(f">{record.id}")
-					#print(adjusted)
-					data.append([record.id, adjusted, sequence])
+				#print(f">{record.id}")
+				#print(adjusted)
+				data.append([record.id, adjusted, sequence])
 		return data
 
 	# Example usage:

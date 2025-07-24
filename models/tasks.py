@@ -131,10 +131,52 @@ class Tasks:
             processor.mafft_query_sequences(join(grouped_fasta, each_query_seq), join(reference_alignments, reference_file), query_ref_alignment)
         
 
+        gff_file = "/Users/dana/CVR/V-gDB_Projects/backend/V-gDB/models/sequence_alignment/NC_001542.gff3"
+        gff_dict = GffDictionary(gff_file).gff_dict
+
+        non_redundant_acc = []
+        for each_query_ref_aln in os.listdir(query_ref_alignment):
+            partial_gaps = processor.find_gaps_in_fasta(join(query_ref_alignment, each_query_ref_aln), gff_file)
+            print(partial_gaps)
+            print("HELLO")
+            for each_acc in partial_gaps:
+                print(each_acc)
+            
+        
+                acc_num = each_acc[0]
+                coordinates = each_acc[1]
+
+                with open(join(table2asn_tmp, acc_num + ".tbl"), "w") as out:
+                    out.write(f">Feature {acc_num}\n")
+
+                    for each_cords in coordinates:
+                        cord_start = each_cords[0]
+                        cord_end = each_cords[1]
+                        print(each_cords)
+                        table2asn_cords = processor.table2asn_coordinates(gff_dict, cord_start, cord_end)
+                        print(table2asn_cords)
+                        if (table2asn_cords != None):
+                            start, end, product = table2asn_cords
+
+                            start_clean = start.lstrip("<>")
+                            end_clean = end.lstrip("<>")
+
+                            gene_symbol = product.split()[-1]
+
+                            product_name = product.replace(gene_symbol, "").strip(" ,")
+
+                            out.write(f"{start_clean}\t{end_clean}\tgene\n")
+                            out.write(f"\t\t\tgene\t{gene_symbol}\n")
+
+                            out.write(f"{start}\t{end}\tCDS\n")
+                            out.write(f"\t\t\tproduct\t{product_name}\n")
+                            out.write(f"\t\t\tgene\t{gene_symbol}\n")
         job.meta['status']['alignment'] = 'done'
         job.save_meta()
         job.meta['status']['message'] = 'done'
         job.save_meta()
+
+
         # # try: 
 
 
@@ -240,6 +282,44 @@ class Tasks:
             reference_file = processor.path_to_basename(each_query_seq)
             processor.mafft_query_sequences(join(grouped_fasta, each_query_seq), join(reference_alignments, reference_file), query_ref_alignment)
 
+
+        gff_file = "/Users/dana/CVR/V-gDB_Projects/backend/V-gDB/models/sequence_alignment/NC_001542.gff3"
+        gff_dict = GffDictionary(gff_file).gff_dict
+
+        non_redundant_acc = []
+        for each_query_ref_aln in os.listdir(query_ref_alignment):
+            partial_gaps = processor.find_gaps_in_fasta(join(query_ref_alignment, each_query_ref_aln), gff_file)
+            print(partial_gaps)
+            print("HELLO")
+            for each_acc in partial_gaps:
+            
+        
+                acc_num = each_acc[0]
+                coordinates = each_acc[1]
+
+                with open(join(table2asn_tmp, acc_num + ".tbl"), "w") as out:
+                    out.write(f">Feature {acc_num}\n")
+
+                    for each_cords in coordinates:
+                        cord_start = each_cords[0]
+                        cord_end = each_cords[1]
+                        table2asn_cords = processor.table2asn_coordinates(gff_dict, cord_start, cord_end)
+
+                        start, end, product = table2asn_cords
+
+                        start_clean = start.lstrip("<>")
+                        end_clean = end.lstrip("<>")
+
+                        gene_symbol = product.split()[-1]
+
+                        product_name = product.replace(gene_symbol, "").strip(" ,")
+
+                        out.write(f"{start_clean}\t{end_clean}\tgene\n")
+                        out.write(f"\t\t\tgene\t{gene_symbol}\n")
+
+                        out.write(f"{start}\t{end}\tCDS\n")
+                        out.write(f"\t\t\tproduct\t{product_name}\n")
+                        out.write(f"\t\t\tgene\t{gene_symbol}\n")
 
 
         # processor.extract_ref_seq()

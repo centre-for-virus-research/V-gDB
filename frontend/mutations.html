@@ -17,10 +17,7 @@
             mutations data: 
 
             <ol>
-                <li>
-                    via API: use the API request for quick and easy access to mutations data. 
-
-                </li>
+                <li>via API: use the API request for quick and easy access to mutations data.</li>
 
                 <li>via Python Class: use the <code>Mutations</code> Python class to extract codon-level mutations from genetic sequence alignments stored in your SQL database via Django.</li>
             </ol>
@@ -38,14 +35,39 @@
                 </li>
             </ul>
         </div>
- <div class="tab-content mt-3">
-        <div class="tab-pane fade" id="api" role="tabpanel">
+        <div class="tab-content mt-3">
+            <div class="tab-pane fade" id="api" role="tabpanel">
 
-        </div>
+                <h3>Hosted API Access</h3>
+                <p>
+                    Access V-gDB mutations programmatically from any language or platform by sending HTTP requests to our public API endpoint
+                    <ul>
+                        <li>Ideal for lightweight integrations and automation</li>
+                        <li>No setup required beyond a network connection</li>
+                        <li>Fully documented parameter options and response formats</li>
+                    </ul>
+                </p>
+                <ul>
+                    <li>Use the predefined V-gDB API endpoint to directly connect to our curated viral genome dataset 
+                    through simple API requests. </li>
+                    <li>This option requires no setup — just make your requests to our 
+                    server and start retrieving data right away.</li>
+                </ul>
+
+            </div>
 
 
         <div class="tab-pane fade" id="python" role="tabpanel">
             <h2>Overview</h2>
+
+            <p>
+                For users working within Python, V-gDB exposes the same logic hrough modular Python classes. This allows advanced users to:
+                <ul>
+                    <li>Customize Logic (eg: filtering, data post-processing)</li>
+                    <li>Integrate tightly with their own pipelines</li>
+                    <li>Replace various functions/methonds with their perferred version</li>
+                </ul>
+            </p>
             
             <p>
                 The <code>Mutations</code> class connects to a specified database, aligns sequences from specified hosts, 
@@ -56,7 +78,7 @@
             <p>To create an instance of the <code>Mutations</code> class:</p>
             <pre><code>from mutations import Mutations
 
-        mutations_obj = Mutations(database='your_database_alias', reference_sequence='NC_001542')</code></pre>
+mutations_obj = Mutations(database='your_database_alias', reference_sequence='NC_001542')</code></pre>
 
             <h2>Getting Mutations</h2>
             <p>Call <code>get_mutations</code> with:</p>
@@ -66,9 +88,9 @@
                 <li><strong>region</strong>: Name of the genomic region (e.g., a gene or protein name)</li>
             </ul>
 
-            <pre><code>hosts = ['Homo sapiens', 'Pan troglodytes']
+            <pre><code>hosts = ['dog', 'camel']
     codons = [10, 20, 30]
-    region = 'Spike Protein'
+    region = 'Large Protein'
 
     mutation_data = mutations_obj.get_mutations(hosts, codons, region)</code></pre>
 

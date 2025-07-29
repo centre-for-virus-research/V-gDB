@@ -24,14 +24,17 @@ class Alignment:
         if not self.reference_sequence:
             self.reference_sequence = 'NC_001542'
         
-        alignments = self.__get_alignments()
+        # alignments = self.__get_alignments()
 
-        master_alignment = self.__get_master_alignment()
+        # master_alignment = self.__get_master_alignment()
 
-        if not master_alignment:
-            raise ValueError("Reference alignment can not be found")
+        # if not master_alignment:
+        #     raise ValueError("Reference alignment can not be found")
         
-        results = self.__parse_alignments(alignments, master_alignment)
+        # results = self.__parse_alignments(alignments, master_alignment)
+
+        alignments = self.__get_alignments_and_features()
+        results = self.__parse_alignments_new(alignments)
 
         return results
 
@@ -57,6 +60,44 @@ class Alignment:
 
 
     # PRIVATE FUNCTIONS
+
+
+    def __parse_alignments_new(self, alignments):
+        results= []
+
+        for a in alignments:
+            if not self.start_coordinate and not self.end_coordinate:  # Use the full region coordinates
+
+                ref_start = a["cds_start"]
+                ref_end = a["cds_end"]
+
+                if self.nucleotide_or_codon == "codon":  # User wants a codon
+                    codon_start, codon_end = get_codon_labeling(ref_start, ref_end)
+            else:  # User chooses the coordinates themselves
+
+                ref_start = int(self.start_coordinate)
+                ref_end = int(self.end_coordinate)
+
+                if self.nucleotide_or_codon == "codon":  # User wants a codon
+                    ref_start = a["cds_start"]
+                    ref_end = a["cds_end"]
+                    codon_start = int(self.start_coordinate)
+                    codon_end = int(self.end_coordinate)
+
+            sub_seq = a["alignment"][ref_start:ref_end+1]
+
+            if (self.nucleotide_or_codon == "codon"):
+                codons = [sub_seq[i:i+3] for i in range(0, len(sub_seq), 3)]
+                selected_codons = codons[codon_start-1:codon_end]
+                sub_seq = ''.join(selected_codons)
+
+            if set(sub_seq) != {"-"}:
+                results.append(f">" + a["sequence_id"] + "\n" + sub_seq + "\n")
+
+        return results
+
+
+
      
     def __parse_alignments(self, alignments, master_alignment):
 
@@ -113,4 +154,20 @@ class Alignment:
                 master_alignment = [{"cds_start": 1, "cds_end":tmp[0]["length"]}]
 
         return master_alignment
+
+
+    def __get_alignments_and_features(self):
+        placeholders = ', '.join(['%s'] * len(self.sequences))  
+        query = f'SELECT s.*, f.* \
+                    FROM sequence_alignment s \
+                    JOIN features f on f.accession = s.sequence_id \
+                    WHERE s.sequence_id IN ("MT862689", "JX987734", "DQ468335") \
+                    AND f.product = "transmembrane glycoprotein G"'
+        with connections[self.database].cursor() as cursor:
+            cursor.execute(query)
+            alignments = dictfetchall(cursor)
+
+        return alignments
+
+        
     

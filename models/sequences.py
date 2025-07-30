@@ -119,9 +119,14 @@ class Sequences:
             params.append(value)
 
         def add_filter_in_clause(key, value):
-            """Add simple equality filter for strings/other fields."""
-            where_clauses.append(f"{key} = %s")
-            params.append(value)
+            """Handles single or multiple values for IN clause."""
+            if isinstance(value, list):
+                placeholders = ','.join(['%s'] * len(value))
+                where_clauses.append(f"{key} IN ({placeholders})")
+                params.extend(value)
+            else:
+                where_clauses.append(f"{key} = %s")
+                params.append(value)
 
         for key, value in self.filters.items():
             if key == 'length_lower':

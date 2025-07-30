@@ -158,13 +158,13 @@ class Alignment:
 
     def __get_alignments_and_features(self):
         placeholders = ', '.join(['%s'] * len(self.sequences))  
-        query = f'SELECT s.*, f.* \
+        query = f"SELECT s.*, f.* \
                     FROM sequence_alignment s \
                     JOIN features f on f.accession = s.sequence_id \
-                    WHERE s.sequence_id IN ("MT862689", "JX987734", "DQ468335") \
-                    AND f.product = "transmembrane glycoprotein G"'
+                    WHERE s.sequence_id IN ({placeholders}) \
+                    AND f.product = '{self.region}';"
         with connections[self.database].cursor() as cursor:
-            cursor.execute(query)
+            cursor.execute(query, self.sequences)
             alignments = dictfetchall(cursor)
 
         return alignments

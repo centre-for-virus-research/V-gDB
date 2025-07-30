@@ -47,9 +47,11 @@ def get_sequences_meta_data_by_filters(request):
 
     database = request.headers.get('database', 'default')
     params = dict(request.GET.items())
-
+    print(params)
     for key, value in params.items():
         params[key] = value.split(',') if ',' in value else value
+    print("HERE WE ARE")
+    print(params)
 
     sequences = Sequences(database=database, filters=params)
 

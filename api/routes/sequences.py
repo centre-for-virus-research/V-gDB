@@ -2,20 +2,46 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db import connections
 from django.http import HttpResponse
-
 import datetime
 import os
 
 from models.helpers import *
 from models.sequences import Sequences
 
+@api_view(['GET'])
+def get_sequences(request):
+
+    database = request.headers.get('database', 'default')
+    # sequences = Sequences(database=database)
+
+    params = dict(request.GET.items())
+
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
+    try:
+        data = sequences.get_sequences()
+    except ValueError as e:
+        print(f"Error: {e}")
+        return HttpResponse(e, status=404)
+        
+    return Response(data)
 
 @api_view(['GET'])
 def get_sequences_meta_data(request):
 
     database = request.headers.get('database', 'default')
-    sequences = Sequences(database=database)
+    # sequences = Sequences(database=database)
 
+    params = dict(request.GET.items())
+
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
     try:
         data = sequences.get_sequences_meta_data()
     except ValueError as e:
@@ -23,6 +49,47 @@ def get_sequences_meta_data(request):
         return HttpResponse(e, status=404)
         
     return Response(data)
+
+@api_view(['GET'])
+def get_sequences_alignment(request):
+
+    database = request.headers.get('database', 'default')
+
+    params = dict(request.GET.items())
+
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
+    try:
+        data = sequences.get_sequences_alignment()
+    except ValueError as e:
+        print(f"Error: {e}")
+        return HttpResponse(e, status=404)
+        
+    return Response(data)
+
+@api_view(['GET'])
+def get_reference_sequences_meta_data(request):
+
+    database = request.headers.get('database', 'default')
+
+    params = dict(request.GET.items())
+
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
+    try:
+        data = sequences.get_reference_sequences_meta_data()
+    except ValueError as e:
+        print(f"Error: {e}")
+        return HttpResponse(e, status=404)
+        
+    return Response(data)
+
 
 @api_view(['GET'])
 def get_sequence_meta_data(request, primary_accession):
@@ -37,31 +104,60 @@ def get_sequence_meta_data(request, primary_accession):
         print(str(e))
         return Response({'message': str(e)}, status=404)
 
-
     return Response(data)
-
 
 
 @api_view(['GET'])
-def get_sequences_meta_data_by_filters(request):
+def get_sequence_alignment(request, primary_accession):
 
     database = request.headers.get('database', 'default')
-    params = dict(request.GET.items())
-    print(params)
-    for key, value in params.items():
-        params[key] = value.split(',') if ',' in value else value
-    print("HERE WE ARE")
-    print(params)
-
-    sequences = Sequences(database=database, filters=params)
+    sequences = Sequences(database=database)
 
     try:
-        data = sequences.get_sequences_meta_data_by_filters()
+        data = sequences.get_sequence_alignment(primary_accession)
+    except ValueError as e:
+        return Response({'message': str(e)}, status=404)
+
+    return Response(data)
+
+
+@api_view(['GET'])
+def get_reference_sequence(request, primary_accession):
+
+    if not primary_accession:
+        return HttpResponse("Reference sequence not defined", status=404)
+
+    database = request.headers.get('database', 'default')
+
+    sequences = Sequences(database=database)
+    data = sequences.get_reference_sequence(primary_accession)
+
+    return Response(data)
+
+
+@api_view(['GET'])
+def get_map_metadata(request):
+
+    database = request.headers.get('database', 'default')
+
+    params = dict(request.GET.items())
+
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
+    try:
+        data = sequences.get_sequences_meta_data()
+        data = sequences.get_map_data(data)
     except ValueError as e:
         print(f"Error: {e}")
         return HttpResponse(e, status=404)
-
+        
     return Response(data)
+
+
+
 
 @api_view(['GET'])
 def download_sequences_meta_data(request):
@@ -89,49 +185,7 @@ def download_sequences_meta_data(request):
 
         return response
     
-@api_view(['GET'])
-def get_reference_sequences_meta_data(request):
 
-    database = request.headers.get('database', 'default')
-    alignment = Sequences(database=database)
-    data = alignment.get_reference_sequences_meta_data()
-
-    return Response(data)
-
-@api_view(['GET'])
-def get_filtered_reference_sequences(request):
-
-    database = request.headers.get('database', 'default')
-    params = dict(request.GET.items())
-
-    for key, value in params.items():
-        params[key] = value.split(',') if ',' in value else value
-
-    sequences = Sequences(database=database, filters=params)
-
-    try:
-        data = sequences.get_sequences_meta_data_by_filters()
-        primary_accessions = [d["primary_accession"] for d in data if "primary_accession" in d]
-        data = sequences.filter_by_reference_sequences(primary_accessions)
-    except ValueError as e:
-        print(f"Error: {e}")
-        return HttpResponse(e, status=404)
-
-    return Response(data)
-
-
-@api_view(['GET'])
-def get_reference_sequence(request, primary_accession):
-
-    if not primary_accession:
-        return HttpResponse("Reference sequence not defined", status=404)
-
-    database = request.headers.get('database', 'default')
-
-    sequences = Sequences(database=database)
-    data = sequences.get_reference_sequence(primary_accession)
-
-    return Response(data)
 
     
 # THIS IS BEING USED IN THE MUTATION GUI

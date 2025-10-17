@@ -13,17 +13,42 @@ from api.routes import search
 # Virus Web Resource GUI will 
 
 urlpatterns = [
-
-
+    
     # SEQUENCES
-    path('sequences/get_sequences_meta_data/', sequences.get_sequences_meta_data, name='get_sequences_meta_data'),
-    path('sequences/get_sequence_meta_data/<str:primary_accession>', sequences.get_sequence_meta_data, name='get_sequence_meta_data'),
-    path('sequences/get_reference_sequences_meta_data/', sequences.get_reference_sequences_meta_data, name='get_reference_sequences_meta_data'),
+    # API paths to get all of the data with various filters
+    path('sequences/', sequences.get_sequences, name='get_sequences'), 
+    path('sequences/metadata/', sequences.get_sequences_meta_data, name='get_sequences_meta_data'),
+    path('sequences/alignment/', sequences.get_sequences_alignment, name='get_sequences_alignment'),
+    path('sequences/reference/metadata/', sequences.get_reference_sequences_meta_data, name='get_reference_sequences_meta_data'),
+
+
+    path('sequences/metadata/map/', sequences.get_map_metadata, name='get_map_metadata'),
+    
+    # API paths to get data for primary accession
+    path('sequence/metadata/<str:primary_accession>', sequences.get_sequence_meta_data, name='get_sequence_meta_data'), #done
+    path('sequence/alignment/<str:primary_accession>', sequences.get_sequence_alignment, name='get_sequence_alignment'),  #done
+    path('sequence/reference/<str:primary_accession>', sequences.get_reference_sequence, name='get_reference_sequence'), #done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # MUTATIONS 
+    path('analysis/mutations/', mutations.get_mutations, name='get_mutations'),
+
     path('alignments/get_reference_sequence/<str:primary_accession>', sequences.get_reference_sequence, name='get_reference_sequence'),
     
-    
-    path('sequences/get_sequences_meta_data_by_filters/', sequences.get_sequences_meta_data_by_filters, name='get_sequences_meta_data_by_filters'),
-    path('sequences/get_filtered_reference_sequences/', sequences.get_filtered_reference_sequences, name='get_filtered_reference_sequences'),
     
     path('sequences/download_sequences_meta_data/', sequences.download_sequences_meta_data, name='download_sequences_meta_data'),
 
@@ -73,6 +98,8 @@ urlpatterns = [
 
     # Genes
     path('genes/get_genes_tree/', genes.get_genes_tree, name='get_genes_tree'),
+
+    path('features/get_clades_tree/', features.get_clades_tree, name='get_clades_tree'),
 
 
     # FILTERS

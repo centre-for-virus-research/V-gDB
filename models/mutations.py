@@ -19,7 +19,8 @@ class Mutations:
         self.database = database
         self.reference_sequence = reference_sequence or 'NC_001542'
 
-    def get_mutations(self, hosts, codons, region):
+
+    def get_mutations(self, codons, region, include_metadata=True, sequence_ids=None, hosts=None):
         """
         Fetch mutations for specific codons in a given genomic region across host samples.
 
@@ -34,22 +35,29 @@ class Mutations:
         Raises:
             ValueError: If required parameters (hosts, codons, or region) are missing.
         """
-        if not hosts:
-            raise ValueError("No hosts chosen")
         if not region:
             raise ValueError("No region chosen")
         if not codons:
             raise ValueError("No codons chosen")
 
+        self.sequence_ids = sequence_ids
         self.hosts = hosts
         self.codons = codons
         self.region = region
-
         alignments = self.__get_alignments()
-        print(len(alignments))
+
+
+
+
+
+
+
 
         mutations = self.__parse_mutations(alignments)
         return mutations
+
+
+
 
     def get_mutation_regions_and_codons(self):
         """
@@ -107,6 +115,12 @@ class Mutations:
         Returns:
             list: List of alignment and metadata records.
         """
+        
+
+        #If using sequence_ids -- do nothing 
+
+        #if using other filters 
+
         formatted_hosts = ', '.join(['%s'] * len(self.hosts))
         query = f'''
             SELECT s.*, m.*, f.* 
@@ -116,7 +130,30 @@ class Mutations:
             WHERE m.host IN ({formatted_hosts}) 
             AND f.product = '{self.region}';
         '''
-        print(query, )
+
+        with connections[self.database].cursor() as cursor:
+            cursor.execute(query, self.hosts)
+            alignments = dictfetchall(cursor)
+        print(alignments)
+        return alignments
+
+    def __get_alignments2(self):
+        """
+        Fetch sequence alignments for the given hosts.
+
+        Returns:
+            list: List of alignment and metadata records.
+        """
+        formatted_hosts = ', '.join(['%s'] * len(self.hosts))
+        query = f'''
+            SELECT s.*, m.*, f.* 
+            FROM sequence_alignment s 
+            LEFT JOIN meta_data m ON s.sequence_id = m.primary_accession 
+            LEFT JOIN features f ON s.sequence_id = f.accession 
+            WHERE m.host IN ({formatted_hosts}) 
+            AND f.product = '{self.region}';
+        '''
+
         with connections[self.database].cursor() as cursor:
             cursor.execute(query, self.hosts)
             alignments = dictfetchall(cursor)

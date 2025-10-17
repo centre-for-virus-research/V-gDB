@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="container-installation">
-    <h1>Viral Genome Project</h1>
+    <h1>Viral Genome Database</h1>
 
     <ul class="nav nav-tabs" id="vGenomeTab" role="tablist">
         <li class="nav-item" role="presentation">
@@ -29,9 +29,9 @@
     <div class="tab-content mt-3">
         <!-- Overview Tab -->
         <div class="tab-pane fade show active" id="overview" role="tabpanel">
-            <h2>The Viral Genome Project</h2>
-            <p>The viral genome project consists of:</p>
-            <ul>
+            <!-- <h2>The Viral Genome Database</h2> -->
+            <p>The Viral Genome Database is a front-end GUI and API that uses the database and workflows curated from the Viral Genome Toolkit.</p>
+            <!-- <ul>
                 <li><h3>Viral Genome Toolkit</h3></li>
                 <li>
                     <h3>Viral Genome Database</h3>
@@ -41,29 +41,55 @@
                         <li>Web Resource</li>
                     </ul>
                 </li>
-            </ul>
+            </ul> -->
             <img class="formatted" src="frontend/static/images/v-g_flowchart.png" alt="API 1">
         </div>
 
         <!-- Toolkit Tab -->
         <div class="tab-pane fade" id="toolkit" role="tabpanel">
             <h2>Viral Genome Toolkit</h2>
-            <p>V-gTK allows you to create your own viral genome database by curating and structuring data from NCBI.</p>
-            <p>You can manage, query, and analyze the data independently or interact with it through the API or frontend.</p>
-            <p>Download the V-gTK codebase: <a href="#">GitHub Link</a></p>
-            <p>Installation instructions: <a href="#">Link to README</a></p>
+            <p>
+                V-gTK (Virus Genome Toolkit) a software framework for end-to-end management of viral genomes covering curation, annotation, 
+                and structured organization built with reproducibility and shareability. It deals with metadata from GenBank and tracks provenance 
+                and versions, integrates the major and minor updated with the existing system to build up-to-date ready to use databse resource for 
+                deep virus analysis.
+            </p>
+
+            <p>Major functions:</p>
+            <ul>
+                <li>Calculate alignment coordinates</li>
+                <li>Phylogenetics with placements</li>
+                <li>Major and minor clade assignments</li>
+                <li>GenBank Sequence submission</li>
+            </ul>
+
+            <p>Download the V-gTK codebase: <a href="https://github.com/josephhughes/V-gTK">GitHub Link</a></p>
+            <p>Installation instructions: <a href="#https://josephhughes.github.io/V-gTK/index.html">V-gTK Installation</a></p>
+        
+
         </div>
 
         <!-- Database Tab -->
         <div class="tab-pane fade" id="database" role="tabpanel">
             <h2>Viral Genome Database</h2>
-            <p>Once the database is created, use the V-gDB API to query data and visualize it through the frontend.</p>
+            <p>
+                V-gDB is a specialized genome database designed for Viruses, 
+                providing researchers with tools to explore, analyze, and interpret viral 
+                genomic data. This platform offers an comprehensive API, easy-to-install system
+                for local development, a clear database schema, integrated web resources, 
+                and tailored functionalities that support in-depth virus research.
+            </p>
+             <ul>
+                <li>Use the <a href="installation/">Installation Guide</a> to install a local version of V-gDB</li>
+                <li>Refer to the core <a href="schema/">core schema</a> for database format requirements if creating your own database.</li>
+                <li>Use the <a href="api_manual/">API</a> to integrate V-gDB data and analysis tools into your own workflows </li>
+            </ul>
             <p>Refer to the <a href="schema/">core schema</a> for database format requirements if creating your own database.</p>
         </div>
 
         <!-- Web Resources Tab -->
         <div class="tab-pane fade" id="webresource" role="tabpanel">
-            <h2>The Viral Genome Web Resource</h2>
+            <h2>Viral Genome Web Resources</h2>
             <p>We offer a GUI template linked to the V-gDB API for visualization and analysis.</p>
             <p>Advanced GUIs that are virus specific are also available.</p>
             <p>Available web resources:</p>
@@ -92,4 +118,18 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // check if there's a hash in the URL
+    const hash = window.location.hash;
+    if (hash) {
+      // find the tab trigger button that matches the hash target
+      const tabTriggerEl = document.querySelector(`[data-bs-target="${hash}"]`);
+      if (tabTriggerEl) {
+        const tab = new bootstrap.Tab(tabTriggerEl);
+        tab.show(); // programmatically activate the tab
+      }
+    }
+  });
+</script>
 {% endblock %}

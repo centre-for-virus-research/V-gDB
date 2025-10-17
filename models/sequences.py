@@ -1,7 +1,7 @@
 from django.db import connections
 import csv
 from models.helpers import *
-
+from collections import Counter
 class Sequences:
     """
     A class to handle operations related to sequence metadata, alignments, 
@@ -20,6 +20,40 @@ class Sequences:
         self.database = database  
         self.filters = filters
 
+    def get_sequences(self):
+        """
+        Retrieve all sequence metadata records from the database.
+
+        Returns:
+            list: A list of dictionaries containing metadata records.
+        """
+        if not self.filters:
+            with connections[self.database].cursor() as cursor:
+                cursor.execute('SELECT header as primary_accession, sequence FROM sequences;')
+                result = dictfetchall(cursor)
+        else:
+            where_str, params = self.__add_filters()
+            query = f"SELECT primary_accession FROM meta_data WHERE {where_str} ORDER BY create_date DESC;"
+
+            with connections[self.database].cursor() as cursor:
+                cursor.execute(query, params)
+                result = dictfetchall(cursor)
+
+             # Extract the list of IDs
+            ids = [row['primary_accession'] for row in result]
+
+            if ids:  # only run second query if not empty
+                # Build placeholders dynamically
+                placeholders = ', '.join(['%s'] * len(ids))
+                with connections[self.database].cursor() as cursor:
+                    query = f"SELECT header as primary_accession, sequence FROM sequences WHERE header IN ({placeholders})"
+                    cursor.execute(query, ids)
+                    result = dictfetchall(cursor)
+            else:
+                result = []  # no ids found
+
+        return result
+
     def get_sequences_meta_data(self):
         """
         Retrieve all sequence metadata records from the database.
@@ -27,12 +61,165 @@ class Sequences:
         Returns:
             list: A list of dictionaries containing metadata records.
         """
-        with connections[self.database].cursor() as cursor:
-            cursor.execute('SELECT * FROM meta_data ORDER BY create_date DESC;')
-            result = dictfetchall(cursor)
-        
+        if not self.filters:
+            with connections[self.database].cursor() as cursor:
+                cursor.execute('SELECT * FROM meta_data ORDER BY create_date DESC;')
+                result = dictfetchall(cursor)
+        else:
+
+            where_str, params = self.__add_filters()
+            query = f"SELECT * FROM meta_data WHERE {where_str} ORDER BY create_date DESC;"
+
+            with connections[self.database].cursor() as cursor:
+                cursor.execute(query, params)
+                result = dictfetchall(cursor)
+
         return result
+
+    def get_sequences_alignment(self):
+        """
+        Retrieve all sequences alignments from the database.
+
+        Returns:
+            list: A list of dictionaries containing alignment records.
+        """
+        if not self.filters:
+            with connections[self.database].cursor() as cursor:
+                cursor.execute('SELECT primary_accession FROM meta_data ORDER BY create_date DESC;')
+                result = dictfetchall(cursor)
+        else:
+            where_str, params = self.__add_filters()
+            query = f"SELECT * FROM meta_data WHERE {where_str} ORDER BY create_date DESC;"
+
+            with connections[self.database].cursor() as cursor:
+                cursor.execute(query, params)
+                result = dictfetchall(cursor)
+
+        # Extract the list of IDs
+        ids = [row['primary_accession'] for row in result]
+
+        if ids:  # only run second query if not empty
+            # Build placeholders dynamically
+            placeholders = ', '.join(['%s'] * len(ids))
+            with connections[self.database].cursor() as cursor:
+                query = f"SELECT * FROM sequence_alignment WHERE sequence_id IN ({placeholders})"
+                cursor.execute(query, ids)
+                final_result = dictfetchall(cursor)
+        else:
+            final_result = []  # no ids found
+
+        return final_result
     
+    def get_reference_sequences_meta_data(self):
+
+        if not self.filters:
+            with connections[self.database].cursor() as cursor:
+                cursor.execute("SELECT * FROM meta_data WHERE primary_accession IN (SELECT alignment_name FROM sequence_alignment)")
+                result = dictfetchall(cursor)
+        else:
+
+            where_str, params = self.__add_filters()
+            query = f"SELECT * FROM meta_data WHERE {where_str} AND primary_accession IN (SELECT alignment_name FROM sequence_alignment) ORDER BY create_date DESC;"
+
+            with connections[self.database].cursor() as cursor:
+                cursor.execute(query, params)
+                result = dictfetchall(cursor)
+
+        return result
+
+    def get_map_data(self, data):
+        filtered = [d["country"] for d in data if d.get("country") not in (None, "") ]
+        print(filtered)
+        with connections[self.database].cursor() as cursor:
+            # cursor.execute(query, params)
+            # metadata_countries = dictfetchall(cursor)
+            # Get reference m49_country data
+            cursor.execute('SELECT display_name, id, m49_code FROM m49_country')
+            m49_country_data = cursor.fetchall()
+        # Clean, merge and process country metadata with m49 reference data
+        parsed_data = self.__parse_and_combine_country_data(filtered, m49_country_data)
+        sequence_counts = self.__count_sequence_occurance_by_country(parsed_data)
+
+        return sequence_counts
+
+    def __add_filters(self):
+
+        comparison_filters = {
+                'length_lower': ('length', '>='),
+                'length_upper': ('length', '<='),
+                'collection_year_lower': ('collection_year', '>='),
+                'collection_year_upper': ('collection_year', '<='),
+                'creation_year_lower': ('create_date', '>='),
+                'creation_year_upper': ('create_date', '<=')
+            }
+
+        where_clauses, params = [], []
+
+        for key, value in self.filters.items():
+            if key in comparison_filters:
+                col, op = comparison_filters[key]
+                where_clauses.append(f"{col} {op} %s")
+                params.append(value)
+
+            elif key == 'region':
+                where_clauses.append(
+                    "primary_accession IN ("
+                    "SELECT m.primary_accession "
+                    "FROM m49_country r "
+                    "JOIN meta_data m ON m.country_validated = CAST(r.m49_code AS TEXT) "
+                    "WHERE r.m49_region_id = %s)"
+                )
+                params.append(value)
+
+            else:
+                if isinstance(value, list):
+                    placeholders = ', '.join(['%s'] * len(value))
+                    where_clauses.append(f"{key} IN ({placeholders})")
+                    params.extend(value)
+                else:
+                    where_clauses.append(f"{key} = %s")
+                    params.append(value)
+
+        where_str = ' AND '.join(where_clauses)
+
+        return where_str, params
+
+
+
+    def get_sequence_alignment(self, primary_accession):
+        """
+        Retrieve metadata and alignment details for a specific sequence, 
+        including insertions, features, and reference sequence.
+
+        Returns:
+            dict: A dictionary containing metadata and alignment details.
+
+        Raises:
+            ValueError: If `primary_accession` is not provided or not found in the database.
+        """
+        result = {}
+
+        if not primary_accession:
+            raise ValueError("Primary accession can not be blank")
+
+        with connections[self.database].cursor() as cursor:
+
+            # Get main metadata
+            cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id = %s;", [primary_accession])
+            sequence = dictfetchall(cursor)
+            
+            if not sequence:
+                raise ValueError(f"Sequence with primary_accession {primary_accession} not found")
+            
+        return sequence
+
+
+
+
+
+
+
+
     def get_sequence_meta_data(self, primary_accession):
         """
         Retrieve metadata and alignment details for a specific sequence, 
@@ -77,11 +264,7 @@ class Sequences:
                 # Add features
                 cursor.execute("SELECT * FROM features WHERE accession=%s and reference_accession = %s ORDER BY cds_start", [primary_accession, result["alignment"]["alignment_name"]])
                 result["alignment"]["features"] = dictfetchall(cursor)
-                # cursor.execute("SELECT cds_info FROM meta_data where primary_accession = %s", [result["alignment"]["alignment_name"]])
-                # result["alignment"]["features"] = dictfetchall(cursor)[0]["cds_info"]
-                # Get reference sequence
-                # cursor.execute("SELECT sequence FROM sequences WHERE header = %s", [result["alignment"]["alignment_name"]])
-                # result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["sequence"]
+
 
                 # Add reference sequence
                 cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [result["alignment"]["alignment_name"]])
@@ -99,61 +282,10 @@ class Sequences:
 
         return result
 
-    def get_sequences_meta_data_by_filters(self):
-        """
-        Retrieve metadata based on filters defined in the `filters` dictionary.
 
-        Returns:
-            list: A list of dictionaries matching the filter criteria.
-        """
-        if not self.filters:
-            # No filters provided, return all metadata
-            return self.get_sequences_meta_data()
-        print(self.filters)
-        where_clauses = []
-        params = []
 
-        def add_filter_clause(key, value, operator='='):
-            """Add WHERE clause for numeric or comparison-based filters."""
-            where_clauses.append(f"{key} {operator} %s")
-            params.append(value)
 
-        def add_filter_in_clause(key, value):
-            """Handles single or multiple values for IN clause."""
-            if isinstance(value, list):
-                placeholders = ','.join(['%s'] * len(value))
-                where_clauses.append(f"{key} IN ({placeholders})")
-                params.extend(value)
-            else:
-                where_clauses.append(f"{key} = %s")
-                params.append(value)
 
-        for key, value in self.filters.items():
-            if key == 'length_lower':
-                add_filter_clause('length', value, operator='>=')
-            elif key == 'length_upper':
-                add_filter_clause('length', value, operator='<=')
-            elif key == 'collection_year_lower':
-                add_filter_clause('collection_year', value, operator='>=')
-            elif key == 'collection_year_upper':
-                add_filter_clause('collection_year', value, operator='<=')
-            elif key =='region':
-                where_clauses.append("primary_accession IN (SELECT m.primary_accession " \
-                                                            "FROM m49_country r " \
-                                                            "JOIN meta_data m on m.country_validated = cast(r.m49_code as TEXT)" \
-                                                            "WHERE r.m49_region_id=%s)")
-                params.append(value)
-            else:
-                add_filter_in_clause(key, value)
-
-        where_str = ' AND '.join(where_clauses)
-        query = f"SELECT * FROM meta_data WHERE {where_str} ORDER BY create_date DESC;"
-        print(query, params)
-        with connections[self.database].cursor() as cursor:
-            cursor.execute(query, params)
-            result = dictfetchall(cursor)
-
-        return result
 
     def filter_by_reference_sequences(self, data):
         formatted_data = ', '.join(['%s'] * len(data))
@@ -167,14 +299,7 @@ class Sequences:
             references = dictfetchall(cursor)
 
         return references
-    def get_reference_sequences_meta_data(self):
 
-        with connections[self.database].cursor() as cursor:
-            cursor.execute("SELECT * FROM meta_data WHERE primary_accession IN (SELECT alignment_name FROM sequence_alignment)")
-
-            references = dictfetchall(cursor)
-
-        return references
     
     def get_reference_sequence(self, primary_accession):
 
@@ -253,3 +378,57 @@ class Sequences:
 
         return result
 
+
+
+    def __parse_and_combine_country_data(self, meta_data, m49_data):
+        """
+        Matches country names from metadata with m49_country data and enriches entries.
+
+        Parameters:
+            meta_data: List of country records from meta_data table.
+            m49_data: List of tuples (display_name, id, m49_code) from m49_country.
+
+        Returns:
+            Enriched meta_data entries with m49_code and country id.
+        """
+        # Build lookup table from m49_country
+        m49_lookup = {
+            key: (m49_code, country_id)
+            for display_name, country_id, m49_code in m49_data
+            for key in (display_name, country_id)
+        }
+
+        for entry in meta_data:
+            country = entry
+            if country:
+                parsed_country = 'Vietnam' if country.split(":")[0] == 'Viet Nam' else country.split(":")[0]
+                entry["parsed_country"] = parsed_country
+                entry["m49_code"], entry["id"] = m49_lookup.get(parsed_country, (None, None))
+
+        return meta_data
+
+    def __count_sequence_occurance_by_country(self, meta_data):
+        """
+        Counts the number of sequences per m49 code and returns enriched, unique country entries.
+
+        Parameters:
+            meta_data: List of enriched meta_data entries.
+
+        Returns:
+            List of unique countries with sequence counts.
+        """
+        # Count how many times each m49_code appears
+        print(meta_data)
+        m49_codes = [entry["m49_code"] for entry in meta_data]
+        m49_code_counts = Counter(m49_codes)
+
+        seen_m49_codes = set()
+        unique_data = []
+
+        for entry in meta_data:
+            entry["sequence_count"] = m49_code_counts[entry["m49_code"]]
+            if entry["m49_code"] not in seen_m49_codes:
+                unique_data.append(entry)
+                seen_m49_codes.add(entry["m49_code"])
+
+        return unique_data

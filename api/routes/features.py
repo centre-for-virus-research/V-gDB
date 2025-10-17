@@ -15,3 +15,12 @@ def get_features(request):
 
     return Response(features)
 
+
+@api_view(["GET"])
+def get_clades_tree(request):
+    database = request.headers.get('database', 'default')
+
+    features = Features(database=database)
+    clade_tree = features.get_clades_tree()
+    # print(clade_tree)
+    return Response(clade_tree)

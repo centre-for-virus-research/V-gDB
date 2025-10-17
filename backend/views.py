@@ -107,6 +107,27 @@ def api(request):
 
     return render(request, 'api.html', {'endpoints': data})
 
+def api_manual(request):
+    """Renders API schema grouped by top-level type."""
+
+    api_urls_module = importlib.import_module("api.urls")
+    url_patterns = getattr(api_urls_module, "urlpatterns", [])
+
+    # Group endpoints by category
+    endpoints = defaultdict(list)
+
+    for pattern in url_patterns:
+        if hasattr(pattern, 'pattern') and hasattr(pattern.pattern, '_route'):
+            route = pattern.pattern._route
+            full_path = "/api/" + route
+            category = route.split('/')[0] if '/' in route else 'uncategorized'
+            endpoints[category].append(full_path)
+
+    with open("/Users/danaallen/CVR/gdb/web-resources/V-gDB/frontend/static/javascript/openapi_new.json", 'r') as f:
+        data = json.load(f)
+
+    return render(request, 'api_manual.html', {'endpoints': data})
+
 def check_db_connection(request):
     try:
         # Try to connect to the database

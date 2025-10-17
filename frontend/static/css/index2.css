@@ -15,6 +15,16 @@
     font-size: 1.5rem;
 }
 
+.sub-title {
+  text-decoration: none; /* no underline */
+  /* color: inherit;        match the h4 text color */
+}
+
+.sub-title:hover {
+  text-decoration: underline; /* optional hover effect */
+  color: #ee9b00 !important; /* optional hover color */
+}
+
 /* .navbar a {
     color: white;
     margin-left: 1rem;

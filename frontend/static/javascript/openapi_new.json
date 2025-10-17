@@ -1,8 +1,8 @@
 {
     "openapi": "3.1.0",
     "info": {
-      "title": "GLUE2",
-      "description": "GLUE2 is a virus database"
+      "title": "V-gDB",
+      "description": "V-gDB is a virus database"
     },
     "servers": [
       {
@@ -36,9 +36,9 @@
         } 
     ],
     "paths": {
-      "/api/sequences/get_sequences_meta_data/": {
-        "path_display":"/api/sequences/get_sequences_meta_data/",
-        "path_url":"api_sequences_get_sequences_meta_data",
+      "/api/sequences/metadata/": {
+        "path_display":"/api/sequences/metadata/",
+        "path_url":"api_sequences_metadata",
         "get": {
             "tags":["sequences"],
             "type":"GET",
@@ -46,7 +46,343 @@
           "description": "Retrieve all NCBI sequences' meta-data",
           "operationId": "get_all_ncbi_sequences__get",
           "parameters": [
-            
+            {
+              "name": "gb_length_lower",
+              "in": "query",
+              "description":"Lower sequence length",
+              "example":100,
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_length_upper",
+              "in": "query",
+              "description":"Upper sequence length",
+              "example":"400",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_update_date_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been updated in NCBI",
+              "example":"2001",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_update_date_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been updated in NCBI",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "collection_year_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been collected",
+              "example":"1964",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "collection_year_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been collected",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "creation_year_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been created in NCBI",
+              "example":"1964",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "creation_year_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been created in NCBI",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "major_clade",
+              "in": "query",
+              "description":"An array of major clades",
+              "example":"[Artic, Africa-2]",
+              "required": false,
+              "schema": {
+                "type": "array"
+              }
+            },
+            {
+              "name": "minor_clade",
+              "in": "query",
+              "description":"Array of minor clades. If major clade is included, the minor clades must belong to the major clades.",
+              "example":"[AL1a, AL2, AL3]",
+              "required": false,
+              "schema": {
+                "type": "array"
+              }
+            },
+            {
+              "name": "host",
+              "in": "query",
+              "description":"Host species the sample was collected from",
+              "example":"Canis familiaris",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "m49_region_id",
+              "in": "query",
+              "description":"Retrieve NCBI sequences that come from the corresponding region_id.",
+              "example":"503",
+              "external_link":"/get_m49_region_ids",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "is_ldc",
+              "in": "query",
+              "description":"Is the sequence from a least developed country (LDC)",
+              "example":"false",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "is_lldc",
+              "in": "query",
+              "description":"Is the sequence from a landlocked developing country (LLDC)",
+              "example":"true",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "is_sids",
+              "in": "query",
+              "description":"Is the sequence from a small island developing state (SIDS)",
+              "example":"true",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenbankEntry"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/sequences/alignment/": {
+        "path_display":"/api/sequences/alignment/",
+        "path_url":"api_sequences_alignment",
+        "get": {
+            "tags":["sequences"],
+            "type":"GET",
+          "summary": "Retrieve all NCBI sequences' meta-data",
+          "description": "Retrieve all NCBI sequences' meta-data",
+          "operationId": "get_all_ncbi_sequences__get",
+         "parameters": [
+            {
+              "name": "gb_length_lower",
+              "in": "query",
+              "description":"Lower sequence length",
+              "example":100,
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_length_upper",
+              "in": "query",
+              "description":"Upper sequence length",
+              "example":"400",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_update_date_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been updated in NCBI",
+              "example":"2001",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_update_date_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been updated in NCBI",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "collection_year_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been collected",
+              "example":"1964",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "collection_year_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been collected",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "creation_year_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been created in NCBI",
+              "example":"1964",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "creation_year_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been created in NCBI",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "major_clade",
+              "in": "query",
+              "description":"An array of major clades",
+              "example":"[Artic, Africa-2]",
+              "required": false,
+              "schema": {
+                "type": "array"
+              }
+            },
+            {
+              "name": "minor_clade",
+              "in": "query",
+              "description":"Array of minor clades. If major clade is included, the minor clades must belong to the major clades.",
+              "example":"[AL1a, AL2, AL3]",
+              "required": false,
+              "schema": {
+                "type": "array"
+              }
+            },
+            {
+              "name": "host",
+              "in": "query",
+              "description":"Host species the sample was collected from",
+              "example":"Canis familiaris",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "m49_region_id",
+              "in": "query",
+              "description":"Retrieve NCBI sequences that come from the corresponding region_id.",
+              "example":"503",
+              "external_link":"/get_m49_region_ids",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "is_ldc",
+              "in": "query",
+              "description":"Is the sequence from a least developed country (LDC)",
+              "example":"false",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "is_lldc",
+              "in": "query",
+              "description":"Is the sequence from a landlocked developing country (LLDC)",
+              "example":"true",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "is_sids",
+              "in": "query",
+              "description":"Is the sequence from a small island developing state (SIDS)",
+              "example":"true",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            }
            
           ],
           "responses": {
@@ -73,10 +409,208 @@
           }
         }
       },
-      "/api/sequences/get_sequence_meta_data/:primary_accession": {
-        "path_display":"/api/sequences/get_sequence_meta_data/:primary_accession",
-        "path_url":"api_sequences_get_sequence_meta_data",
-        "path_parameters":"/api/sequences/get_sequence_meta_data/",
+      "/api/sequence/metadata/{primary_accession}": {
+        "path_display":"/api/sequence/metadata/{primary_accession}",
+        "path_url":"api_sequence_get_sequence_meta_data",
+        "path_parameters":"/api/sequence/metadata/",
+        "get": {
+            "tags":["sequences"],
+            "type":"GET",
+          "summary": "Lookup NCBI primary_accession and retrieve corresponding meta-data.",
+          "description": "Get NCBI sequence with specific primary_accession",
+          "operationId": "get_all_ncbi_sequences__get",
+          "parameters": [
+            {
+              "name": "primary_accession",
+              "description":"NCBI primary accession",
+              "in": "query",
+              "required": true,
+              "example":"PP760209",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "gb_length_lower",
+              "in": "query",
+              "description":"Lower sequence length",
+              "example":100,
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_length_upper",
+              "in": "query",
+              "description":"Upper sequence length",
+              "example":"400",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_update_date_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been updated in NCBI",
+              "example":"2001",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "gb_update_date_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been updated in NCBI",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "collection_year_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been collected",
+              "example":"1964",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "collection_year_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been collected",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "creation_year_lower",
+              "in": "query",
+              "description":"Earliest year that the sequences have been created in NCBI",
+              "example":"1964",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "creation_year_upper",
+              "in": "query",
+              "description":"Latest year that the sequences have been created in NCBI",
+              "example":"2023",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "major_clade",
+              "in": "query",
+              "description":"An array of major clades",
+              "example":"[Artic, Africa-2]",
+              "required": false,
+              "schema": {
+                "type": "array"
+              }
+            },
+            {
+              "name": "minor_clade",
+              "in": "query",
+              "description":"Array of minor clades. If major clade is included, the minor clades must belong to the major clades.",
+              "example":"[AL1a, AL2, AL3]",
+              "required": false,
+              "schema": {
+                "type": "array"
+              }
+            },
+            {
+              "name": "host",
+              "in": "query",
+              "description":"Host species the sample was collected from",
+              "example":"Canis familiaris",
+              "required": false,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "m49_region_id",
+              "in": "query",
+              "description":"Retrieve NCBI sequences that come from the corresponding region_id.",
+              "example":"503",
+              "external_link":"/get_m49_region_ids",
+              "required": false,
+              "schema": {
+                "type": "int"
+              }
+            },
+            {
+              "name": "is_ldc",
+              "in": "query",
+              "description":"Is the sequence from a least developed country (LDC)",
+              "example":"false",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "is_lldc",
+              "in": "query",
+              "description":"Is the sequence from a landlocked developing country (LLDC)",
+              "example":"true",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            },
+            {
+              "name": "is_sids",
+              "in": "query",
+              "description":"Is the sequence from a small island developing state (SIDS)",
+              "example":"true",
+              "required": false,
+              "schema": {
+                "type": "boolean"
+              }
+            }
+           
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GenbankEntry"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/sequence/alignment/{primary_accession}": {
+        "path_display":"/api/sequence/alignment/{primary_accession}",
+        "path_url":"api_sequence_get_sequence_alignment",
+        "path_parameters":"/api/sequence/alignment/",
         "get": {
             "tags":["sequences"],
             "type":"GET",

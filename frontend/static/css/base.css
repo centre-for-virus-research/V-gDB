@@ -22,29 +22,37 @@ h1, h2, h3, h4, h5, h6 {
 } */
 
 
-
-/* ✅ Make the navbar fixed at the top */
-.navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: #008cba;
-    /* background: linear-gradient(135deg, #0a9396, #94d2bd); */
-    color: white;
-
-    text-align: center;
-    z-index: 1000; 
+/* Make the navbar background blue and text white */
+.navbar.navbar-color {
+    background: #008cba !important; /* stronger than bootstrap */
 }
-.navbar-color {
-    background: #008cba;
-    color: white;
+
+/* Style the links */
+.navbar .nav-link,
+.navbar .navbar-brand {
+    color: white !important;
+}
+
+/* Hover effect for links */
+.navbar .nav-link:hover,
+.navbar .navbar-brand:hover {
+    color: #ffd700 !important; /* gold/yellow hover */
+}
+
+/* Dropdown items */
+.dropdown-menu {
+    background: white;
+    /* color:  */
+}
+.dropdown-item {
+    color: #008cba !important;
+
+}
+.dropdown-item:hover {
+    background: #006994; /* darker blue on hover */
+    color: #ffd700 !important;
 }
 /*
-.navbar:hover {
-    color: black;
-}
-
 .navbar a, .dropbtn {
     float: left;
     font-size: 16px;

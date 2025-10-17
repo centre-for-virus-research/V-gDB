@@ -13,8 +13,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-home">
-    <h1>V-gDB Installation Guide</h1>
+<div class="container">
+    <!-- <h1>V-gDB Installation Guide</h1> -->
 
     <p>
         The Viral Genome Database (V-gDB) can be installed locally on your system. This allows you to connect 
@@ -31,9 +31,6 @@
       <button class="nav-link" id="setup-tab" data-bs-toggle="tab" data-bs-target="#setup" type="button" role="tab">Setup Project</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="requirements-tab" data-bs-toggle="tab" data-bs-target="#requirements" type="button" role="tab">Install Requirements</button>
-    </li>
-    <li class="nav-item" role="presentation">
       <button class="nav-link" id="database-tab" data-bs-toggle="tab" data-bs-target="#database" type="button" role="tab">Connect Database</button>
     </li>
     <li class="nav-item" role="presentation">
@@ -48,9 +45,14 @@
   <div class="tab-content mt-3" id="installationTabContent">
   
     <div class="tab-pane fade show active" id="getting-started" role="tabpanel">
-      <h2>Getting Started</h2>
+      <h2>Getting Started</h2>   
       <ol>
         <li>Follow the steps below to install and run V-gDB on your computer.</li>
+        <ul>
+          <li>Setup Project</li>
+          <li>Connect Database</li>
+          <li>Start Server</li>
+        </ul>
         <li>After installation, you can either:
             <ul>
                 <li>Download a sample viral database</li>
@@ -62,7 +64,11 @@
     </div>
   
     <div class="tab-pane fade" id="setup" role="tabpanel">
-      <h2>Setup V-gDB Project</h2>
+      <h3>Create Virutal Environment</h3>
+      <p>
+        V-gDB uses a virtual python environment to install dependency packages.
+      </p> 
+      
       <p>Create and activate a Python virtual environment:</p>
 
       <pre><code># Create virtual environment
@@ -74,12 +80,8 @@
   # Activate on macOS/Linux
   source v-gdb/bin/activate
       </code></pre>
-      
-    </div>
-  
-    <div class="tab-pane fade" id="requirements" role="tabpanel">
 
-        <h2>Install Core Requirements</h2>
+      <h3>Install Core Requirements</h3>
 
         <p>Install Django (required for the V-gDB API):</p>
         <pre><code>pip install Django</code></pre>
@@ -88,22 +90,23 @@
         <pre><code>git clone https://github.com/centre-for-virus-research/V-gDB</code></pre>
 
         <p>Install project requirements:</p>
+        <p>The requirements.txt file contains all the packages and tools necessary to run VgDB.</p>
+        
 
         <pre><code>cd V-gDB 
-            pip install -r requirements.txt</code></pre>
-
+        pip install -r requirements.txt</code></pre>
+      
     </div>
-
-    
+  
   
     <div class="tab-pane fade" id="database" role="tabpanel">
-      <h2>Connect SQLite Database</h2>
+      <h3>Connect SQLite Database</h3>
       <p>
         For development, you can:
     </p>
     <ul>
         <li>Curate your own viral database using the <a href="/installation">V-gTK pipeline</a></li>
-        <li>Or download a pre-curated <a href="/installation">viral database</a></li>
+        <li>Or download a pre-curated <a href="/about#webresource">viral database</a></li>
     </ul>
 
     <p>Once you have a database, update <code>backend/settings.py</code> to configure the database connection. Edit the <code>DATABASES</code> section with the path to your database:</p>
@@ -123,8 +126,7 @@ DATABASES = {
     </div>
   
     <div class="tab-pane fade" id="start-server" role="tabpanel">
-      <h2>Start the Server</h2>
-      <pre><code>python manage.py runserver</code></pre>
+      <h3>Start the Server</h3>
       <pre><code>python manage.py runserver</code></pre>
 
       <p>Then navigate to <a href="http://localhost:8000/">http://localhost:8000/</a> in your browser.</p>
@@ -132,12 +134,6 @@ DATABASES = {
       <p>If installed successfully, you will see:</p>
       <img src="{% static 'images/success_install.png' %}" alt="Successful Installation" class="installation-image">
   
-      <h2>Next Steps</h2>
-      <ul>
-          <li>Start building custom API endpoints.</li>
-          <li>Connect the GUI frontend for visualization.</li>
-          <li>Integrate with your research tools and pipelines.</li>
-      </ul>
     </div>
 
     <div class="tab-pane fade" id="next-steps" role="tabpanel">

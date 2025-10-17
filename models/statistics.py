@@ -69,7 +69,6 @@ class Statistics:
                 # Get reference m49_country data
                 cursor.execute('SELECT display_name, id, m49_code FROM m49_country')
                 m49_country_data = cursor.fetchall()
-                print(m49_country_data)
 
             
 
@@ -170,7 +169,6 @@ class Statistics:
             List of unique countries with sequence counts.
         """
         # Count how many times each m49_code appears
-        print(meta_data)
         m49_codes = [entry["m49_code"] for entry in meta_data]
         m49_code_counts = Counter(m49_codes)
 

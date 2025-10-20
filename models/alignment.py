@@ -96,8 +96,6 @@ class Alignment:
 
         return results
 
-
-
      
     def __parse_alignments(self, alignments, master_alignment):
 

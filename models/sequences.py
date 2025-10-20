@@ -55,27 +55,74 @@ class Sequences:
 
         return result
 
-    def get_sequences_meta_data(self):
+    # def get_sequences_meta_data(self):
+    #     """
+    #     Retrieve all sequence metadata records from the database.
+
+    #     Returns:
+    #         list: A list of dictionaries containing metadata records.
+    #     """
+    #     if not self.filters:
+    #         with connections[self.database].cursor() as cursor:
+    #             cursor.execute('SELECT * FROM meta_data ORDER BY create_date DESC LIMIT 20;')
+    #             result = dictfetchall(cursor)
+    #     else:
+
+    #         where_str, params = self.__add_filters()
+    #         query = f"SELECT * FROM meta_data WHERE {where_str} ORDER BY create_date DESC;"
+
+    #         with connections[self.database].cursor() as cursor:
+    #             cursor.execute(query, params)
+    #             result = dictfetchall(cursor)
+
+    #     return result
+
+    def get_sequences_meta_data(self, page=1, page_size=50):
         """
-        Retrieve all sequence metadata records from the database.
+        Retrieve paginated sequence metadata records from the database.
+
+        Args:
+            page (int): The current page number (1-indexed).
+            page_size (int): Number of records per page.
 
         Returns:
-            list: A list of dictionaries containing metadata records.
+            dict: Contains 'results', 'total', 'page', and 'page_size'.
         """
+        offset = (page - 1) * page_size
+
+        # Base query (with filters if any)
         if not self.filters:
-            with connections[self.database].cursor() as cursor:
-                cursor.execute('SELECT * FROM meta_data ORDER BY create_date DESC LIMIT 20;')
-                result = dictfetchall(cursor)
+            base_query = "SELECT * FROM meta_data"
+            params = []
         else:
-
             where_str, params = self.__add_filters()
-            query = f"SELECT * FROM meta_data WHERE {where_str} ORDER BY create_date DESC;"
+            base_query = f"SELECT * FROM meta_data WHERE {where_str}"
 
-            with connections[self.database].cursor() as cursor:
-                cursor.execute(query, params)
-                result = dictfetchall(cursor)
+        # Total count
+        count_query = "SELECT COUNT(*) FROM meta_data"
 
-        return result
+        # Paginated query
+        paginated_query = f"""
+            {base_query}
+            ORDER BY create_date DESC
+            LIMIT %s OFFSET %s;
+        """
+        print(count_query)
+        with connections[self.database].cursor() as cursor:
+            # total count
+            cursor.execute(count_query, params)
+            total = cursor.fetchone()[0]
+            print(total)
+            # results
+            cursor.execute(paginated_query, params + [page_size, offset])
+            results = dictfetchall(cursor)
+
+        return {
+            "results": results,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+        }
 
     def get_sequences_alignment(self):
         """
@@ -218,7 +265,7 @@ class Sequences:
     def get_strains(self):
         if not self.filters:
             with connections[self.database].cursor() as cursor:
-                cursor.execute(' SELECT isolate, country, host, segment, collection_date, primary_accession FROM meta_data ORDER BY isolate, segment')
+                cursor.execute(' SELECT isolate, country, host, segment, collection_date, primary_accession FROM meta_data ORDER BY isolate, segment;')
                 rows = cursor.fetchall()
         # Structure data by isolate
         data_by_isolate = defaultdict(lambda: {"host": None, "segments": {}})
@@ -248,7 +295,7 @@ class Sequences:
 
         if isolate:
             with connections[self.database].cursor() as cursor:
-                cursor.execute(' SELECT * FROM meta_data where isolate=%s ORDER BY segment', [isolate])
+                cursor.execute('SELECT * FROM meta_data where isolate=%s ORDER BY segment', [isolate])
                 result = dictfetchall(cursor)
 
         return result

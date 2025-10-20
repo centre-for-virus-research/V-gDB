@@ -68,6 +68,8 @@ def get_strain(request, isolate):
 def get_sequences_meta_data(request):
 
     database = request.headers.get('database', 'default')
+    page = int(request.GET.get("page", 1))
+    page_size = int(request.GET.get("page_size", 50))
     # sequences = Sequences(database=database)
 
     params = dict(request.GET.items())
@@ -78,7 +80,7 @@ def get_sequences_meta_data(request):
 
     sequences = Sequences(database=database, filters=params)
     try:
-        data = sequences.get_sequences_meta_data()
+        data = sequences.get_sequences_meta_data(page, page_size)
     except ValueError as e:
         print(f"Error: {e}")
         return HttpResponse(e, status=404)

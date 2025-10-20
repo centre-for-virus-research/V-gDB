@@ -30,6 +30,41 @@ def get_sequences(request):
     return Response(data)
 
 @api_view(['GET'])
+def get_strains(request):
+
+    database = request.headers.get('database', 'default')
+    # sequences = Sequences(database=database)
+
+    params = dict(request.GET.items())
+
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
+    try:
+        data = sequences.get_strains()
+    except ValueError as e:
+        print(f"Error: {e}")
+        return HttpResponse(e, status=404)
+        
+    return Response(data)
+
+@api_view(['GET'])
+def get_strain(request, isolate):
+
+    database = request.headers.get('database', 'default')
+    sequences = Sequences(database=database)
+
+    try:
+        data = sequences.get_strain(isolate)
+    except ValueError as e:
+        print(str(e))
+        return Response({'message': str(e)}, status=404)
+
+    return Response(data)
+
+@api_view(['GET'])
 def get_sequences_meta_data(request):
 
     database = request.headers.get('database', 'default')

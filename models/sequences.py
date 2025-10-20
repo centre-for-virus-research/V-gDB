@@ -2,6 +2,7 @@ from django.db import connections
 import csv
 from models.helpers import *
 from collections import Counter
+from collections import defaultdict
 class Sequences:
     """
     A class to handle operations related to sequence metadata, alignments, 
@@ -63,7 +64,7 @@ class Sequences:
         """
         if not self.filters:
             with connections[self.database].cursor() as cursor:
-                cursor.execute('SELECT * FROM meta_data ORDER BY create_date DESC;')
+                cursor.execute('SELECT * FROM meta_data ORDER BY create_date DESC LIMIT 20;')
                 result = dictfetchall(cursor)
         else:
 
@@ -214,8 +215,43 @@ class Sequences:
         return sequence
 
 
+    def get_strains(self):
+        if not self.filters:
+            with connections[self.database].cursor() as cursor:
+                cursor.execute(' SELECT isolate, country, host, segment, collection_date, primary_accession FROM meta_data ORDER BY isolate, segment')
+                rows = cursor.fetchall()
+        # Structure data by isolate
+        data_by_isolate = defaultdict(lambda: {"host": None, "segments": {}})
 
+        for isolate, country, host, segment, collection_date, accession in rows:
+            if data_by_isolate[isolate]["host"] is None:
+                data_by_isolate[isolate]["host"] = host
+                data_by_isolate[isolate]["country"] = country
+                data_by_isolate[isolate]["collection_date"] = collection_date
+            data_by_isolate[isolate]["segments"][segment] = accession
 
+        # Convert to a nice list/dict if needed
+        result = []
+        for isolate, data in data_by_isolate.items():
+            entry = {
+                "isolate": isolate,
+                "country": data["country"],
+                "collection_date": data["collection_date"],
+                "host": data["host"],
+                "segments": data["segments"]  # dict like {1: 'ACC001', 2: 'ACC002', ...}
+            }
+            result.append(entry)
+
+        return result
+
+    def get_strain(self, isolate):
+
+        if isolate:
+            with connections[self.database].cursor() as cursor:
+                cursor.execute(' SELECT * FROM meta_data where isolate=%s ORDER BY segment', [isolate])
+                result = dictfetchall(cursor)
+
+        return result
 
 
 

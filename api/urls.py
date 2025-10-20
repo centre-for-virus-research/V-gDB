@@ -32,7 +32,8 @@ urlpatterns = [
 
 
 
-
+    path('sequences/strains/', sequences.get_strains, name='get_strains'), 
+    path('sequence/strain/<str:isolate>', sequences.get_strain, name='get_strain'), #done
 
 
 

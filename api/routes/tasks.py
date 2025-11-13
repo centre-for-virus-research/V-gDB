@@ -155,6 +155,8 @@ def get_job_logs(request, job_id):
     """
     queue = django_rq.get_queue('default')
     job = queue.fetch_job(job_id)
+    print("WE ARE HERE")
+    print(job.meta)
 
     if job and job.meta.get('status'):
         return Response(job.meta)

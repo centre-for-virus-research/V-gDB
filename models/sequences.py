@@ -77,52 +77,48 @@ class Sequences:
 
     #     return result
 
-    def get_sequences_meta_data(self, page=1, page_size=50):
-        """
-        Retrieve paginated sequence metadata records from the database.
-
-        Args:
-            page (int): The current page number (1-indexed).
-            page_size (int): Number of records per page.
-
-        Returns:
-            dict: Contains 'results', 'total', 'page', and 'page_size'.
-        """
-        offset = (page - 1) * page_size
-
+    def get_sequences_meta_data(self, next_cursor, prev_cursor, items_per_page):
         # Base query (with filters if any)
         if not self.filters:
-            base_query = "SELECT * FROM meta_data"
-            params = []
+            if next_cursor == 0:
+                base_query = 'SELECT * FROM meta_data ORDER BY primary_accession LIMIT %s;'
+                params = [items_per_page]
+            else: 
+                base_query = "SELECT * FROM meta_data WHERE primary_accession > %s ORDER BY primary_accession LIMIT %s;"
+                params = [next_cursor, items_per_page]
         else:
-            where_str, params = self.__add_filters()
-            base_query = f"SELECT * FROM meta_data WHERE {where_str}"
+            if next_cursor:
+                base_query = "SELECT * FROM meta_data WHERE primary_accession > %s ORDER BY primary_accession LIMIT %s;"
+                params = [next_cursor, items_per_page]
+            elif prev_cursor: 
+                if prev_cursor == '0':
+                    base_query = 'SELECT * FROM meta_data ORDER BY primary_accession DESC LIMIT %s;'
+                    params = [items_per_page]
+                else:
+                    base_query = "SELECT * FROM meta_data WHERE primary_accession < %s ORDER BY primary_accession DESC LIMIT %s;"
+                    params = [prev_cursor, items_per_page]
+            else:
+                base_query = 'SELECT * FROM meta_data ORDER BY primary_accession LIMIT %s;'
+                params = [items_per_page]
 
-        # Total count
-        count_query = "SELECT COUNT(*) FROM meta_data"
-
-        # Paginated query
-        paginated_query = f"""
-            {base_query}
-            ORDER BY create_date DESC
-            LIMIT %s OFFSET %s;
-        """
-        print(count_query)
+            # where_str, params = self.__add_filters()
+            # base_query = f"SELECT * FROM meta_data WHERE {where_str}"
+        print(base_query, params)
         with connections[self.database].cursor() as cursor:
-            # total count
-            cursor.execute(count_query, params)
-            total = cursor.fetchone()[0]
-            print(total)
-            # results
-            cursor.execute(paginated_query, params + [page_size, offset])
+            cursor.execute(base_query, params)
             results = dictfetchall(cursor)
+            
 
-        return {
-            "results": results,
-            "total": total,
-            "page": page,
-            "page_size": page_size,
-        }
+        if prev_cursor:
+            results.reverse()
+
+        next_cursor = results[-1]["primary_accession"] if results else None
+        prev_cursor = results[0]["primary_accession"] if results else None
+
+            
+
+        return {"data":results, "next_cursor":next_cursor, "prev_cursor":prev_cursor}
+
 
     def get_sequences_alignment(self):
         """
@@ -292,12 +288,15 @@ class Sequences:
         return result
 
     def get_strain(self, isolate):
-
+        print('here')
+        print(isolate)
+        print(self.database)
         if isolate:
             with connections[self.database].cursor() as cursor:
-                cursor.execute('SELECT * FROM meta_data where isolate=%s ORDER BY segment', [isolate])
+                print("starting")
+                cursor.execute('SELECT * FROM meta_data where isolate=%s ORDER BY segment', ['zd201603'])
                 result = dictfetchall(cursor)
-
+        print(result)
         return result
 
 
@@ -334,24 +333,24 @@ class Sequences:
             cursor.execute("SELECT sequence FROM sequences WHERE header=%s", [primary_accession])
             result["sequence"] = dictfetchall(cursor)[0]["sequence"]
             # Get alignment information
-            cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id=%s", [primary_accession])
-            alignment = dictfetchall(cursor)
+            # cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id=%s", [primary_accession])
+            # alignment = dictfetchall(cursor)
 
-            if alignment:
-                result["alignment"] = alignment[0]
+            # if alignment:
+            #     result["alignment"] = alignment[0]
 
-                # Add insertions
-                cursor.execute("SELECT * FROM insertions WHERE accession = %s", [primary_accession])
-                result["alignment"]["insertions"] = dictfetchall(cursor)
+            #     # Add insertions
+            #     cursor.execute("SELECT * FROM insertions WHERE accession = %s", [primary_accession])
+            #     result["alignment"]["insertions"] = dictfetchall(cursor)
 
-                # Add features
-                cursor.execute("SELECT * FROM features WHERE accession=%s and reference_accession = %s ORDER BY cds_start", [primary_accession, result["alignment"]["alignment_name"]])
-                result["alignment"]["features"] = dictfetchall(cursor)
+            #     # Add features
+            #     cursor.execute("SELECT * FROM features WHERE accession=%s and reference_accession = %s ORDER BY cds_start", [primary_accession, result["alignment"]["alignment_name"]])
+            #     result["alignment"]["features"] = dictfetchall(cursor)
 
 
-                # Add reference sequence
-                cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [result["alignment"]["alignment_name"]])
-                result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
+            #     # Add reference sequence
+            #     cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [result["alignment"]["alignment_name"]])
+            #     result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
 
             # Get regional info if country exists
             if result["meta_data"].get("country"):

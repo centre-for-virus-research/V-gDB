@@ -12,7 +12,6 @@ from models.sequences import Sequences
 def get_sequences(request):
 
     database = request.headers.get('database', 'default')
-    # sequences = Sequences(database=database)
 
     params = dict(request.GET.items())
 
@@ -22,7 +21,10 @@ def get_sequences(request):
 
     sequences = Sequences(database=database, filters=params)
     try:
-        data = sequences.get_sequences()
+        if database == 'RABV':
+            data = sequences.get_sequences()
+        else:
+            data = sequences.get_sequences_segmented()
     except ValueError as e:
         print(f"Error: {e}")
         return HttpResponse(e, status=404)
@@ -68,11 +70,17 @@ def get_strain(request, isolate):
 def get_sequences_meta_data(request):
 
     database = request.headers.get('database', 'default')
-    page = int(request.GET.get("page", 1))
-    page_size = int(request.GET.get("page_size", 50))
     # sequences = Sequences(database=database)
-
+    prev_cursor = None
+    next_cursor = None
     params = dict(request.GET.items())
+    if "next_cursor" in params:
+        next_cursor = params["next_cursor"]
+
+    elif "prev_cursor" in params:
+        
+        prev_cursor = params["prev_cursor"]
+    
 
     if params:
         for key, value in params.items():
@@ -80,11 +88,11 @@ def get_sequences_meta_data(request):
 
     sequences = Sequences(database=database, filters=params)
     try:
-        data = sequences.get_sequences_meta_data(page, page_size)
+        data = sequences.get_sequences_meta_data(next_cursor, prev_cursor, params["items_per_page"])
     except ValueError as e:
         print(f"Error: {e}")
         return HttpResponse(e, status=404)
-        
+    
     return Response(data)
 
 @api_view(['GET'])

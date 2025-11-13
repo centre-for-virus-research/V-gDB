@@ -259,48 +259,44 @@ class Sequences:
 
 
     def get_strains(self):
-        if not self.filters:
-            with connections[self.database].cursor() as cursor:
-                cursor.execute(' SELECT isolate, country, host, segment, collection_date, primary_accession FROM meta_data ORDER BY isolate, segment;')
-                rows = cursor.fetchall()
-        # Structure data by isolate
-        data_by_isolate = defaultdict(lambda: {"host": None, "segments": {}})
+        # if not self.filters:
+        #     with connections[self.database].cursor() as cursor:
+        #         cursor.execute(' SELECT isolate, country, host, segment, collection_date, primary_accession FROM meta_data ORDER BY isolate, segment;')
+        #         rows = cursor.fetchall()
+        # # Structure data by isolate
+        # data_by_isolate = defaultdict(lambda: {"host": None, "segments": {}})
 
-        for isolate, country, host, segment, collection_date, accession in rows:
-            if data_by_isolate[isolate]["host"] is None:
-                data_by_isolate[isolate]["host"] = host
-                data_by_isolate[isolate]["country"] = country
-                data_by_isolate[isolate]["collection_date"] = collection_date
-            data_by_isolate[isolate]["segments"][segment] = accession
+        # for isolate, country, host, segment, collection_date, accession in rows:
+        #     if data_by_isolate[isolate]["host"] is None:
+        #         data_by_isolate[isolate]["host"] = host
+        #         data_by_isolate[isolate]["country"] = country
+        #         data_by_isolate[isolate]["collection_date"] = collection_date
+        #     data_by_isolate[isolate]["segments"][segment] = accession
 
-        # Convert to a nice list/dict if needed
-        result = []
-        for isolate, data in data_by_isolate.items():
-            entry = {
-                "isolate": isolate,
-                "country": data["country"],
-                "collection_date": data["collection_date"],
-                "host": data["host"],
-                "segments": data["segments"]  # dict like {1: 'ACC001', 2: 'ACC002', ...}
-            }
-            result.append(entry)
+        # # Convert to a nice list/dict if needed
+        # result = []
+        # for isolate, data in data_by_isolate.items():
+        #     entry = {
+        #         "isolate": isolate,
+        #         "country": data["country"],
+        #         "collection_date": data["collection_date"],
+        #         "host": data["host"],
+        #         "segments": data["segments"]  # dict like {1: 'ACC001', 2: 'ACC002', ...}
+        #     }
+        #     result.append(entry)
+        with connections[self.database].cursor() as cursor:
+                cursor.execute(' SELECT * FROM isolates')
+                result = dictfetchall(cursor)
 
         return result
 
     def get_strain(self, isolate):
-        print('here')
-        print(isolate)
-        print(self.database)
         if isolate:
             with connections[self.database].cursor() as cursor:
-                print("starting")
-                cursor.execute('SELECT * FROM meta_data where isolate=%s ORDER BY segment', ['zd201603'])
+                cursor.execute('SELECT * FROM meta_data where isolate=%s ORDER BY segment', [isolate])
                 result = dictfetchall(cursor)
         print(result)
         return result
-
-
-
 
     def get_sequence_meta_data(self, primary_accession):
         """

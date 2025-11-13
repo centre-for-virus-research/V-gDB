@@ -145,7 +145,6 @@ def get_sequence_meta_data(request, primary_accession):
     try:
         data = sequences.get_sequence_meta_data(primary_accession)
     except ValueError as e:
-        print("HI")
         print(str(e))
         return Response({'message': str(e)}, status=404)
 

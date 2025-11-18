@@ -76,10 +76,15 @@ def get_sequences_meta_data(request):
     params = dict(request.GET.items())
     if "next_cursor" in params:
         next_cursor = params["next_cursor"]
+        del params["next_cursor"]
 
     elif "prev_cursor" in params:
         
         prev_cursor = params["prev_cursor"]
+        del params["prev_cursor"]
+
+    items_per_page = params["items_per_page"]
+    del params["items_per_page"]
     
 
     if params:
@@ -88,7 +93,7 @@ def get_sequences_meta_data(request):
 
     sequences = Sequences(database=database, filters=params)
     try:
-        data = sequences.get_sequences_meta_data(next_cursor, prev_cursor, params["items_per_page"])
+        data = sequences.get_sequences_meta_data(next_cursor, prev_cursor, items_per_page)
     except ValueError as e:
         print(f"Error: {e}")
         return HttpResponse(e, status=404)

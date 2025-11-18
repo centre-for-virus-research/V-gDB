@@ -80,29 +80,51 @@ class Sequences:
     def get_sequences_meta_data(self, next_cursor, prev_cursor, items_per_page):
         # Base query (with filters if any)
         if not self.filters:
-            if next_cursor == 0:
-                base_query = 'SELECT * FROM meta_data ORDER BY primary_accession LIMIT %s;'
-                params = [items_per_page]
-            else: 
-                base_query = "SELECT * FROM meta_data WHERE primary_accession > %s ORDER BY primary_accession LIMIT %s;"
-                params = [next_cursor, items_per_page]
-        else:
             if next_cursor:
                 base_query = "SELECT * FROM meta_data WHERE primary_accession > %s ORDER BY primary_accession LIMIT %s;"
                 params = [next_cursor, items_per_page]
-            elif prev_cursor: 
+
+            elif prev_cursor:
                 if prev_cursor == '0':
                     base_query = 'SELECT * FROM meta_data ORDER BY primary_accession DESC LIMIT %s;'
                     params = [items_per_page]
                 else:
-                    base_query = "SELECT * FROM meta_data WHERE primary_accession < %s ORDER BY primary_accession DESC LIMIT %s;"
-                    params = [prev_cursor, items_per_page]
-            else:
-                base_query = 'SELECT * FROM meta_data ORDER BY primary_accession LIMIT %s;'
+                  base_query = 'SELECT * FROM meta_data WHERE primary_accession < %s ORDER BY primary_accession DESC LIMIT %s;'
+                  params = [prev_cursor, items_per_page]
+            else: 
+                base_query = "SELECT * FROM meta_data ORDER BY primary_accession LIMIT %s;"
                 params = [items_per_page]
-
-            # where_str, params = self.__add_filters()
+        else:
+            where_str, params = self.__add_filters()
             # base_query = f"SELECT * FROM meta_data WHERE {where_str}"
+            if next_cursor:
+                and_str = "AND primary_accession > %s ORDER BY primary_accession LIMIT %s;"
+                # base_query = f"SELECT * FROM meta_data WHERE {where_str} AND primary_accession > %s ORDER BY primary_accession LIMIT %s;"
+                # base_query = "SELECT * FROM meta_data WHERE primary_accession > %s ORDER BY primary_accession LIMIT %s;"
+                # params = [next_cursor, items_per_page]
+                params.append(next_cursor)
+                params.append(items_per_page)
+            elif prev_cursor: 
+                if prev_cursor == '0':
+                    and_str = "ORDER BY primary_accession DESC LIMIT %s;"
+                    # base_query = 'SELECT * FROM meta_data ORDER BY primary_accession DESC LIMIT %s;'
+                    params.append(items_per_page)
+                    # params = [items_per_page]
+                else:
+                    and_str = "AND primary_accession < %s ORDER BY primary_accession DESC LIMIT %s;"
+                    # base_query = "SELECT * FROM meta_data WHERE primary_accession < %s ORDER BY primary_accession DESC LIMIT %s;"
+                    # params = [prev_cursor, items_per_page]
+                    params.append(prev_cursor)
+                    params.append(items_per_page)
+            else:
+                and_str = "ORDER BY primary_accession LIMIT %s;"
+                # base_query = 'SELECT * FROM meta_data ORDER BY primary_accession LIMIT %s;'
+                # params = [items_per_page]
+                params.append(items_per_page)
+
+            base_query = f"SELECT * FROM meta_data WHERE {where_str} {and_str}"
+
+            
         print(base_query, params)
         with connections[self.database].cursor() as cursor:
             cursor.execute(base_query, params)

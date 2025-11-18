@@ -2,6 +2,17 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from models.mutations import Mutations
 
+
+@api_view(['GET'])
+def get_adaptive_mutations(request):
+
+    database = request.headers.get('database')
+
+    mutations = Mutations(database=database)
+    data = mutations.get_adaptive_mutations()
+
+    return Response(data)
+
 @api_view(['GET'])
 def get_mutations2(request):
 

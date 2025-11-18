@@ -46,6 +46,8 @@ urlpatterns = [
 
 
     # MUTATIONS 
+    path('adaptive_mutations/', mutations.get_adaptive_mutations, name='get_adaptive_mutations'),
+
     path('analysis/mutations/', mutations.get_mutations, name='get_mutations'),
 
     path('alignments/get_reference_sequence/<str:primary_accession>', sequences.get_reference_sequence, name='get_reference_sequence'),

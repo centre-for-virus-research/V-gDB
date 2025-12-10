@@ -24,36 +24,36 @@ class Features:
 
 
     def get_clades_tree(self):
-        with connections[self.database].cursor() as cursor:
-            cursor.execute('SELECT * FROM genotypes')
+        # with connections[self.database].cursor() as cursor:
+        #     cursor.execute('SELECT * FROM genotypes')
 
-            features = dictfetchall(cursor)
+        #     features = dictfetchall(cursor)
 
-        nodes = {}
+        # nodes = {}
 
-        for clade in features:
-            major = clade['major_clade']
-            minor = clade['minor_clade']
-            if major != "NULL":
-                if major not in nodes: 
-                    nodes[major] = {
-                        'name':major,
-                        'text':major,
-                        'parent':None,
-                        'nodes':[]
-                    }
-                if minor != None:
-                    nodes[major]['nodes'].append({
-                        'name':minor,
-                        'text':minor,
-                        'parent':major
-                    })
+        # for clade in features:
+        #     major = clade['major_clade']
+        #     minor = clade['minor_clade']
+        #     if major != "NULL":
+        #         if major not in nodes: 
+        #             nodes[major] = {
+        #                 'name':major,
+        #                 'text':major,
+        #                 'parent':None,
+        #                 'nodes':[]
+        #             }
+        #         if minor != None:
+        #             nodes[major]['nodes'].append({
+        #                 'name':minor,
+        #                 'text':minor,
+        #                 'parent':major
+        #             })
         
         tree = []
-        for clade in nodes.values():
-            if len(clade['nodes']) == 0:
-                clade['nodes'] = None
+        # for clade in nodes.values():
+        #     if len(clade['nodes']) == 0:
+        #         clade['nodes'] = None
         
-        tree = list(nodes.values())
+        # tree = list(nodes.values())
         return tree
     

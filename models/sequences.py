@@ -317,7 +317,34 @@ class Sequences:
             with connections[self.database].cursor() as cursor:
                 cursor.execute('SELECT * FROM meta_data where isolate=%s ORDER BY segment', [isolate])
                 result = dictfetchall(cursor)
-        print(result)
+                # print(result)
+                for l in result:
+                    print(l["primary_accession"])
+                    print("here0")
+                    cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id=%s", [l["primary_accession"]])
+                    alignment = dictfetchall(cursor)
+                    print("here4")
+                    if alignment:
+                        l["alignment"] = alignment[0]
+                        print("here")
+                        # Add insertions
+                        cursor.execute("SELECT * FROM insertions WHERE accession = %s", [l["primary_accession"]])
+                        l["alignment"]["insertions"] = dictfetchall(cursor)
+                        print("here2")
+                        # Add features
+                        print(l["alignment"]["alignment_name"])
+                        cursor.execute("SELECT * FROM features WHERE accession=%s and reference_accession = %s ORDER BY cds_start", [l["primary_accession"], l["alignment"]["alignment_name"]])
+                        l["alignment"]["features"] = dictfetchall(cursor)
+                        print("here3")
+
+                        # Add reference sequence
+                        cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [l["alignment"]["alignment_name"]])
+                        l["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
+
+                # print(result)
+                
+        
+        
         return result
 
     def get_sequence_meta_data(self, primary_accession):

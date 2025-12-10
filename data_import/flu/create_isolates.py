@@ -45,7 +45,13 @@
 
 import sqlite3
 
-conn = sqlite3.connect("/Volumes/My Passport/V-gDB-flu-Sep292025.db")
+def to_int_if_float(value):
+  try:
+    return int(float(value))
+  except (ValueError, TypeError):
+      return None 
+
+conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/Flu/flu-gDB_dec02.db")
 conn.row_factory = sqlite3.Row  
 cur = conn.cursor()
 
@@ -55,7 +61,7 @@ cur.execute("DROP TABLE IF EXISTS isolates;")
 # Create new genotypes table
 cur.execute("""CREATE TABLE isolates 
             (
-              isolate TEXT,
+              strain TEXT,
               seg_1 TEXT,
               seg_2 TEXT,
               seg_3 TEXT,
@@ -64,30 +70,33 @@ cur.execute("""CREATE TABLE isolates
               seg_6 TEXT,
               seg_7 TEXT,
               seg_8 TEXT,
-              PRIMARY KEY(isolate)
+              PRIMARY KEY(strain)
             )""")
 
 conn.commit()
 
 
-cur.execute("SELECT isolate, primary_accession, segment from meta_data where isolate IS NOT NULL;")
+cur.execute("SELECT Parsed_strain, primary_accession, segment from meta_data where strain IS NOT NULL;")
 rows = cur.fetchall()
 # conn.close()
 
 print("starting")
 isolates_map = {}
 for row in rows:
-    isolate = row['isolate']
+    isolate = row['Parsed_Strain']
     if isolate not in isolates_map:
       isolates_map[isolate] = {1: None, 2: None, 3: None, 4: None, 5: None, 6: None, 7: None, 8: None}
     if row['segment']:
-      isolates_map[isolate][int(float(row['segment']))] = row['primary_accession']
+      segment = to_int_if_float(row['segment'])
+      if segment is not None:
+        isolates_map[isolate][segment] = row['primary_accession']
+      # isolates_map[isolate][int(float(row['segment']))] = row['primary_accession']
 print("inserting")
 for key in isolates_map.keys():
   isolates = isolates_map[key]
   cur.execute("""
             INSERT INTO isolates (
-              isolate,
+              strain, 
               seg_1,
               seg_2,
               seg_3,
@@ -114,3 +123,44 @@ conn.commit()
 conn.close()
 
 
+
+# print("starting")
+# isolates_map = {}
+# for row in rows:
+#     isolate = row['Parsed_Strain']
+#     if isolate not in isolates_map:
+#       isolates_map[isolate] = {1: None, 2: None, 3: None, 4: None, 5: None, 6: None, 7: None, 8: None}
+#     if row['segment']:
+#       isolates_map[isolate][int(float(row['segment']))] = row['primary_accession']
+# print("inserting")
+# for key in isolates_map.keys():
+#   isolates = isolates_map[key]
+#   cur.execute("""
+#             INSERT INTO isolates (
+#               strain, 
+#               seg_1,
+#               seg_2,
+#               seg_3,
+#               seg_4,
+#               seg_5,
+#               seg_6,
+#               seg_7,
+#               seg_8
+#             )
+#             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+#         """, (
+#             key,
+#             isolates[1],
+#             isolates[2],
+#             isolates[3],
+#             isolates[4],
+#             isolates[5],
+#             isolates[6],
+#             isolates[7],
+#             isolates[8]
+#         ))
+  
+# conn.commit()
+# conn.close()
+
+# 

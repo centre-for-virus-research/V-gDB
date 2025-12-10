@@ -3,7 +3,7 @@ import sqlite3
 import csv
 
 # "/Volumes/My Passport/V-gDB-flu-Sep292025.db"
-# "/Volumes/My Passport/CVR/gdb/Flu/adaptive_mutations/Clean PB2.csv"
+"/Volumes/My Passport/CVR/gdb/Flu/adaptive_mutations/Clean PB2.csv"
 def import_adaptive_mutations(file, database):
     conn = sqlite3.connect(database)
     conn.row_factory = sqlite3.Row  

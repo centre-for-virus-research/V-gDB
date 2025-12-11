@@ -8,7 +8,7 @@ from api.routes import features
 from api.routes import genes
 from api.routes import tasks
 from api.routes import search
-
+from api.routes import phylogeny
 # MAIN API endpoints! 
 # Virus Web Resource GUI will 
 
@@ -36,7 +36,7 @@ urlpatterns = [
     path('sequence/strain/<path:isolate>', sequences.get_strain, name='get_strain'), #done
 
 
-
+    path("phylogeny/tree/", phylogeny.get_tree, name='get_tree'),
 
 
 

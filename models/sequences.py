@@ -378,24 +378,24 @@ class Sequences:
             cursor.execute("SELECT sequence FROM sequences WHERE header=%s", [primary_accession])
             result["sequence"] = dictfetchall(cursor)[0]["sequence"]
             # Get alignment information
-            # cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id=%s", [primary_accession])
-            # alignment = dictfetchall(cursor)
+            cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id=%s", [primary_accession])
+            alignment = dictfetchall(cursor)
 
-            # if alignment:
-            #     result["alignment"] = alignment[0]
+            if alignment:
+                result["alignment"] = alignment[0]
 
-            #     # Add insertions
-            #     cursor.execute("SELECT * FROM insertions WHERE accession = %s", [primary_accession])
-            #     result["alignment"]["insertions"] = dictfetchall(cursor)
+                # Add insertions
+                cursor.execute("SELECT * FROM insertions WHERE accession = %s", [primary_accession])
+                result["alignment"]["insertions"] = dictfetchall(cursor)
 
-            #     # Add features
-            #     cursor.execute("SELECT * FROM features WHERE accession=%s and reference_accession = %s ORDER BY cds_start", [primary_accession, result["alignment"]["alignment_name"]])
-            #     result["alignment"]["features"] = dictfetchall(cursor)
+                # Add features
+                cursor.execute("SELECT * FROM features WHERE accession=%s and reference_accession = %s ORDER BY cds_start", [primary_accession, result["alignment"]["alignment_name"]])
+                result["alignment"]["features"] = dictfetchall(cursor)
 
 
-            #     # Add reference sequence
-            #     cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [result["alignment"]["alignment_name"]])
-            #     result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
+                # Add reference sequence
+                cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [result["alignment"]["alignment_name"]])
+                result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
 
             # Get regional info if country exists
             if result["meta_data"].get("country"):

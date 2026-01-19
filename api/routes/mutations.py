@@ -14,6 +14,19 @@ def get_adaptive_mutations(request):
     return Response(data)
 
 @api_view(['GET'])
+def get_adaptive_mutations_chart(request, segment):
+
+    database = request.headers.get('database')
+
+    mutations = Mutations(database=database)
+    data = mutations.get_adaptive_mutations_chart(segment)
+
+    return Response(data)
+
+
+
+
+@api_view(['GET'])
 def get_mutations2(request):
 
     database = request.headers.get('database')

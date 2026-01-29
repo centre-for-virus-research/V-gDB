@@ -397,6 +397,11 @@ class Sequences:
                 cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [result["alignment"]["alignment_name"]])
                 result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
             
+            if result["meta_data"]["host_taxa_id"]:
+                cursor.execute("SELECT * FROM host_lineage WHERE taxa_id = %s", [result["meta_data"]["host_taxa_id"]])
+                lineage = dictfetchall(cursor)
+                if lineage:
+                    result["meta_data"]["lineage"] = lineage
 
             # Get regional info if country exists
             if result["meta_data"].get("country"):

@@ -12,80 +12,22 @@ from models.sequences import Sequences
 def get_sequences(request):
 
     database = request.headers.get('database', 'default')
-
-    params = dict(request.GET.items())
-
-    if params:
-        for key, value in params.items():
-            params[key] = value.split(',') if ',' in value else value
-
-    sequences = Sequences(database=database, filters=params)
-    try:
-        if database == 'RABV':
-            data = sequences.get_sequences()
-        else:
-            data = sequences.get_sequences_segmented()
-    except ValueError as e:
-        print(f"Error: {e}")
-        return HttpResponse(e, status=404)
-        
-    return Response(data)
-
-@api_view(['GET'])
-def get_strains(request):
-
-    database = request.headers.get('database', 'default')
-    # sequences = Sequences(database=database)
-
-    params = dict(request.GET.items())
-
-    if params:
-        for key, value in params.items():
-            params[key] = value.split(',') if ',' in value else value
-
-    sequences = Sequences(database=database, filters=params)
-    try:
-        data = sequences.get_strains()
-    except ValueError as e:
-        print(f"Error: {e}")
-        return HttpResponse(e, status=404)
-        
-    return Response(data)
-
-@api_view(['GET'])
-def get_strain(request, isolate):
-
-    database = request.headers.get('database', 'default')
-    sequences = Sequences(database=database)
-
-    try:
-        data = sequences.get_strain(isolate)
-    except ValueError as e:
-        print(str(e))
-        return Response({'message': str(e)}, status=404)
-
-    return Response(data)
-
-@api_view(['GET'])
-def get_sequences_meta_data(request):
-
-    database = request.headers.get('database', 'default')
-    # sequences = Sequences(database=database)
     prev_cursor = None
     next_cursor = None
+
     params = dict(request.GET.items())
+
     if "next_cursor" in params:
         next_cursor = params["next_cursor"]
         del params["next_cursor"]
 
-    elif "prev_cursor" in params:
-        
+    if "prev_cursor" in params:
         prev_cursor = params["prev_cursor"]
         del params["prev_cursor"]
 
-    items_per_page = params["items_per_page"]
-    del params["items_per_page"]
-    
+    if "items_per_page" in params:
+        items_per_page = params["items_per_page"]
+        del params["items_per_page"]
 
     if params:
         for key, value in params.items():
@@ -93,47 +35,7 @@ def get_sequences_meta_data(request):
 
     sequences = Sequences(database=database, filters=params)
     try:
-        data = sequences.get_sequences_meta_data(next_cursor, prev_cursor, items_per_page)
-    except ValueError as e:
-        print(f"Error: {e}")
-        return HttpResponse(e, status=404)
-    
-    return Response(data)
-
-@api_view(['GET'])
-def get_sequences_alignment(request):
-
-    database = request.headers.get('database', 'default')
-
-    params = dict(request.GET.items())
-
-    if params:
-        for key, value in params.items():
-            params[key] = value.split(',') if ',' in value else value
-
-    sequences = Sequences(database=database, filters=params)
-    try:
-        data = sequences.get_sequences_alignment()
-    except ValueError as e:
-        print(f"Error: {e}")
-        return HttpResponse(e, status=404)
-        
-    return Response(data)
-
-@api_view(['GET'])
-def get_reference_sequences_meta_data(request):
-
-    database = request.headers.get('database', 'default')
-
-    params = dict(request.GET.items())
-
-    if params:
-        for key, value in params.items():
-            params[key] = value.split(',') if ',' in value else value
-
-    sequences = Sequences(database=database, filters=params)
-    try:
-        data = sequences.get_reference_sequences_meta_data()
+        data = sequences.get_sequences(next_cursor, prev_cursor, items_per_page)
     except ValueError as e:
         print(f"Error: {e}")
         return HttpResponse(e, status=404)
@@ -142,32 +44,54 @@ def get_reference_sequences_meta_data(request):
 
 
 @api_view(['GET'])
-def get_sequence_meta_data(request, primary_accession):
+def get_sequence(request, primary_accession):
 
     database = request.headers.get('database', 'default')
     sequences = Sequences(database=database)
 
     try:
-        data = sequences.get_sequence_meta_data(primary_accession)
+        data = sequences.get_sequence(primary_accession)
     except ValueError as e:
         print(str(e))
         return Response({'message': str(e)}, status=404)
 
     return Response(data)
 
+# @api_view(['GET'])
+# def get_strains(request):
 
-@api_view(['GET'])
-def get_sequence_alignment(request, primary_accession):
+#     database = request.headers.get('database', 'default')
+#     # sequences = Sequences(database=database)
 
-    database = request.headers.get('database', 'default')
-    sequences = Sequences(database=database)
+#     params = dict(request.GET.items())
 
-    try:
-        data = sequences.get_sequence_alignment(primary_accession)
-    except ValueError as e:
-        return Response({'message': str(e)}, status=404)
+#     if params:
+#         for key, value in params.items():
+#             params[key] = value.split(',') if ',' in value else value
 
-    return Response(data)
+#     sequences = Sequences(database=database, filters=params)
+#     try:
+#         data = sequences.get_strains()
+#     except ValueError as e:
+#         print(f"Error: {e}")
+#         return HttpResponse(e, status=404)
+        
+#     return Response(data)
+
+# @api_view(['GET'])
+# def get_strain(request, isolate):
+
+#     database = request.headers.get('database', 'default')
+#     sequences = Sequences(database=database)
+
+#     try:
+#         data = sequences.get_strain(isolate)
+#     except ValueError as e:
+#         print(str(e))
+#         return Response({'message': str(e)}, status=404)
+
+#     return Response(data)
+
 
 
 @api_view(['GET'])

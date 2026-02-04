@@ -19,6 +19,24 @@ def dictfetchall(cursor):
         for row in cursor.fetchall()
     ]
 
+
+def fetch_one(cursor, query, params):
+    print(query, params)
+    cursor.execute(query, params)
+    results = dictfetchall(cursor)
+    print(results)
+    if len(results) > 0:
+        results = results[0]
+    return results
+
+
+
+def fetch_all(cursor, query, params):
+    print(query, params)
+    cursor.execute(query, params)
+    return dictfetchall(cursor)
+
+
 def build_csv_file(data, file_name):
     """
     Export metadata to a CSV file.

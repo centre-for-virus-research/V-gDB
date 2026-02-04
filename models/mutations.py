@@ -33,54 +33,49 @@ class Mutations:
     
     def get_adaptive_mutations_chart(self, segment):
         pb2_ref_seq = "ATGGAAAGAATAAAAGAACTAAGAGATCTAATGTCGCAGTCCCGCACTCGCGAGATACTAACAAAAACCACTGTGGATCATATGGCCATAATCAAGAAATACACATCAGGAAGACAAGAGAAGAACCCTGCTCTCAGAATGAAATGGATGATGGCAATGAAATATCCAATCACAGCAGACAAGAGAATAATGGAGATGATTCCTGAAAGGAATGAGCAAGGACAAACGCTTTGGAGCAAGACAAATGATGCTGGGTCGGACAGAGTGATGGTGTCTCCCCTAGCTGTAACTTGGTGGAACAGGAATGGGCCGACAACAAGTACAGTCCATTATCCAAAGGTTTACAAAACATACTTTGAGAAGGTTGAAAGGTTAAAACATGGAACCTTCGGTCCCGTTCATTTCCGAAACCAAGTTAAAATACGTCGCCGGGTGGATATAAACCCGGGCCATGCAGATCTCAGTGCTAAAGAAGCACAAGATGTTATCATGGAGGTCGTTTTCCCAAATGAAGTGGGAGCTAGAATATTGACATCAGAGTCGCAATTGACAATAACAAAAGAGAAGAAAGAAGAGCTCCAGGATTGTAAAATTGCTCCTTTAATGGTGGCATACATGTTGGAAAGAGAACTGGTCCGCAAAACCAGATTTCTACCGGTAGCAGGCGGAACAAGCAGTGTGTACATTGAGGTATTGCATTTGACTCAAGGGACCTGTTGGGAACAGATGTACACTCCCGGCGGAGAAGTAAGAAATGATGATGTTGACCAGAGTTTGATCATCGCTGCCAGAAACATTGTTAGGAGAGCAACAGTATCAGCGGACCCACTGGCATCACTCTTGGAGATGTGTCACAGCACACAAATTGGGGGAATAAGGATGGTGGACATCCTTAGGCAAAACCCAACTGAGGAGCAAGCTGTGGATATATGCAAAGCAGCAATGGGTTTGAGGATCAGTTCATCCTTTAGCTTTGGAGGCTTCACTTTCAAAAGAACAAATGGATCATCCGTCAAGAAGGAAGAGGAAGTGCTTACAGGCAACCTCCAAACATTGAAAATAAAAGTACATGAGGGGTATGAAGAATTCACAATGGTTGGGCGGAGAGCAACAGCTATCCTGAGGAAAGCAACTAGAAGGCTGATTCAGTTGATAGTAAGTGGAAGAGATGAACAATCAATCGCTGAAGCGATCATTGTAGCAATGGTGTTCTCACAGGAGGATTGCATGATAAAGGCAGTCCGAGGCGATCTGAATTTCGTGAACAGAGCAAACCAAAGATTGAACCCCATGCATCAACTCCTGAGGCACTTCCAAAAAGATGCAAAAGTGCTGTTTCAGAACTGGGGAATTGAACCTATTGACAATGTCATGGGGATGATCGGAATATTACCTGACATGACTCCAAGCGCAGAGATGTCACTGAGAGGAGTGAGAGTTAGTAAGATGGGAGTAGATGAATATTCCAGCACGGAGAGAGTGGTGGTGAGTATTGACCGTTTCTTGAGGGTCCGAGATCAGCAGGGGAACGTACTCTTATCTCCTGAAGAGGTTAGTGAAACACAGGGAACAGAGAAGTTGACAATAACATATTCATCCTCAATGATGTGGGAAATCAACGGTCCTGAGTCAGTGCTTGTTAACACTTATCAATGGATCATCAGGAATTGGGAGACTGTAAAGATTCAATGGTCTCAAGATCCCACAATGCTGTACAATAAGATGGAGTTTGAATCGTTCCAATCCTTGGTGCCAAAGGCTGCCAGAAGCCAATATAGTGGATTTGTGAGAACACTATTCCAACAGATGCGTGATGTTTTGGGGACATTTGATACTGTCCAAATAATCAAGCTGCTACCATTTGCAGCAGCCCCACCGGAGCCGAGCAGAATGCAGTTTTCTTCTCTAACTGTGAATGTGAGAGGCTCAGGAATGAGAATACTCGTGAGGGGTAACTCCCCCGTGTTCAACTACAACAAGGCAACCAAAAGGCTTACAGTCCTCGGAAAGGACGCAGGTGCATTAACAGAAGATCCAGACGAGGGAACAGCCGGGGTGGAATCTGCAGTATTGAGGGGATTCCTAATTCTAGGCAGAGAGGACAAAAGATATGGACCCGCATTGAGCATCAATGAACTGAGCAATCTTGCAAAAGGGGAGAAGGCTAATGTATTGATAATGCAAGGAGACGTGGTGTTGGTAATGAAACGGAAACGGGACTTTAGCATACTTACTGACAGCCAGACAGCGACCAAAAGAATTCGGATGGCCATCAAT---TAG"
-
-        query = "SELECT * FROM adaptive_mutations;"
-
+        print("starting")
         with connections["FLUV"].cursor() as cursor:
-            cursor.execute("""SELECT cm.primary_accession, md.host_taxa_id, f.cds_start, f.cds_end, sa.alignment
+            # cursor.execute("""SELECT cm.primary_accession, md.host_taxa_id
+            #                 FROM cluster_members cm
+            #                 JOIN meta_data md ON md.primary_accession = cm.primary_accession
+            #                 WHERE cm.segment = %s""", ['PB2'])
+            cursor.execute("""SELECT cm.primary_accession, md.host_taxa_id, sa.alignment
                             FROM cluster_members cm
                             JOIN meta_data md ON md.primary_accession = cm.primary_accession
-                            JOIN features f ON f.accession = cm.primary_accession
                             JOIN sequence_alignment sa ON sa.sequence_id = cm.primary_accession
                             WHERE cm.segment = %s""", ['PB2'])
+            print("done")
             rows = dictfetchall(cursor)
 
         translated_results = []
         # print(rows)
         for row in rows:
-            # print(row)
             primary_accession = row['primary_accession']
             host = row['host_taxa_id']
-            cds_start = row['cds_start']
-            cds_end = row['cds_end']
             alignment = row['alignment']
-            # print('cds_start ',cds_start, ' cds_end ',cds_end)
             if alignment is None:
-                # print("We are in alignment")
                 continue
-            # if cds_start or cds_end is None:
-            #     print("We are in features")
-            #     continue
-            # Convert from 1-based inclusive → 0-based slicing
-            # cds_seq = alignment[int(cds_start) - 1 : int(cds_end)]
-            cds_seq = alignment
 
             # Remove gaps if this is an alignment
-            cds_seq = cds_seq.replace("-", "")
-
-            ref_seq = pb2_ref_seq.replace("-", "")
-
+            cds_seq = alignment.replace("-", "")
             protein = str(Seq(cds_seq).translate(to_stop=False))
-            # print(protein)
-            ref_protein = str(Seq(ref_seq).translate(to_stop=False))
+            
             translated_results.append({
                 "primary_accession": primary_accession,
                 "host": host,
                 "protein": protein,
-                "ref_protein": ref_protein
             })
+
+
+        ref_seq = pb2_ref_seq.replace("-", "")
+
+        
+        # print(protein)
+        ref_protein = str(Seq(ref_seq).translate(to_stop=False))
+
+        results = [{"reference_protein": ref_protein, "translated_results": translated_results}]
         # print(translated_results)
-        return translated_results
+        return results
 
 
 

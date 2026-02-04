@@ -9,6 +9,8 @@ from api.routes import genes
 from api.routes import tasks
 from api.routes import search
 from api.routes import phylogeny
+from api.routes import strains
+
 # MAIN API endpoints! 
 # Virus Web Resource GUI will 
 
@@ -16,24 +18,34 @@ urlpatterns = [
     
     # SEQUENCES
     # API paths to get all of the data with various filters
-    path('sequences/', sequences.get_sequences, name='get_sequences'), 
-    path('sequences/metadata/', sequences.get_sequences_meta_data, name='get_sequences_meta_data'),
-    path('sequences/alignment/', sequences.get_sequences_alignment, name='get_sequences_alignment'),
-    path('sequences/reference/metadata/', sequences.get_reference_sequences_meta_data, name='get_reference_sequences_meta_data'),
+    path('sequences/', sequences.get_sequences, name='get_sequences'), #DONE
+    path('sequence/<str:primary_accession>', sequences.get_sequence, name='get_sequence'), #done
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     path('sequences/metadata/map/', sequences.get_map_metadata, name='get_map_metadata'),
     
     # API paths to get data for primary accession
-    path('sequence/metadata/<str:primary_accession>', sequences.get_sequence_meta_data, name='get_sequence_meta_data'), #done
-    path('sequence/alignment/<str:primary_accession>', sequences.get_sequence_alignment, name='get_sequence_alignment'),  #done
+    
     path('sequence/reference/<str:primary_accession>', sequences.get_reference_sequence, name='get_reference_sequence'), #done
 
 
 
 
-    path('sequences/strains/', sequences.get_strains, name='get_strains'), 
-    path('sequence/strain/<path:isolate>', sequences.get_strain, name='get_strain'), #done
+    path('strains/', strains.get_strains, name='get_strains'), 
+    path('strain/<path:strain_id>', strains.get_strain, name='get_strain'), #done
 
 
     path("phylogeny/tree/", phylogeny.get_tree, name='get_tree'),

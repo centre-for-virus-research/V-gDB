@@ -1,16 +1,14 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
-
-from models.genes import Genes
+from models.lineages import Lineages
 
 
 @api_view(['GET'])
-def get_genes_tree(request):
+def get_lineage(request):
 
     database = request.headers.get('database', 'default')
 
-    genes = Genes(database=database)
-    data = genes.get_genes_tree()
+    lineages = Lineages(database=database)
+    data = lineages.get_lineages()
 
     return Response(data)

@@ -3,16 +3,13 @@ from api.routes import sequences
 from api.routes import alignments
 from api.routes import versions
 from api.routes import mutations
-from api.routes import statistics
-from api.routes import features
-from api.routes import genes
 from api.routes import tasks
 from api.routes import search
 from api.routes import phylogeny
 from api.routes import strains
-
-# MAIN API endpoints! 
-# Virus Web Resource GUI will 
+from api.routes import lineage
+from api.routes import taxonomy
+from api.routes import analysis
 
 urlpatterns = [
     
@@ -20,51 +17,55 @@ urlpatterns = [
     # API paths to get all of the data with various filters
     path('sequences/', sequences.get_sequences, name='get_sequences'), #DONE
     path('sequence/<str:primary_accession>', sequences.get_sequence, name='get_sequence'), #done
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    path('sequences/metadata/map/', sequences.get_map_metadata, name='get_map_metadata'),
-    
-    # API paths to get data for primary accession
-    
     path('sequence/reference/<str:primary_accession>', sequences.get_reference_sequence, name='get_reference_sequence'), #done
-
-
+    
 
 
     path('strains/', strains.get_strains, name='get_strains'), 
     path('strain/<path:strain_id>', strains.get_strain, name='get_strain'), #done
 
 
+    path('lineages/', lineage.get_lineage, name='get_lineage'),
+
+
+
+    path('alignments/download', alignments.download_alignments, name='download_alignment'),
+
+
+
+    # Taxonomy
+    path('taxonomy/phylum', taxonomy.get_phylum, name='get_phylum'), 
+    path('taxonomy/class', taxonomy.get_class, name='get_class'), 
+    path('taxonomy/order_category', taxonomy.get_order, name='get_order'), 
+    path('taxonomy/family', taxonomy.get_family, name='get_family'),
+    path('taxonomy/genus', taxonomy.get_genus, name='get_genus'),
+    path('taxonomy/species', taxonomy.get_species, name='get_species'),
+    
+
+
+    # NOT FINISHED STUFF
+    path('sequences/global/', sequences.get_global_distribution_of_sequences, name='get_global_distribution_of_sequences'),
     path("phylogeny/tree/", phylogeny.get_tree, name='get_tree'),
 
+    path('adaptive_mutations/', mutations.get_adaptive_mutations, name='get_adaptive_mutations'),
+
+    path('analysis/mutations/', mutations.get_mutations, name='get_mutations'),
 
 
 
+    path('analysis/clade_assignment/', analysis.run_phylogenetic_clade_assignment_analysis, name='run_phylogenetic_clade_assignment_analysis'),
 
-
-
-
+    
+    # API paths to get data for primary accession
+    
+    
     # MUTATIONS 
     path('adaptive_mutations/', mutations.get_adaptive_mutations, name='get_adaptive_mutations'),
 
     path('adaptive_mutations_chart/<str:segment>', mutations.get_adaptive_mutations_chart, name='get_adaptive_mutations_chart'),
 
-    path('analysis/mutations/', mutations.get_mutations, name='get_mutations'),
+    
 
-    path('alignments/get_reference_sequence/<str:primary_accession>', sequences.get_reference_sequence, name='get_reference_sequence'),
     
     
     path('sequences/download_sequences_meta_data/', sequences.download_sequences_meta_data, name='download_sequences_meta_data'),
@@ -77,7 +78,7 @@ urlpatterns = [
 
 
     # MUTATIONS - DONE (documentation API)
-    path('mutations/get_mutations/', mutations.get_mutations, name='get_mutations'),
+    
     path('mutations/get_mutation_regions_and_codons', mutations.get_mutation_regions_and_codons, name='get_mutations_regions_and_codons'),
     
 
@@ -101,22 +102,10 @@ urlpatterns = [
 
 
     # STATISTICS - DONE (documentation API)
-    path('statistics/get_global_distribution_of_sequences/', statistics.get_global_distribution_of_sequences, name='get_global_distribution_of_sequences'),
-    path('statistics/get_statistics/', statistics.get_statistics, name='get_statistics'),
+    
 
     
 
-
-
-
-
-    # Features
-    path('features/get_features/', features.get_features, name='get_features'),
-
-    # Genes
-    path('genes/get_genes_tree/', genes.get_genes_tree, name='get_genes_tree'),
-
-    path('features/get_clades_tree/', features.get_clades_tree, name='get_clades_tree'),
 
 
     # FILTERS
@@ -126,6 +115,7 @@ urlpatterns = [
     path('filters/search_primary_accession_ids/<str:query>', search.search_primary_accession_ids, name='search_primary_accession_ids'),
     path('filters/search_country/<str:query>', search.search_country, name='search_country'),
     path('filters/search_region/', search.search_region, name='search_region'),
+    path('filters/search_phylum/', search.search_phylum, name='search_phylum'),
 
 
 

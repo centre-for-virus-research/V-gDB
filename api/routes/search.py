@@ -5,6 +5,20 @@ from django.db import connections
 from models.helpers import dictfetchall  # Ensure this function is imported
 
 
+
+@api_view(['GET'])
+def search_phylum(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(phylum) FROM host_lineage WHERE phylum IS NOT NULL")
+        data = dictfetchall(cursor)
+
+    return Response(data)
+
+
 @api_view(['GET'])
 def search_primary_accession_ids(request, query):
 

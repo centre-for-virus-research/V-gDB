@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
 from django.db import connections
 from django.http import HttpResponse
 import datetime
@@ -29,6 +30,10 @@ def get_sequences(request):
         items_per_page = params["items_per_page"]
         del params["items_per_page"]
 
+    if "EPA_minor_clade" in params:
+        if params["EPA_minor_clade"] == "null":
+            del params["EPA_minor_clade"]
+
     if params:
         for key, value in params.items():
             params[key] = value.split(',') if ',' in value else value
@@ -38,7 +43,10 @@ def get_sequences(request):
         data = sequences.get_sequences(next_cursor, prev_cursor, items_per_page)
     except ValueError as e:
         print(f"Error: {e}")
-        return HttpResponse(e, status=404)
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
         
     return Response(data)
 
@@ -52,45 +60,41 @@ def get_sequence(request, primary_accession):
     try:
         data = sequences.get_sequence(primary_accession)
     except ValueError as e:
-        print(str(e))
-        return Response({'message': str(e)}, status=404)
+        print(f"Error: {e}")
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     return Response(data)
 
-# @api_view(['GET'])
-# def get_strains(request):
 
-#     database = request.headers.get('database', 'default')
-#     # sequences = Sequences(database=database)
+@api_view(['GET'])
+def get_global_distribution_of_sequences(request):
 
-#     params = dict(request.GET.items())
+    database = request.headers.get('database', 'default')
+    params = dict(request.GET.items())
 
-#     if params:
-#         for key, value in params.items():
-#             params[key] = value.split(',') if ',' in value else value
+    if "EPA_minor_clade" in params:
+        if params["EPA_minor_clade"] == "null":
+            del params["EPA_minor_clade"]
 
-#     sequences = Sequences(database=database, filters=params)
-#     try:
-#         data = sequences.get_strains()
-#     except ValueError as e:
-#         print(f"Error: {e}")
-#         return HttpResponse(e, status=404)
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
+
+    try:
+        data = sequences.get_global_distribution_of_sequences()
+    except ValueError as e:
+        print(f"Error: {e}")
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
         
-#     return Response(data)
-
-# @api_view(['GET'])
-# def get_strain(request, isolate):
-
-#     database = request.headers.get('database', 'default')
-#     sequences = Sequences(database=database)
-
-#     try:
-#         data = sequences.get_strain(isolate)
-#     except ValueError as e:
-#         print(str(e))
-#         return Response({'message': str(e)}, status=404)
-
-#     return Response(data)
+    return Response(data)
 
 
 
@@ -103,42 +107,26 @@ def get_reference_sequence(request, primary_accession):
     database = request.headers.get('database', 'default')
 
     sequences = Sequences(database=database)
-    data = sequences.get_reference_sequence(primary_accession)
-
-    return Response(data)
-
-
-@api_view(['GET'])
-def get_map_metadata(request):
-
-    database = request.headers.get('database', 'default')
-
-    params = dict(request.GET.items())
-
-    if params:
-        for key, value in params.items():
-            params[key] = value.split(',') if ',' in value else value
-
-    sequences = Sequences(database=database, filters=params)
     try:
-        data = sequences.get_sequences_meta_data()
-        data = sequences.get_map_data(data)
+        data = sequences.get_reference_sequence(primary_accession)
     except ValueError as e:
         print(f"Error: {e}")
-        return HttpResponse(e, status=404)
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
         
-    return Response(data)
 
+    return Response(data)
 
 
 
 @api_view(['GET'])
 def download_sequences_meta_data(request):
-    print("starting")
+
     database = request.headers.get('database', 'default')
     params = dict(request.GET.items())
 
-    print(params)
 
     sequences = Sequences(database=database, filters=params)
     if params:
@@ -147,10 +135,9 @@ def download_sequences_meta_data(request):
         data = sequences.get_sequences_meta_data()
     
     
-    print("ending")
     file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_meta_data.csv'
     build_csv_file(data, file_name)
-    print("THIS IS THE FOWNLOAD")
+
     with open(file_name, 'r') as file:
         response = HttpResponse(file, content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename='+file_name

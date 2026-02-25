@@ -6,7 +6,7 @@ from models.mutations import Mutations
 @api_view(['GET'])
 def get_adaptive_mutations(request):
 
-    database = request.headers.get('database')
+    database = request.headers.get('database', 'default')
 
     mutations = Mutations(database=database)
     data = mutations.get_adaptive_mutations()
@@ -16,7 +16,7 @@ def get_adaptive_mutations(request):
 @api_view(['GET'])
 def get_adaptive_mutations_chart(request, segment):
 
-    database = request.headers.get('database')
+    database = request.headers.get('database', 'default')
 
     mutations = Mutations(database=database)
     data = mutations.get_adaptive_mutations_chart(segment)
@@ -24,27 +24,34 @@ def get_adaptive_mutations_chart(request, segment):
     return Response(data)
 
 
-
-
 @api_view(['GET'])
-def get_mutations2(request):
+def get_adaptive_mutations_chart(request, segment):
 
-    database = request.headers.get('database')
+    database = request.headers.get('database', 'default')
     params = dict(request.GET.items())
-
-    hosts = params["host"].split(',')
-    region = params["region"]
-    codons = params["codon"].split(',')
+    final_params = {}
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+        if "species" in params:
+            final_params = {"species":params["species"]}
+        if "genus" in params:
+            final_params = {"genus":params["genus"]}
+    print("params", final_params)
 
     mutations = Mutations(database=database)
-    data = mutations.get_mutations(hosts, codons, region)
+
+    if database == "RABV" or "default" and params:
+        data = mutations.get_adaptive_mutations_chart_RABV(final_params)
+    else :
+        data = mutations.get_adaptive_mutations_chart(segment)
 
     return Response(data)
 
 @api_view(['GET'])
 def get_mutations(request):
 
-    database = request.headers.get('database')
+    database = request.headers.get('database', 'default')
     params = dict(request.GET.items())
 
     sequence_ids_param = params.get("sequence_ids")  # returns None if not present
@@ -69,7 +76,7 @@ def get_mutations(request):
 @api_view(['GET'])
 def get_mutation_regions_and_codons(request):
 
-    database = request.headers.get('database')
+    database = request.headers.get('database', 'default')
     mutations = Mutations(database=database)
     data = mutations.get_mutation_regions_and_codons()
    

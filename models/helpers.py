@@ -24,7 +24,7 @@ def fetch_one(cursor, query, params):
     print(query, params)
     cursor.execute(query, params)
     results = dictfetchall(cursor)
-    print(results)
+
     if len(results) > 0:
         results = results[0]
     return results

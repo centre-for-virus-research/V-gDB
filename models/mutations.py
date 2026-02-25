@@ -20,6 +20,25 @@ class Mutations:
         self.database = database
         self.reference_sequence = reference_sequence or 'NC_001542'
 
+    def _add_filters(self, params):
+
+        where_clauses = []
+        where_params = []
+        columns_picked = []
+        for key, value in params.items():
+            columns_picked.append(f"hl.{key} as host")
+            if isinstance(value, list):
+                placeholders = ', '.join(['%s'] * len(value))
+                where_clauses.append(f"hl.{key} IN ({placeholders})")
+                where_params.extend(value)
+            else:
+                where_clauses.append(f"hl.{key} = %s")
+                where_params.append(value)
+        print(where_clauses, where_params)
+
+        where_str = ' AND '.join(where_clauses)
+        columns_str = ', '.join(columns_picked)
+        return where_str, where_params, columns_str
 
     def get_adaptive_mutations(self):
 
@@ -30,8 +49,100 @@ class Mutations:
             mutations = dictfetchall(cursor)
 
         return mutations
+
+    def get_adaptive_mutations_chart_RABV(self, params):
+        where_clauses = []
+        if params:
+            where_str, filter_params, columns_str = self._add_filters(params)
+            where_clauses.append(where_str)
+
+        # query = 'SELECT DISTINCT(class) FROM host_lineage WHERE  ORDER BY class ASC'
+        where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+        
+        # print(query, filter_params)
+        
+
+        with connections[self.database].cursor() as cursor:
+            
+
+            query = f"""
+                        SELECT md.primary_accession, sa.alignment, f.product, f.cds_start, f.cds_end, {columns_str} 
+                        FROM meta_data md
+                        JOIN host_lineage hl ON hl.taxa_id = md.host_taxa_id 
+                        JOIN sequence_alignment sa ON sa.sequence_id = md.primary_accession 
+                        JOIN features f on f.accession = sa.sequence_id
+                        {where_sql}
+                    """
+            print(query, filter_params)
+            cursor.execute(query, filter_params)
+            rows = dictfetchall(cursor)
+            
+            query_ref = f"""
+                            SELECT sa.alignment, f.product, f.cds_start, f.cds_end 
+                            FROM sequence_alignment sa 
+                            JOIN features f ON f.accession = sa.sequence_id
+                            WHERE sa.sequence_id = %s
+                        """
+            cursor.execute(query_ref, ['NC_001542'])
+            ref_results = dictfetchall(cursor)
+        
+        translated_ref_results = []
+        for row in ref_results:
+
+            primary_accession = 'NC_001542'
+            alignment = row['alignment']
+            product = row['product']
+            cds_start = row['cds_start']
+            cds_end = row['cds_end']
+
+            if alignment is None:
+                continue
+            sub_seq = alignment[int(cds_start): int(cds_end)+1]
+
+            cds_seq = sub_seq.replace("-", "")
+            if len(cds_seq) < 3:
+                continue
+            protein = str(Seq(cds_seq).translate(to_stop=False))
+            
+            translated_ref_results.append({
+                "primary_accession": primary_accession,
+                "protein": protein,
+                "region":product
+            })
+
+
+        translated_results = []
+        # print(rows)
+        for row in rows:
+            # print(row)
+            primary_accession = row['primary_accession']
+            host = row['host']
+            alignment = row['alignment']
+            product = row['product']
+            cds_start = row['cds_start']
+            cds_end = row['cds_end']
+
+            if alignment is None:
+                continue
+            sub_seq = alignment[int(cds_start): int(cds_end)+1]
+            cds_seq = sub_seq.replace("-", "")
+            if len(cds_seq) < 3:
+                continue
+            protein = str(Seq(cds_seq).translate(to_stop=False))
+            
+            translated_results.append({
+                "primary_accession": primary_accession,
+                "host": host,
+                "protein": protein,
+                "region":product
+            })
+
+        results = {"reference_protein": translated_ref_results, "translated_sequences": translated_results}
+        # print(translated_results)
+        return results
     
     def get_adaptive_mutations_chart(self, segment):
+        
         pb2_ref_seq = "ATGGAAAGAATAAAAGAACTAAGAGATCTAATGTCGCAGTCCCGCACTCGCGAGATACTAACAAAAACCACTGTGGATCATATGGCCATAATCAAGAAATACACATCAGGAAGACAAGAGAAGAACCCTGCTCTCAGAATGAAATGGATGATGGCAATGAAATATCCAATCACAGCAGACAAGAGAATAATGGAGATGATTCCTGAAAGGAATGAGCAAGGACAAACGCTTTGGAGCAAGACAAATGATGCTGGGTCGGACAGAGTGATGGTGTCTCCCCTAGCTGTAACTTGGTGGAACAGGAATGGGCCGACAACAAGTACAGTCCATTATCCAAAGGTTTACAAAACATACTTTGAGAAGGTTGAAAGGTTAAAACATGGAACCTTCGGTCCCGTTCATTTCCGAAACCAAGTTAAAATACGTCGCCGGGTGGATATAAACCCGGGCCATGCAGATCTCAGTGCTAAAGAAGCACAAGATGTTATCATGGAGGTCGTTTTCCCAAATGAAGTGGGAGCTAGAATATTGACATCAGAGTCGCAATTGACAATAACAAAAGAGAAGAAAGAAGAGCTCCAGGATTGTAAAATTGCTCCTTTAATGGTGGCATACATGTTGGAAAGAGAACTGGTCCGCAAAACCAGATTTCTACCGGTAGCAGGCGGAACAAGCAGTGTGTACATTGAGGTATTGCATTTGACTCAAGGGACCTGTTGGGAACAGATGTACACTCCCGGCGGAGAAGTAAGAAATGATGATGTTGACCAGAGTTTGATCATCGCTGCCAGAAACATTGTTAGGAGAGCAACAGTATCAGCGGACCCACTGGCATCACTCTTGGAGATGTGTCACAGCACACAAATTGGGGGAATAAGGATGGTGGACATCCTTAGGCAAAACCCAACTGAGGAGCAAGCTGTGGATATATGCAAAGCAGCAATGGGTTTGAGGATCAGTTCATCCTTTAGCTTTGGAGGCTTCACTTTCAAAAGAACAAATGGATCATCCGTCAAGAAGGAAGAGGAAGTGCTTACAGGCAACCTCCAAACATTGAAAATAAAAGTACATGAGGGGTATGAAGAATTCACAATGGTTGGGCGGAGAGCAACAGCTATCCTGAGGAAAGCAACTAGAAGGCTGATTCAGTTGATAGTAAGTGGAAGAGATGAACAATCAATCGCTGAAGCGATCATTGTAGCAATGGTGTTCTCACAGGAGGATTGCATGATAAAGGCAGTCCGAGGCGATCTGAATTTCGTGAACAGAGCAAACCAAAGATTGAACCCCATGCATCAACTCCTGAGGCACTTCCAAAAAGATGCAAAAGTGCTGTTTCAGAACTGGGGAATTGAACCTATTGACAATGTCATGGGGATGATCGGAATATTACCTGACATGACTCCAAGCGCAGAGATGTCACTGAGAGGAGTGAGAGTTAGTAAGATGGGAGTAGATGAATATTCCAGCACGGAGAGAGTGGTGGTGAGTATTGACCGTTTCTTGAGGGTCCGAGATCAGCAGGGGAACGTACTCTTATCTCCTGAAGAGGTTAGTGAAACACAGGGAACAGAGAAGTTGACAATAACATATTCATCCTCAATGATGTGGGAAATCAACGGTCCTGAGTCAGTGCTTGTTAACACTTATCAATGGATCATCAGGAATTGGGAGACTGTAAAGATTCAATGGTCTCAAGATCCCACAATGCTGTACAATAAGATGGAGTTTGAATCGTTCCAATCCTTGGTGCCAAAGGCTGCCAGAAGCCAATATAGTGGATTTGTGAGAACACTATTCCAACAGATGCGTGATGTTTTGGGGACATTTGATACTGTCCAAATAATCAAGCTGCTACCATTTGCAGCAGCCCCACCGGAGCCGAGCAGAATGCAGTTTTCTTCTCTAACTGTGAATGTGAGAGGCTCAGGAATGAGAATACTCGTGAGGGGTAACTCCCCCGTGTTCAACTACAACAAGGCAACCAAAAGGCTTACAGTCCTCGGAAAGGACGCAGGTGCATTAACAGAAGATCCAGACGAGGGAACAGCCGGGGTGGAATCTGCAGTATTGAGGGGATTCCTAATTCTAGGCAGAGAGGACAAAAGATATGGACCCGCATTGAGCATCAATGAACTGAGCAATCTTGCAAAAGGGGAGAAGGCTAATGTATTGATAATGCAAGGAGACGTGGTGTTGGTAATGAAACGGAAACGGGACTTTAGCATACTTACTGACAGCCAGACAGCGACCAAAAGAATTCGGATGGCCATCAAT---TAG"
         print("starting")
         with connections["FLUV"].cursor() as cursor:
@@ -39,7 +150,7 @@ class Mutations:
             #                 FROM cluster_members cm
             #                 JOIN meta_data md ON md.primary_accession = cm.primary_accession
             #                 WHERE cm.segment = %s""", ['PB2'])
-            cursor.execute("""SELECT cm.primary_accession, md.host_taxa_id, sa.alignment
+            cursor.execute("""SELECT cm.primary_accession, md.host_scientific_name as host, sa.alignment
                             FROM cluster_members cm
                             JOIN meta_data md ON md.primary_accession = cm.primary_accession
                             JOIN sequence_alignment sa ON sa.sequence_id = cm.primary_accession
@@ -51,7 +162,7 @@ class Mutations:
         # print(rows)
         for row in rows:
             primary_accession = row['primary_accession']
-            host = row['host_taxa_id']
+            host = row['host']
             alignment = row['alignment']
             if alignment is None:
                 continue
@@ -73,7 +184,7 @@ class Mutations:
         # print(protein)
         ref_protein = str(Seq(ref_seq).translate(to_stop=False))
 
-        results = [{"reference_protein": ref_protein, "translated_results": translated_results}]
+        results = {"reference_protein": ref_protein, "translated_sequences": translated_results}
         # print(translated_results)
         return results
 

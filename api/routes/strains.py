@@ -40,6 +40,7 @@ def get_strain(request, strain_id):
         print(str(e))
         return Response({'message': str(e)}, status=404)
 
+    print(data)
     return Response(data)
 
 

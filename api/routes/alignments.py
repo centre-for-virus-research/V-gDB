@@ -20,33 +20,44 @@ import json
 def download_alignments(request):
 
     database = request.headers.get('database', 'default')
-
-    
     params = dict(request.GET.items())
-    filters = json.loads(unquote(params["filters"])) if params["filters"] != 'undefined' else None
 
-    sequences_helper = Sequences(database=database, filters=filters)
-    data = sequences_helper.get_sequences_meta_data_by_filters()
+    region = None
+    sequence_type = None
+    start_coordinate = None
+    end_coordinate = None
 
-    sequences = [d["primary_accession"] for d in data if "primary_accession" in d]
-    region = params['region']
-    nucleotide_or_codon = params['nucleotide_or_codon']
-    start_coordinate = params['start']
-    end_coordinate = params['end']
+    if "region" in params:
+        region = params["region"]
+        del params["region"]
 
+    if "sequenceType" in params:
+        sequence_type = params["sequenceType"]
+        del params["sequenceType"]
 
-    alignment = Alignment(database=database,
-                          sequences=sequences,
-                            region=region, 
-                            nucleotide_or_codon=nucleotide_or_codon, 
-                            start_coordinate=start_coordinate, 
-                            end_coordinate=end_coordinate)
+    if "startCoordinate" in params:
+        start_coordinate = params["startCoordinate"]
+        del params["startCoordinate"]
 
-    data = alignment.get_alignments()
+    if "endCoordinate" in params:
+        end_coordinate = params["endCoordinate"]
+        del params["endCoordinate"]
+    if "items_per_page" in params:
+        del params["items_per_page"]
+    if "next_cursor" in params:
+        del params["next_cursor"]
+    if "prev_cursor" in params:
+        del params["prev_cursor"]
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
+    data = sequences.get_sequences_alignment(start_coordinate, end_coordinate, sequence_type)
+
     
-    
 
-    file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + 'alignment.fasta'
+    file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_alignments.fasta'
     build_fasta_file(data, file_name)
 
     with open(file_name, 'r') as file:
@@ -55,6 +66,5 @@ def download_alignments(request):
         os.remove(file_name)
 
     return response
-    # return Response(data)
 
 

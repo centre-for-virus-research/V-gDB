@@ -8,6 +8,52 @@ from models.sequence_alignment.GenBankSequenceSubmitter import *
 from models.sequence_alignment.GffToDictionary import GffDictionary
 import urllib.parse
 
+
+
+
+def run_phylogenetic_clade_assignment_analysis():
+    # Step 2: Save to file
+    results = {}
+
+    with open("/Users/danaallen/CVR/gdb/web-resources/V-gDB/tmp/results/query_tophits.tsv", newline='') as file:
+        reader = csv.reader(file, delimiter='\t')
+        for row in reader:
+            #query, ref, identity, strand,
+            col1, col2, col3, col4 = row[0], row[1].split("|")[0], float(row[2]), row[3]
+            results[col1] = {"blast_results":{
+                                                "ref":col2,
+                                                "identity:":col3,
+                                            }
+                            }
+    with open("/Users/danaallen/CVR/gdb/web-resources/V-gDB/tmp/results/query_tophits.tsv", newline='') as file:
+        reader = csv.reader(file, delimiter='\t')
+        for row in reader:
+            #query, ref, identity, strand,
+            col1, col2, col3, col4 = row[0], row[1].split("|")[0], float(row[2]), row[3]
+            results[col1] = {"blast_results":{
+                                                "ref":col2,
+                                                "identity:":col3,
+                                            }
+                            }
+
+    major_per_query_file = "/Users/danaallen/CVR/gdb/web-resources/V-gDB/tmp/CladeAssignment/gappa_major_clades_assigned/per_query.tsv"
+    minor_per_query_file = "/Users/danaallen/CVR/gdb/web-resources/V-gDB/tmp/CladeAssignment/gappa_minor_clades_assigned/per_query.tsv"
+    for accession in results.keys():
+        with open(major_per_query_file, newline='') as f:
+            reader = csv.DictReader(f, delimiter='\t')
+            for row in reader:
+                if row['name'] == accession:
+                    results[accession]["epa-ng"]["major"] = row['taxopath']
+                    break
+        with open(minor_per_query_file, newline='') as f:
+            reader = csv.DictReader(f, delimiter='\t')
+            for row in reader:
+                if row['name'] == accession:
+                    results[accession]["epa-ng"]["minor"] = row['taxopath']
+                    break
+
+    print(results)
+
 def save_query_to_fasta(encoded_query, filename="output.fasta"):
     # Step 1: URL-decode the query
     

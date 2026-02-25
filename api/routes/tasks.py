@@ -7,7 +7,7 @@ import os
 
 from models.helpers import *
 from models.tasks import Tasks
-from models.features import Features
+# from models.features import Features
 
 # ----------------------------------------------------------------------
 # View to enqueue a sequence alignment job
@@ -35,6 +35,33 @@ def run_sequence_alignment(request):
     except ConnectionError as e:
         print(f"Error: {e}")
         return HttpResponse(e, status=404)
+
+
+# @api_view(['GET'])
+# def run_sequence_alignment(request):
+#     """
+#     Enqueues a sequence alignment task using RQ (Redis Queue).
+#     Requires a 'query' parameter and optionally a 'database' header.
+#     Returns:
+#         Job ID (str): The ID of the queued job.
+#     """
+#     database = request.headers.get('database', 'default')
+#     params = dict(request.GET.items())
+#     query = params.get("query")
+
+#     tasks = Tasks(database=database, query=query)
+
+#     try:
+#         queue = django_rq.get_queue('default')
+#         job = queue.enqueue(tasks.run_sequence_alignment)  # Submit task to queue
+#         return Response(job.id)
+#     except ConnectionError as e:
+#         print(f"Error: {e}")
+#         return HttpResponse(e, status=404)
+
+
+
+
     
 def parse_tbl(file_path):
     cds_entries = []

@@ -11,10 +11,10 @@ from models import sequences_helpers as sh
 def _get_tree_from_type(cursor, tree_type, segment):
 
     if segment:
-        query = "SELECT * FROM trees WHERE tree_type = %s AND segment = %s;"
+        query = "SELECT * FROM tree WHERE tree_type = %s AND segment = %s;"
         params = [tree_type, segment]
     else:
-        query = "SELECT * FROM trees"
+        query = "SELECT * FROM tree"
         params = None
     
     data = fetch_one(cursor, query, params)

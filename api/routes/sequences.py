@@ -34,6 +34,10 @@ def get_sequences(request):
         if params["EPA_minor_clade"] == "null":
             del params["EPA_minor_clade"]
 
+    if "country_validated" in params:
+        if params["country_validated"][0] == "0":
+            params["country_validated"] = params["country_validated"][1:]
+
     if params:
         for key, value in params.items():
             params[key] = value.split(',') if ',' in value else value

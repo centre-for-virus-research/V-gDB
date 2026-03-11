@@ -60,7 +60,8 @@ class Mutations:
         where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
         
         # print(query, filter_params)
-        
+        print("COLUMNS", columns_str)
+        print("SQL", where_sql)
 
         with connections[self.database].cursor() as cursor:
             

@@ -136,7 +136,6 @@ class Sequences:
             # cursor.execute(query, filter_params)
             # data = fetchall()
             
-
     def __parse_alignments_new(self, alignments, start_coordinate, end_coordinate, sequence_type):
         results= []
 
@@ -154,8 +153,8 @@ class Sequences:
                 ref_end = int(end_coordinate)
 
                 if sequence_type == "codon":  # User wants a codon
-                    ref_start = a["cds_start"]
-                    ref_end = a["cds_end"]
+                    ref_start = int(a["cds_start"])
+                    ref_end = int(a["cds_end"])
                     codon_start = int(start_coordinate)
                     codon_end = int(end_coordinate)
 
@@ -171,7 +170,6 @@ class Sequences:
 
         return results
         
-
     def get_sequence(self, primary_accession):
         """
         Retrieve metadata and alignment details for a specific sequence, 
@@ -213,9 +211,9 @@ class Sequences:
                     result["taxanomic_info"] = taxanomic_info
 
             # Get insertions
-            insertions = sh._get_insertions_from_primary_accession(cursor, primary_accession)
-            if insertions:
-                result["insertions"] = insertions
+            # insertions = sh._get_insertions_from_primary_accession(cursor, primary_accession)
+            # if insertions:
+            #     result["insertions"] = insertions
 
             query_alignment_dict = sh._get_query_alignment_from_primary_accession(cursor, primary_accession)
         
@@ -227,6 +225,9 @@ class Sequences:
                 # Get aligned reference sequence
                 reference_alignment_dict = sh._get_query_alignment_from_primary_accession(cursor, reference_accession)
                 reference_alignment_sequence = reference_alignment_dict["alignment"]
+                print(reference_alignment_dict["insertion"])
+                if reference_alignment_dict["insertion"]:
+                    result["insertions"] = [reference_alignment_dict["insertion"]]
                 
                 # Get features
                 features = sh._get_features_from_primary_accession(cursor, primary_accession)

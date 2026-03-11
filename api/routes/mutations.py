@@ -37,7 +37,13 @@ def get_adaptive_mutations_chart(request, segment):
             final_params = {"species":params["species"]}
         if "genus" in params:
             final_params = {"genus":params["genus"]}
-    print("params", final_params)
+        if "family" in params:
+            final_params = {"family":params["family"]}
+        if "class" in params:
+            final_params = {"class":params["class"]}
+        if "phylum" in params:
+            final_params = {"phylum":params["phylum"]}
+
 
     mutations = Mutations(database=database)
 

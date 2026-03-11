@@ -226,10 +226,6 @@ def parse_blast_results(database, query_tophits, tmp_dir_input):
 
 def combine_query_and_ref(database, reference_accession, query_path):
 
-    # db_file = '/Volumes/My Passport/CVR/gdb/RABV/RABV-gDB_feb172026.db'
-
-    # conn = sqlite3.connect(db_file)
-    # cursor = conn.cursor()
     with connections[database].cursor() as cursor:
         cursor.execute(
             "SELECT alignment FROM sequence_alignment WHERE sequence_id = %s",
@@ -337,8 +333,11 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
     aligned_out = str(results_path) + "/input_seqs_with_ref_alignment.fa"
     print(aligned_out)
 
+
+    "ref_aln == reference sequences for all the reference sequences"
+
     print("STARTING THE ANALYSIS")
-    runner = CladeAssignment(ref_aln=ref_aln,
+    runner = CladeAssignment(ref_aln=ref_aln, 
                             ref_tree=ref_tree,
                             query_fa=inputs_path/'input.fa',
                             taxon_major=taxon_major,
@@ -371,30 +370,3 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
     return {"queries":results, "tree":tree}
 
 
-
-
-def main():
-    
-    # extract_ref_seq()
-    # run_makeblastdb("/Users/danaallen/CVR/gdb/web-resources/V-gDB/db/db.fa")
-    # blastn(tmp_dir='/Users/danaallen/CVR/gdb/web-resources/V-gDB/tmp', 
-    #         query_path='/Users/danaallen/CVR/gdb/web-resources/V-gDB/models/clade_assignment/query.fa',
-    #         db_path='/Users/danaallen/CVR/gdb/web-resources/V-gDB/db/db.fa')
-    # parse_blast_results(query_tophits='/Users/danaallen/CVR/gdb/web-resources/V-gDB/tmp/results/query_tophits.tsv')
-
-
-    # get_taxon_major_minor()
-    # get_reference_tree()
-    # get_reference_meta_data()
-    # get_reference_alignment()
-    # ref_tree = get_reference_tree()
-    # taxon_major = get_taxon_major()
-    # taxon_minor = get_taxon_minor()
-
-
-
-
-    run_phylogenetic_clade_assignment_analysis()
-
-if __name__ == "__main__":
-    main()

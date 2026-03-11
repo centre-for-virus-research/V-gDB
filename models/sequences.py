@@ -336,8 +336,8 @@ class Sequences:
         comparison_filters = {
                 'length_lower': ('real_length', '>='),
                 'length_upper': ('real_length', '<='),
-                'collection_year_lower': ('collection_year', '>='),
-                'collection_year_upper': ('collection_year', '<='),
+                'collection_year_lower': ('collection_year', '<='),
+                'collection_year_upper': ('collection_year', '>='),
                 'creation_year_lower': ('create_date', '>='),
                 'creation_year_upper': ('create_date', '<=')
             }
@@ -345,6 +345,7 @@ class Sequences:
         where_clauses, params = [], []
 
         for key, value in self.filters.items():
+            print(key, ":  ", value)
             if key in comparison_filters:
 
                 col, op = comparison_filters[key]

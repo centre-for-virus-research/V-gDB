@@ -29,7 +29,11 @@ def _get_meta_data_for_tree(cursor, segment):
         
         params = [segment]
     else:
-        query = "SELECT primary_accession, host, EPA_major_clade, EPA_minor_clade FROM meta_data;"
+        query = f"""SELECT md.primary_accession, md.EPA_major_clade, md.EPA_minor_clade, md.collection_year, c.display_name  as country, h.*
+                    FROM meta_data md 
+                    JOIN m49_country c ON c.m49_code = md.country_validated
+                    JOIN host_lineage h ON h.taxa_id = md.host_taxa_id
+                """
         params = None
     data = fetch_all(cursor, query, params)
 

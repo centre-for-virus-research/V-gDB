@@ -343,10 +343,13 @@ class Sequences:
             }
 
         where_clauses, params = [], []
-
+        print("filters.items", self.filters.items())
+        print("filters.keys", self.filters.keys())
         for key, value in self.filters.items():
             print(key, ":  ", value)
-            if key in comparison_filters:
+            if key.startswith("exclude_"): 
+                continue
+            elif key in comparison_filters:
 
                 col, op = comparison_filters[key]
                 where_clauses.append(f"{col} {op} %s")
@@ -364,11 +367,18 @@ class Sequences:
 
             else:
                 if isinstance(value, list):
+                    comparison = "IN"
+                    if ("exclude_"+key in self.filters):
+                        comparison = "NOT IN"
+
                     placeholders = ', '.join(['%s'] * len(value))
-                    where_clauses.append(f"{key} IN ({placeholders})")
+                    where_clauses.append(f"{key} {comparison} ({placeholders})")
                     params.extend(value)
                 else:
-                    where_clauses.append(f"{key} = %s")
+                    comparison = "="
+                    if ("exclude_"+key in self.filters):
+                        comparison = "!="
+                    where_clauses.append(f"{key} {comparison} %s")
                     params.append(value)
 
         where_str = ' AND '.join(where_clauses)
@@ -376,4 +386,3 @@ class Sequences:
         print(where_str, params)
 
         return where_str, params
-

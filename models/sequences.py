@@ -91,6 +91,30 @@ class Sequences:
             "prev_cursor": results[0]["primary_accession"] if results else None,
         }
 
+    def get_sequences_download(self):
+        where_clauses = []
+        params = []
+        filter_params = []
+
+        if self.filters:
+            where_str, filter_params = self._add_filters()
+            where_clauses.append(where_str)
+
+        filter_where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+
+        count_query = f"""
+            SELECT *
+            FROM meta_data
+            {filter_where_sql}
+        """
+
+        with connections[self.database].cursor() as cursor:
+            cursor.execute(count_query, filter_params)
+            results = dictfetchall(cursor)
+
+
+        return results
+
     def get_sequences_alignment(self, start_coordinate, end_coordinate, sequence_type):
 
         where_clauses = []

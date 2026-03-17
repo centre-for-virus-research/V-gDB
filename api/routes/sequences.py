@@ -134,9 +134,7 @@ def download_sequences_meta_data(request):
 
     sequences = Sequences(database=database, filters=params)
     if params:
-        data = sequences.get_sequences_meta_data_by_filters()
-    else:
-        data = sequences.get_sequences_meta_data()
+        data = sequences.get_sequences_download()
     
     
     file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_meta_data.csv'

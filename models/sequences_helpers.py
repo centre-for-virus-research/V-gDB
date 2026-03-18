@@ -5,9 +5,9 @@ def _get_aligned_sequences_and_features_from_reference(cursor, reference_accessi
     query = f"""
                 SELECT * 
                 FROM sequence_alignment sa
-                JOIN features f ON f.accession = sa.alignment_name
                 WHERE sa.alignment_name = %s
             """
+                  # JOIN features f ON f.accession = sa.alignment_name
     params = [reference_accession]
     results = fetch_all(cursor, query, params)
 

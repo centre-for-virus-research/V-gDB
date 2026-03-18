@@ -31,7 +31,6 @@ class Sequences:
         filter_params = []
 
         if self.filters:
-            print("STARTING THE FILTERS", self.filters)
             where_str, filter_params = self._add_filters()
             where_clauses.append(where_str)
 
@@ -108,7 +107,6 @@ class Sequences:
             FROM meta_data
             {filter_where_sql}
         """
-        # print("QUERY: ", query)
         with connections[self.database].cursor() as cursor:
 
             # primary_accessions = fetch_all(cursor, query, filter_params)
@@ -226,7 +224,6 @@ class Sequences:
                 # Get aligned reference sequence
                 reference_alignment_dict = sh._get_query_alignment_from_primary_accession(cursor, reference_accession)
                 reference_alignment_sequence = reference_alignment_dict["alignment"]
-                print(reference_alignment_dict["insertion"])
                 if reference_alignment_dict["insertion"]:
                     result["insertions"] = [reference_alignment_dict["insertion"]]
                 
@@ -297,7 +294,6 @@ class Sequences:
         Returns a list of unique countries (with m49 codes) and the number of sequences per country.
         """
 
-        print(self.database)
         where_clauses = []
         params = []
 
@@ -359,14 +355,16 @@ class Sequences:
 
         where_clauses, params = [], []
         taxonomy_clauses, taxonomy_params = [], []
-        print("filters.items", self.filters.items())
-        print("filters.keys", self.filters.keys())
-        for key, value in self.filters.items():
-            print(key, ":  ", value)
-            if key.startswith("exclude_"): 
-                continue
-            elif key in comparison_filters:
 
+        for key, value in self.filters.items():
+            if key.startswith("exclude_"): 
+                if key == 'exclude_taxa':
+                    continue
+                key=key[8:]
+                # continue
+                
+
+            if key in comparison_filters:
                 col, op = comparison_filters[key]
                 where_clauses.append(f"{col} {op} %s")
                 params.append(int(value))
@@ -382,10 +380,9 @@ class Sequences:
                 params.append(value)
 
             elif key in taxonomy_filters:
-                print("TAXONOMY", key)
                 if isinstance(value, list):
                     comparison = "IN"
-                    if ("exclude_"+key in self.filters):
+                    if ("exclude_taxa" in self.filters):
                         comparison = "NOT IN"
 
                     placeholders = ', '.join(['%s'] * len(value))
@@ -393,15 +390,13 @@ class Sequences:
                     taxonomy_params.extend(value)
                 else:
                     comparison = "="
-                    if ("exclude_"+key in self.filters):
+                    if ("exclude_taxa" in self.filters):
                         comparison = "!="
                     taxonomy_clauses.append(f"{key} {comparison} %s")
                     taxonomy_params.append(value)
 
-
-                
-
             else:
+
                 if isinstance(value, list):
                     comparison = "IN"
                     if ("exclude_"+key in self.filters):

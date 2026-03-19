@@ -31,7 +31,8 @@ class Sequences:
         filter_params = []
 
         if self.filters:
-            where_str, filter_params = self._add_filters()
+            # where_str, filter_params = self._add_filters()
+            where_str, filter_params = self._add_filters_refactored()
             where_clauses.append(where_str)
 
         filter_where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
@@ -365,6 +366,76 @@ class Sequences:
 #       ON hc.parent_taxa_id = tt.id
 # )
 # SELECT DISTINCT id FROM taxa_tree;
+
+
+    def _add_filters_refactored(self):
+        comparison_filters = {
+                'length_lower': ('real_length', '<='),
+                'length_upper': ('real_length', '>='),
+                'collection_year_lower': ('collection_year', '<='),
+                'collection_year_upper': ('collection_year', '>='),
+                'creation_year_lower': ('create_date', '>='),
+                'creation_year_upper': ('create_date', '<=')
+            }
+        
+        taxonomy_filters = ['phylum', 'class', 'order_category', 'family', 'genus', 'species']
+        standard_filters = ['primary_accession', 'isolate', 'exclusion_status', 'EPA_major_clade', 'EPA_minor_clade']
+        region_filters = ['country']
+
+        where_clauses, params = [], []
+        taxonomy_clauses, taxonomy_params = [], []
+
+        for key, value in self.filters.items():
+            exclude = False
+            if key.startswith("exclude_"): 
+                exclude = True
+                key=key[8:]
+                if key == 'exclude_taxa':
+                    continue
+            if key in comparison_filters:
+                col, op = comparison_filters[key]
+                where_clauses.append(f"{col} {op} %s")
+                params.append(int(value))
+
+            elif key in taxonomy_filters:
+                clause, param = sh._add_standard_filters(key, value, exclude)
+                taxonomy_clauses.append(clause)
+                taxonomy_params.extend(param)
+
+            elif key in standard_filters:
+                clause, param = sh._add_standard_filters(key, value, exclude)
+                where_clauses.append(clause)
+                params.extend(param)
+
+            elif key in region_filters:
+                clause, param = sh._add_region_filters(value, exclude)
+                where_clauses.append(clause)
+                params.extend(param)
+
+        if taxonomy_clauses:
+            
+            comparison = 'IN'
+            if ("exclude_taxa" in self.filters.keys()):
+                comparison = 'NOT IN'
+
+            if ("species" in self.filters.keys()):
+                clause, param = sh._add_taxonomy_species_filters(self.filters["species"], comparison)
+                params.extend(param)
+            else:
+                clause = sh._add_taxonomy_filters(taxonomy_clauses, comparison)
+                params.extend(taxonomy_params)
+                
+            where_clauses.append(clause)
+
+        where_str = ' AND '.join(where_clauses)
+
+        print(where_str, params)
+
+        return where_str, params
+                
+
+
+
     def _add_filters(self):
         comparison_filters = {
                 'length_lower': ('real_length', '>='),
@@ -376,6 +447,7 @@ class Sequences:
             }
         
         taxonomy_filters = ['phylum', 'class', 'order_category', 'family', 'genus', 'species']
+
 
         where_clauses, params = [], []
         taxonomy_clauses, taxonomy_params = [], []
@@ -392,6 +464,7 @@ class Sequences:
                 col, op = comparison_filters[key]
                 where_clauses.append(f"{col} {op} %s")
                 params.append(int(value))
+                
 
             elif key == 'region':
                 where_clauses.append(
@@ -408,6 +481,9 @@ class Sequences:
                     comparison = "IN"
                     if ("exclude_taxa" in self.filters):
                         comparison = "NOT IN"
+
+                    if (key == 'species'):
+                        taxonomy_clauses.append(f"({key} {comparison} ({placeholders}) OR ({key} {comparison} ({placeholders})")
 
                     placeholders = ', '.join(['%s'] * len(value))
                     taxonomy_clauses.append(f"{key} {comparison} ({placeholders})")

@@ -66,12 +66,12 @@ def _get_region_from_country_code(cursor, country_code):
 
 def _get_country_meta_data(cursor):
     query = "SELECT country_validated FROM meta_data WHERE country_validated IS NOT NULL"
-    data = fetchall(cursor, query, params=None)
+    data = fetch_all(cursor, query, params=None)
     return data
 
 def _get_m49_country_data(cursor):
     query = "SELECT display_name, id, m49_code FROM m49_country"
-    data = fetchall(cursor, query, params=None)
+    data = fetch_all(cursor, query, params=None)
     return data
 
 def _get_taxa_from_host_taxa_id(cursor, host_taxa_id):
@@ -79,3 +79,88 @@ def _get_taxa_from_host_taxa_id(cursor, host_taxa_id):
     params = [host_taxa_id]
     data = fetch_one(cursor, query, params)
     return data
+
+def _add_standard_filters(key, value, exclude):
+
+    params, where_clauses, placeholders = [], [], []
+    comparison = get_comparison(value, exclude)
+
+    if isinstance(value, list):
+        placeholders = ', '.join(['%s'] * len(value))
+        where_clauses = f"{key} {comparison} ({placeholders})"
+        params.extend(value)
+    else:
+        where_clauses = f"{key} {comparison} %s"
+        params.append(value)
+
+    return where_clauses, params
+
+
+def _add_region_filters(value, exclude):
+
+    where_clauses, params = _add_standard_filters("display_name", value, exclude)
+
+    region_sql = f"""
+                country_validated IN (
+                    SELECT m49_code
+                    FROM m49_country 
+                    WHERE {where_clauses})
+                """
+    
+    return region_sql, params
+
+def _add_taxonomy_species_filters(value, comparison):
+    # taxa_where_str = ' AND '.join(clauses)
+    params = []
+    common_clause, common_param = _add_standard_filters("host", value, False)
+    scientific_clause, scientific_param = _add_standard_filters("species", value, False)
+
+    common_sql = f""" SELECT host_taxa_id FROM meta_data WHERE {common_clause} """
+    scientific_sql = f""" SELECT taxa_id FROM host_lineage WHERE {scientific_clause} """
+
+    sql = f""" ( host_taxa_id {comparison} ( {common_sql} ) 
+                OR host_taxa_id {comparison} ({scientific_sql})
+                )
+            """
+    params.extend(common_param)
+    params.extend(scientific_param)
+
+    return sql, params
+
+def _add_taxonomy_filters(clauses, comparison):
+    taxa_where_str = ' AND '.join(clauses)
+    taxa_sql = f""" host_taxa_id {comparison} (
+                SELECT taxa_id
+                FROM host_lineage
+                WHERE {taxa_where_str}
+            )
+        """
+    return taxa_sql
+
+def get_comparison(value, exclude):
+    if isinstance(value, list):
+        comparison = "IN"
+        if (exclude):
+            comparison = "NOT IN"
+    else:
+        comparison = "="
+        if (exclude):
+            comparison = "!="
+    return comparison
+
+
+def recursive_taxa_search(ids):
+    sql = f""" WITH RECURSIVE taxa_tree(id) AS (
+                    SELECT parent_taxa_id
+                    FROM host_children
+                    WHERE parent_taxa_id IN (9822)
+
+                UNION
+
+                    SELECT hc.child_taxa_id
+                    FROM host_children hc
+                    JOIN taxa_tree tt
+                    ON hc.parent_taxa_id = tt.id 
+                )
+            SELECT DISTINCT id FROM taxa_tree;
+            """

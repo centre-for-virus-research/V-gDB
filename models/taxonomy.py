@@ -165,9 +165,9 @@ class Taxonomy:
             results = dictfetchall(cursor)
             taxa_ids = [item["taxa_id"] for item in results]
             placeholders = ', '.join(['%s'] * len(taxa_ids))
-            common_taxa = f"taxa_id IN ({placeholders})"
-            query2 = f""" SELECT DISTINCT(name) AS species 
-                            FROM host_taxa 
+            common_taxa = f"host_taxa_id IN ({placeholders})"
+            query2 = f""" SELECT DISTINCT(host) AS species 
+                            FROM meta_data 
                             WHERE {common_taxa}
                         """
 

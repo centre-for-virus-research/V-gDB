@@ -307,12 +307,14 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
     inputs_path = tmp_dir / "inputs" 
     query_path = inputs_path / "input.fa"
     results_path = tmp_dir / "results"
+
+    blast_db_path = BASE_DIR / "db" / "blast_db.fa" 
     
 
     blastn(tmp_dir=tmp_dir, 
             query_path=query_path,
             results_path=results_path,
-            db_path='/Users/danaallen/CVR/gdb/web-resources/V-gDB/db/db.fa')
+            db_path=blast_db_path)
 
     query_tophits_file = results_path / 'query_tophits.tsv'
     if not os.path.exists(query_tophits_file):

@@ -379,7 +379,7 @@ class Sequences:
             }
         
         taxonomy_filters = ['phylum', 'class', 'order_category', 'family', 'genus', 'species']
-        standard_filters = ['primary_accession', 'isolate', 'exclusion_status', 'EPA_major_clade', 'EPA_minor_clade']
+        standard_filters = ['primary_accession', 'isolate', 'exclusion_status', 'EPA_major_clade', 'EPA_minor_clade', 'accession_type']
         region_filters = ['country']
 
         where_clauses, params = [], []

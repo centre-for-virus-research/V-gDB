@@ -9,7 +9,7 @@ from os.path import join
 import subprocess
 import csv
 from models.clade_assignment.clade_assignment import CladeAssignment
-
+from rest_framework import status
 from Bio import SeqIO
 from pathlib import Path
 
@@ -200,6 +200,7 @@ def blastn(tmp_dir, query_path, results_path, db_path):
     db_file_name = os.path.basename(db_path)
 
     output_file = join(results_path,"query_tophits.tsv")
+
     command = [
         'blastn',
         '-query', query_path,
@@ -308,8 +309,9 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
     query_path = inputs_path / "input.fa"
     results_path = tmp_dir / "results"
 
-    blast_db_path = BASE_DIR / "db" / "blast_db.fa" 
+    blast_db_path = BASE_DIR / "db" / "blast" / "db.fa" 
     
+    print("BLASTS_DB", blast_db_path)
 
     blastn(tmp_dir=tmp_dir, 
             query_path=query_path,
@@ -321,7 +323,6 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
         raise ValueError("BLAST did not run.")
     
     blast_results = parse_query_tophits(query_tophits_file)
-    print(blast_results)
 
     # parse_blast_results(database=database, query_tophits=query_tophits_file, tmp_dir_input=inputs_path)
 
@@ -355,15 +356,6 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
         runner.run_all()
     except subprocess.CalledProcessError as e:
         runner._die("Command failed with exit code " + str(e.returncode))
-
-
-    # results = {"query":{},
-    #         "tree":''}
-
-    # 
-
-    # print(results)
-
 
     results, tree = parse_clade_assignment_results(blast_results, results_path)
 

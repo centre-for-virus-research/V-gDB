@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from models.helpers import *
 from django.http import HttpResponse
 from models.helpers import *
-
+from rest_framework import status
 from urllib.parse import unquote
 
 from models.alignment import Alignment
@@ -81,11 +81,11 @@ def run_phylogenetic_clade_assignment_analysis(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    finally:
+    # finally:
         # Clean up everything after analysis
-        if job_dir.exists() and job_dir.is_dir():
-            shutil.rmtree(job_dir)
-            print(f"Deleted temporary job folder: {job_dir}")
+        # if job_dir.exists() and job_dir.is_dir():
+        #     shutil.rmtree(job_dir)
+        #     print(f"Deleted temporary job folder: {job_dir}")
 
     # Return the response after successful analysis
     return Response({

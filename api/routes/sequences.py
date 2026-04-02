@@ -134,6 +134,9 @@ def download_sequences_meta_data(request):
 
     sequences = Sequences(database=database, filters=params)
     if params:
+        if "items_per_page" in params:
+            del params["items_per_page"]
+
         data = sequences.get_sequences_download()
     
     

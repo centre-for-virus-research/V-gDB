@@ -81,25 +81,16 @@ def run_phylogenetic_clade_assignment_analysis(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # finally:
+    finally:
         # Clean up everything after analysis
-        # if job_dir.exists() and job_dir.is_dir():
-        #     shutil.rmtree(job_dir)
-        #     print(f"Deleted temporary job folder: {job_dir}")
+        if job_dir.exists() and job_dir.is_dir():
+            shutil.rmtree(job_dir)
+            print(f"Deleted temporary job folder: {job_dir}")
 
     # Return the response after successful analysis
     return Response({
         "job_id": job_id,
         "results": data
     })
-
-    
-
-    # with open(file_name, 'r') as file:
-    #     response = HttpResponse(file, content_type='text')
-    #     response['Content-Disposition'] = f'attachment; filename="{file_name}"'
-    #     os.remove(file_name)
-
-    # return Response("HI")
 
 

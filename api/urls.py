@@ -47,6 +47,7 @@ urlpatterns = [
     # NOT FINISHED STUFF
     path('sequences/global/', sequences.get_global_distribution_of_sequences, name='get_global_distribution_of_sequences'),
     path("phylogeny/tree/", phylogeny.get_tree, name='get_tree'),
+    path("phylogeny/trees/", phylogeny.get_trees, name='get_trees'),
 
     path('adaptive_mutations/', mutations.get_adaptive_mutations, name='get_adaptive_mutations'),
 

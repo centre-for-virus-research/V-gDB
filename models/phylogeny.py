@@ -7,15 +7,24 @@ from collections import defaultdict
     
 from models import sequences_helpers as sh
 
+def _get_trees(cursor):
+
+    query = "SELECT name FROM trees"
+    params = None
+    
+    data = fetch_all(cursor, query, params)
+    
+    return data
 
 def _get_tree_from_type(cursor, tree_type, segment):
-
-    if segment:
-        query = "SELECT * FROM tree WHERE tree_type = %s AND segment = %s;"
-        params = [tree_type, segment]
+    print("TREE TYPE", tree_type)
+    if segment or tree_type:
+        query = "SELECT * FROM trees WHERE name = %s;"
+        params = [tree_type]
     else:
-        query = "SELECT * FROM tree"
-        params = None
+        query = "SELECT * FROM trees WHERE name = %s;"
+        # params = None
+        params = ["usher_AF009606.aligned_merged_MSA_dedup"]
     
     data = fetch_one(cursor, query, params)
     
@@ -33,6 +42,10 @@ def _get_meta_data_for_tree(cursor, segment):
                     FROM meta_data md 
                     JOIN m49_country c ON c.m49_code = md.country_validated
                     JOIN host_lineage h ON h.taxa_id = md.host_taxa_id
+                """
+        query = f"""SELECT md.primary_accession, md.collection_year, c.display_name  as country
+                    FROM meta_data md 
+                    JOIN m49_country c ON c.m49_code = md.country_validated
                 """
         params = None
     data = fetch_all(cursor, query, params)
@@ -53,7 +66,7 @@ class Phylogeny:
 
         if self.filters:
             tree_type = self.filters["tree_type"]
-            segment = self.filters["segment"]
+            # segment = self.filters["segment"]
 
         results = {}
         with connections[self.database].cursor() as cursor:
@@ -65,6 +78,17 @@ class Phylogeny:
             results = {
                         "tree": tree,
                         "meta_data": meta_data
+                        }   
+
+        return results
+
+    def get_trees(self):
+
+        with connections[self.database].cursor() as cursor:
+
+            trees = _get_trees(cursor)
+            results = {
+                        "trees": trees
                         }   
 
         return results

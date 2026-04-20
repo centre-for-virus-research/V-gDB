@@ -17,3 +17,14 @@ def get_tree(request):
 
         
     return Response(tree)
+
+@api_view(['GET'])
+def get_trees(request):
+
+    database = request.headers.get('database', 'default')
+    
+    phylogeny = Phylogeny(database=database)
+
+    tree = phylogeny.get_trees()
+    
+    return Response(tree)

@@ -29,6 +29,7 @@ class Sequences:
         where_clauses = []
         params = []
         filter_params = []
+        print('DATABASE', self.database)
 
         if self.filters:
             # where_str, filter_params = self._add_filters()
@@ -249,7 +250,7 @@ class Sequences:
                 # Get aligned reference sequence
                 reference_alignment_dict = sh._get_query_alignment_from_primary_accession(cursor, reference_accession)
                 reference_alignment_sequence = reference_alignment_dict["alignment"]
-                if reference_alignment_dict["insertion"]:
+                if reference_alignment_dict.get("insertion"):
                     result["insertions"] = [reference_alignment_dict["insertion"]]
                 
                 # Get features

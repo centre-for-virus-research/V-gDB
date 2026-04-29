@@ -43,7 +43,7 @@ def _get_features_from_primary_accession(cursor, primary_accession):
     return features
 
 def _get_insertions_from_primary_accession(cursor, primary_accession):
-    query = "SELECT * FROM insertions WHERE accession = %s"
+    query = "SELECT * FROM insertions WHERE primary_accession = %s"
     params = [primary_accession]
 
     insertions = fetch_all(cursor, query, params)

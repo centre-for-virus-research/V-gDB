@@ -236,9 +236,9 @@ class Sequences:
                     result["taxanomic_info"] = taxanomic_info
 
             # Get insertions
-            # insertions = sh._get_insertions_from_primary_accession(cursor, primary_accession)
-            # if insertions:
-            #     result["insertions"] = insertions
+            insertions = sh._get_insertions_from_primary_accession(cursor, primary_accession)
+            if insertions:
+                result["insertions"] = [insertions[0]["insertion"]]
 
             query_alignment_dict = sh._get_query_alignment_from_primary_accession(cursor, primary_accession)
         
@@ -250,8 +250,8 @@ class Sequences:
                 # Get aligned reference sequence
                 reference_alignment_dict = sh._get_query_alignment_from_primary_accession(cursor, reference_accession)
                 reference_alignment_sequence = reference_alignment_dict["alignment"]
-                if reference_alignment_dict.get("insertion"):
-                    result["insertions"] = [reference_alignment_dict["insertion"]]
+                # if reference_alignment_dict.get("insertion"):
+                #     result["insertions"] = [reference_alignment_dict["insertion"]]
                 
                 # Get features
                 features = sh._get_features_from_primary_accession(cursor, primary_accession)

@@ -10,6 +10,7 @@ from api.routes import strains
 from api.routes import lineage
 from api.routes import taxonomy
 from api.routes import analysis
+from api.routes import polymorphisms
 
 urlpatterns = [
     
@@ -19,7 +20,8 @@ urlpatterns = [
     path('sequence/<str:primary_accession>', sequences.get_sequence, name='get_sequence'), #done
     path('sequence/reference/<str:primary_accession>', sequences.get_reference_sequence, name='get_reference_sequence'), #done
     
-
+    path('polymorphisms/', polymorphisms.get_polymorphisms, name='get_polymorphisms'), 
+    path('polymorphism/<str:id>', polymorphisms.get_polymorphism, name='get_polymorphism'), 
 
     path('strains/', strains.get_strains, name='get_strains'), 
     path('strain/<path:strain_id>', strains.get_strain, name='get_strain'), #done

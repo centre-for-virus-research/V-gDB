@@ -6,6 +6,7 @@ from collections import defaultdict
 
     
 from models import sequences_helpers as sh
+from models import polymorphisms_helpers as ph
 
 class Sequences:
     """
@@ -265,6 +266,12 @@ class Sequences:
                             }    
             
                 result["alignment"] = alignment
+
+            if self.database == 'HCV':
+                mutations = ph._get_polymorphim_sequence(cursor, primary_accession)
+
+                if mutations:
+                    result["mutations"] = mutations
 
         return result
 

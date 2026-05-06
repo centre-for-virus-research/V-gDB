@@ -23,8 +23,8 @@ def _get_tree_from_type(cursor, tree_type, segment):
         params = [tree_type]
     else:
         query = "SELECT * FROM trees WHERE name = %s;"
-        # params = None
-        params = ["usher_AF009606.aligned_merged_MSA_dedup"]
+        params = None
+        # params = ["usher_AF009606.aligned_merged_MSA_dedup"]
     
     data = fetch_one(cursor, query, params)
     

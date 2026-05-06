@@ -38,6 +38,14 @@ class Polymorphisms:
 
         
         with connections[self.database].cursor() as cursor:
-            result = ph._get_polymorphim(cursor, id)
+            polymorphism = ph._get_polymorphim(cursor, id)
 
+            sequences = ph._get_polymorphim_sequences(cursor, id)
+
+        result = {
+                    "polymorphism": polymorphism,
+                    "sequences": sequences
+                }
         return result
+
+    

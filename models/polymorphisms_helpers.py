@@ -23,3 +23,15 @@ def _get_polymorphim(cursor, id):
     results = fetch_all(cursor, query, params)
 
     return results
+
+def _get_polymorphim_sequences(cursor, id):
+
+    query = f"""
+                SELECT *
+                FROM completed_signatures_only
+                WHERE signature_id = %s;
+            """
+    params = [id]
+    results = fetch_all(cursor, query, params)
+
+    return results

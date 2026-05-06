@@ -230,7 +230,8 @@ class Sequences:
 
             if meta_data["host_taxa_id"]:
                 host_taxa_id = meta_data["host_taxa_id"]
-                taxanomic_info = sh._get_taxa_from_host_taxa_id(cursor, host_taxa_id)
+                # taxanomic_info = sh._get_taxa_from_host_taxa_id(cursor, host_taxa_id)
+                taxanomic_info = None
 
                 if taxanomic_info:
                     result["taxanomic_info"] = taxanomic_info

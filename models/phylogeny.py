@@ -36,14 +36,14 @@ def _get_meta_data_for_tree(cursor, segment):
                     FROM meta_data WHERE segment = %s;""" 
 
         
-        params = [segment]
+        params = [segment]    
     else:
         query = f"""SELECT md.primary_accession, md.EPA_major_clade, md.EPA_minor_clade, md.collection_year, c.display_name  as country, h.*
                     FROM meta_data md 
                     JOIN m49_country c ON c.m49_code = md.country_validated
                     JOIN host_lineage h ON h.taxa_id = md.host_taxa_id
                 """
-        query = f"""SELECT md.primary_accession, md.collection_year, c.display_name  as country
+        query = f"""SELECT md.primary_accession, md.*, c.display_name  as country
                     FROM meta_data md 
                     JOIN m49_country c ON c.m49_code = md.country_validated
                 """

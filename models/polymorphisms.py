@@ -41,11 +41,15 @@ class Polymorphisms:
             polymorphism = ph._get_polymorphim(cursor, id)
 
             sequences = ph._get_polymorphim_sequences(cursor, id)
+            chart_data = ph._get_mutation_prevalence(cursor, id)
 
         result = {
                     "polymorphism": polymorphism,
-                    "sequences": sequences
+                    "sequences": sequences,
+                    "chart_data": chart_data
                 }
         return result
+    
+    
 
     

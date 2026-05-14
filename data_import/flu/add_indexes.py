@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/HCV/HCV_OM_test.db")
+conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/HCV/HCV_full_new_annot.db")
 conn.row_factory = sqlite3.Row  
 cur = conn.cursor()
 

@@ -202,7 +202,7 @@ class CladeAssignment:
             return
         
         with open(self.aligned_out, "w") as fh:
-            subprocess.run(cmd, stdout=fh, check=True)
+            subprocess.run(cmd, stdout=fh, stderr=subprocess.DEVNULL, check=True)
         print("FINISHED MAFFT")
 
     def run_epa_ng(self):

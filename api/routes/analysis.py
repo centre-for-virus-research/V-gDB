@@ -37,6 +37,10 @@ def run_phylogenetic_clade_assignment_analysis(request):
     if not fasta_text:
         return Response({"error": "No FASTA provided"}, status=400)
 
+    fasta_text = "\n".join(
+        line.split()[0] if line.startswith(">") else line
+        for line in fasta_text.splitlines()
+    )
     # # # Unique job id
     # job_id = "d23a0b10-1335-4668-b351-2c954e7c55df"
     job_id = str(uuid.uuid4())
@@ -84,7 +88,7 @@ def run_phylogenetic_clade_assignment_analysis(request):
     finally:
         # Clean up everything after analysis
         if job_dir.exists() and job_dir.is_dir():
-            shutil.rmtree(job_dir)
+            # shutil.rmtree(job_dir)
             print(f"Deleted temporary job folder: {job_dir}")
 
     # Return the response after successful analysis

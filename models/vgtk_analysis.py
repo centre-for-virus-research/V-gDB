@@ -22,7 +22,7 @@ RESOURCES_DIR = BASE_DIR / "resources"
 
 def blastn(tmp_dir, query_path, results_path, db_path):
     
-    if not os.path.exists(db_path):
+    if not os.path.exists(f"{db_path}.fa"):
         raise ValueError("BLAST database not found, please message site administrator")
         
     db_file_name = os.path.basename(db_path)

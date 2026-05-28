@@ -96,19 +96,57 @@ def _add_standard_filters(key, value, exclude):
 
     return where_clauses, params
 
+def _add_exclude_clade_filters(key, major, minor=None, exclude=True):
 
-def _add_region_filters(value, exclude):
+    params, where_clauses, placeholders_major, placeholders_minor = [], [], [], []
+    # comparison = get_comparison(value, exclude)
 
-    where_clauses, params = _add_standard_filters("display_name", value, exclude)
+    if isinstance(major, list):
+        placeholders_major = ', '.join(['%s'] * len(major))
+        where_clauses_major = f"EPA_major_clade IN ({placeholders_major})"
+        params.extend(major)
+    else:
+        where_clauses_major = f"EPA_major_clade = %s"
+        params.append(major)
 
+    if minor:
+        if isinstance(minor, list):
+            placeholders_minor = ', '.join(['%s'] * len(minor))
+            where_clauses_minor = f"EPA_minor_clade IN ({placeholders_minor})"
+            params.extend(minor)
+        else:
+            where_clauses_minor = f"EPA_minor_clade = %s"
+            params.append(minor)
+
+    if minor:
+        where_clauses = f"NOT ({where_clauses_major} AND {where_clauses_minor})"
+    else:
+        where_clauses = f"NOT ({where_clauses_major})"
+        
+
+    return where_clauses, params
+
+def _add_region_filters(clauses, comparison):
+
+    region_where_str = ' AND '.join(clauses)
     region_sql = f"""
-                country_validated IN (
+                country_validated {comparison} (
                     SELECT m49_code
                     FROM m49_country 
-                    WHERE {where_clauses})
+                    WHERE {region_where_str})
                 """
+    return region_sql
+
+    # where_clauses, params = _add_standard_filters("display_name", value, exclude)
+
+    # region_sql = f"""
+    #             country_validated IN (
+    #                 SELECT m49_code
+    #                 FROM m49_country 
+    #                 WHERE {where_clauses})
+    #             """
     
-    return region_sql, params
+    # return region_sql, params
 
 def _add_taxonomy_species_filters(value, comparison):
     # taxa_where_str = ' AND '.join(clauses)

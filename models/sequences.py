@@ -97,7 +97,7 @@ class Sequences:
         filter_params = []
 
         if self.filters:
-            where_str, filter_params = self._add_filters()
+            where_str, filter_params = self._add_filters_refactored()
             where_clauses.append(where_str)
 
         filter_where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
@@ -122,7 +122,7 @@ class Sequences:
         filter_params = []
 
         if self.filters:
-            where_str, filter_params = self._add_filters()
+            where_str, filter_params = self._add_filters_refactored()
             where_clauses.append(where_str)
 
         filter_where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
@@ -323,7 +323,7 @@ class Sequences:
         params = []
 
         if self.filters:
-            where_str, filter_params = self._add_filters()
+            where_str, filter_params = self._add_filters_refactored()
             where_clauses.append(where_str)
             params.extend(filter_params)
 
@@ -379,19 +379,24 @@ class Sequences:
             }
         
         taxonomy_filters = ['phylum', 'class', 'order_category', 'family', 'genus', 'species']
-        standard_filters = ['primary_accession', 'isolate', 'exclusion_status', 'EPA_major_clade', 'EPA_minor_clade', 'accession_type', 'country_validated']
-        region_filters = ['country']
+        standard_filters = ['primary_accession', 'isolate', 'exclusion_status', 'accession_type', 'country_validated']
+        clade_filters = ['EPA_major_clade']
+        region_filters = ['country', 'm49_region_id', 'm49_sub_region_id', 'm49_intermediate_region_id', 'm49_code']
 
         where_clauses, params = [], []
         taxonomy_clauses, taxonomy_params = [], []
+        region_clauses, region_params = [], []
 
         for key, value in self.filters.items():
             exclude = False
             if key.startswith("exclude_"): 
                 exclude = True
                 key=key[8:]
-                if key == 'exclude_taxa':
+                if key == 'taxa':
                     continue
+                if key == 'clades':
+                    continue
+
             if key in comparison_filters:
                 col, op = comparison_filters[key]
                 where_clauses.append(f"{col} {op} %s")
@@ -402,15 +407,34 @@ class Sequences:
                 taxonomy_clauses.append(clause)
                 taxonomy_params.extend(param)
 
+            elif key in region_filters:
+                if key=='country':
+                    key='display_name'
+                clause, param = sh._add_standard_filters(key, value, exclude)
+                region_clauses.append(clause)
+                region_params.extend(param)
+
+
+            elif key in clade_filters:
+                print("FILTER ITEMS", self.filters.items())
+                if self.filters.get("exclude_clades"):
+                    print("WE ARE HERE")
+                    exclude = True
+                    clause, param = sh._add_exclude_clade_filters(key, self.filters.get("EPA_major_clade"), self.filters.get("EPA_minor_clade"), exclude)
+                else:
+                    clause, param = sh._add_standard_filters(key, value, exclude)
+                where_clauses.append(clause)
+                params.extend(param)
+
             elif key in standard_filters:
                 clause, param = sh._add_standard_filters(key, value, exclude)
                 where_clauses.append(clause)
                 params.extend(param)
 
-            elif key in region_filters:
-                clause, param = sh._add_region_filters(value, exclude)
-                where_clauses.append(clause)
-                params.extend(param)
+            # elif key in region_filters:
+            #     clause, param = sh._add_region_filters(value, exclude)
+            #     where_clauses.append(clause)
+            #     params.extend(param)
 
         if taxonomy_clauses:
             
@@ -426,6 +450,17 @@ class Sequences:
                 params.extend(taxonomy_params)
                 
             where_clauses.append(clause)
+
+        if region_clauses:
+            comparison = 'IN'
+            if ("exclude_region" in self.filters.keys()):
+                comparison = 'NOT IN'
+            
+            clause = sh._add_region_filters(region_clauses, comparison)
+            params.extend(region_params)
+                
+            where_clauses.append(clause)
+
 
         where_str = ' AND '.join(where_clauses)
 
@@ -469,7 +504,7 @@ class Sequences:
             elif key == 'region':
                 where_clauses.append(
                     "primary_accession IN ("
-                    "SELECT m.primary_accession"
+                    "SELECT m.primary_accession "
                     "FROM m49_country r "
                     "JOIN meta_data m ON m.country_validated = CAST(r.m49_code AS TEXT) "
                     "WHERE r.m49_region_id = %s)"

@@ -82,9 +82,10 @@ def get_global_distribution_of_sequences(request):
     if "EPA_minor_clade" in params:
         if params["EPA_minor_clade"] == "null":
             del params["EPA_minor_clade"]
-
+    
     if params:
         for key, value in params.items():
+            print("PARAMS", key, value)
             params[key] = value.split(',') if ',' in value else value
 
     sequences = Sequences(database=database, filters=params)
@@ -137,7 +138,7 @@ def download_sequences_meta_data(request):
         if "items_per_page" in params:
             del params["items_per_page"]
 
-        data = sequences.get_sequences_download()
+    data = sequences.get_sequences_download()
     
     
     file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_meta_data.csv'

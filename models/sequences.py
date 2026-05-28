@@ -31,7 +31,6 @@ class Sequences:
         filter_params = []
 
         if self.filters:
-            # where_str, filter_params = self._add_filters()
             where_str, filter_params = self._add_filters_refactored()
             where_clauses.append(where_str)
 
@@ -95,19 +94,24 @@ class Sequences:
         where_clauses = []
         params = []
         filter_params = []
+        columns_str = '*'
 
         if self.filters:
-            where_str, filter_params = self._add_filters_refactored()
-            where_clauses.append(where_str)
+            if ("metadata_columns" in self.filters.keys()):
+                columns_str = self.filters["metadata_columns"]
+                del self.filters["metadata_columns"]
+            if self.filters:
+                where_str, filter_params = self._add_filters_refactored()
+                where_clauses.append(where_str)
 
         filter_where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
 
         count_query = f"""
-            SELECT *
+            SELECT {columns_str}
             FROM meta_data
             {filter_where_sql}
         """
-
+        print('DOWNLOAD QUERY', count_query, filter_params)
         with connections[self.database].cursor() as cursor:
             cursor.execute(count_query, filter_params)
             results = dictfetchall(cursor)
@@ -326,7 +330,7 @@ class Sequences:
             where_str, filter_params = self._add_filters_refactored()
             where_clauses.append(where_str)
             params.extend(filter_params)
-
+        
         # Build query
         where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
 
@@ -353,20 +357,6 @@ class Sequences:
 
         return metadata_countries
 
-# WITH RECURSIVE taxa_tree(id) AS (
-#     SELECT parent_taxa_id
-#     FROM host_children
-#     WHERE parent_taxa_id IN (9031)
-
-#     UNION
-
-#     SELECT hc.child_taxa_id
-#     FROM host_children hc
-#     JOIN taxa_tree tt
-#       ON hc.parent_taxa_id = tt.id
-# )
-# SELECT DISTINCT id FROM taxa_tree;
-
 
     def _add_filters_refactored(self):
         comparison_filters = {
@@ -378,7 +368,7 @@ class Sequences:
                 'creation_year_upper': ('create_date', '<=')
             }
         
-        taxonomy_filters = ['phylum', 'class', 'order_category', 'family', 'genus', 'species']
+        taxonomy_filters = ['phylum', 'class', 'order_category', 'family', 'genus', 'species', 'host']
         standard_filters = ['primary_accession', 'isolate', 'exclusion_status', 'accession_type', 'country_validated']
         clade_filters = ['EPA_major_clade']
         region_filters = ['country', 'm49_region_id', 'm49_sub_region_id', 'm49_intermediate_region_id', 'm49_code']
@@ -445,6 +435,9 @@ class Sequences:
             if ("species" in self.filters.keys()):
                 clause, param = sh._add_taxonomy_species_filters(self.filters["species"], comparison)
                 params.extend(param)
+            elif ("host" in self.filters.keys()):
+                clause, param = sh._add_taxonomy_host_filters(self.filters["host"], comparison)
+                params.extend(param)
             else:
                 clause = sh._add_taxonomy_filters(taxonomy_clauses, comparison)
                 params.extend(taxonomy_params)
@@ -452,6 +445,7 @@ class Sequences:
             where_clauses.append(clause)
 
         if region_clauses:
+            print("WE ARE IN HERE")
             comparison = 'IN'
             if ("exclude_region" in self.filters.keys()):
                 comparison = 'NOT IN'
@@ -468,99 +462,3 @@ class Sequences:
 
         return where_str, params
                 
-
-
-
-    def _add_filters(self):
-        comparison_filters = {
-                'length_lower': ('real_length', '>='),
-                'length_upper': ('real_length', '<='),
-                'collection_year_lower': ('collection_year', '<='),
-                'collection_year_upper': ('collection_year', '>='),
-                'creation_year_lower': ('create_date', '>='),
-                'creation_year_upper': ('create_date', '<=')
-            }
-        
-        taxonomy_filters = ['phylum', 'class', 'order_category', 'family', 'genus', 'species']
-
-
-        where_clauses, params = [], []
-        taxonomy_clauses, taxonomy_params = [], []
-
-        for key, value in self.filters.items():
-            if key.startswith("exclude_"): 
-                if key == 'exclude_taxa':
-                    continue
-                key=key[8:]
-                # continue
-                
-
-            if key in comparison_filters:
-                col, op = comparison_filters[key]
-                where_clauses.append(f"{col} {op} %s")
-                params.append(int(value))
-                
-
-            elif key == 'region':
-                where_clauses.append(
-                    "primary_accession IN ("
-                    "SELECT m.primary_accession "
-                    "FROM m49_country r "
-                    "JOIN meta_data m ON m.country_validated = CAST(r.m49_code AS TEXT) "
-                    "WHERE r.m49_region_id = %s)"
-                )
-                params.append(value)
-
-            elif key in taxonomy_filters:
-                if isinstance(value, list):
-                    comparison = "IN"
-                    if ("exclude_taxa" in self.filters):
-                        comparison = "NOT IN"
-
-                    if (key == 'species'):
-                        taxonomy_clauses.append(f"({key} {comparison} ({placeholders}) OR ({key} {comparison} ({placeholders})")
-
-                    placeholders = ', '.join(['%s'] * len(value))
-                    taxonomy_clauses.append(f"{key} {comparison} ({placeholders})")
-                    taxonomy_params.extend(value)
-                else:
-                    comparison = "="
-                    if ("exclude_taxa" in self.filters):
-                        comparison = "!="
-                    taxonomy_clauses.append(f"{key} {comparison} %s")
-                    taxonomy_params.append(value)
-
-            else:
-
-                if isinstance(value, list):
-                    comparison = "IN"
-                    if ("exclude_"+key in self.filters):
-                        comparison = "NOT IN"
-
-                    placeholders = ', '.join(['%s'] * len(value))
-                    where_clauses.append(f"{key} {comparison} ({placeholders})")
-                    params.extend(value)
-                else:
-                    comparison = "="
-                    if ("exclude_"+key in self.filters):
-                        comparison = "!="
-                    where_clauses.append(f"{key} {comparison} %s")
-                    params.append(value)
-
-        if taxonomy_clauses:
-            taxa_where_str = ' AND '.join(taxonomy_clauses)
-            where_clauses.append(
-                f"""host_taxa_id IN (
-                        SELECT taxa_id
-                        FROM host_lineage
-                        WHERE {taxa_where_str}
-                    )"""
-            )
-            params.extend(taxonomy_params)
-
-
-        where_str = ' AND '.join(where_clauses)
-
-        print(where_str, params)
-
-        return where_str, params

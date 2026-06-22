@@ -51,20 +51,16 @@ def _get_polymorphim_sequence(cursor, id):
 def _get_mutation_prevalence(cursor, id):
 
     accession_query = f""" 
-                        SELECT cso.primary_accession
-                        FROM completed_signatures_only cso
-                        WHERE cso.signature_id = %s
-                    """
-                # SELECT DISTINCT f.reference_accession
-                # FROM features f
-                # WHERE f.product LIKE %s
-                # AND f.accession IN ({accession_query}))
+                            SELECT cso.primary_accession
+                            FROM completed_signatures_only cso
+                            WHERE cso.signature_id = %s
+                        """
+
     reference_query = f""" 
                 SELECT accession, reference_accession, cds_start, cds_end
                 FROM features
                 WHERE product LIKE %s
                 AND accession IN ({accession_query})
-
             """
     
 #     reference_query = f"""
@@ -77,9 +73,16 @@ def _get_mutation_prevalence(cursor, id):
 #                         WHERE cso.signature_id = "NS3:117L"
 #                     )
 #                         """
-    
+    # meta_data_query = f"""
+    #         SELECT sa.header as sequence_id, sa.sequence as alignment, f.reference_accession, f.cds_start, f.cds_end, md.host, md.nearest_reference_genotype, md.nearest_reference_subtype, md.host_scientific_name, md.country
+    #         FROM sequences sa 
+    #         LEFT JOIN features f ON f.accession = sa.header
+    #         LEFT JOIN meta_data md ON md.primary_accession = sa.header
+    #         WHERE f.product LIKE %s
+    #         AND sa.header IN ({accession_query})
+    #     """
     meta_data_query = f"""
-                    SELECT sa.sequence_id, sa.alignment, f.reference_accession, md.host, md.nearest_reference_genotype, md.nearest_reference_subtype, md.host_scientific_name, md.country
+                    SELECT sa.sequence_id, sa.alignment, f.reference_accession, f.cds_start, f.cds_end, md.host, md.nearest_reference_genotype, md.nearest_reference_subtype, md.host_scientific_name, md.country
                     FROM sequence_alignment sa 
                     LEFT JOIN features f ON f.accession = sa.sequence_id
                     LEFT JOIN meta_data md ON md.primary_accession = sa.sequence_id

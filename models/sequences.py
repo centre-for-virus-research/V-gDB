@@ -119,7 +119,8 @@ class Sequences:
 
         return results
 
-    def get_sequences_alignment(self, start_coordinate, end_coordinate, sequence_type):
+
+    def get_sequences_alignment(self, start_coordinate, end_coordinate, sequence_type, product):
 
         where_clauses = []
         params = []
@@ -138,32 +139,29 @@ class Sequences:
         """
         with connections[self.database].cursor() as cursor:
 
-            # primary_accessions = fetch_all(cursor, query, filter_params)
-            # accessions = [item['primary_accession'] for item in primary_accessions]
-
-            # placeholders = ','.join(['?'] * len(accessions))
-
-            query2 = f"""
+            if product: 
+                query2 = f"""
                     SELECT sa.*, f.*
                     FROM sequence_alignment sa
                     JOIN features f ON f.accession = sa.sequence_id
-                    WHERE sa.sequence_id IN ({query}) AND f.product = 'nucleoprotein N'
+                    WHERE sa.sequence_id IN ({query}) AND f.product = %s
                     """
-            # print(query2)
+                filter_params.append(product)
+            else:
+                query2 = f"""
+                        SELECT sa.*, f.*
+                        FROM sequence_alignment sa
+                        JOIN features f ON f.accession = sa.sequence_id
+                        WHERE sa.sequence_id IN ({query})
+                        """
+
             cursor.execute(query2, filter_params)
             results = dictfetchall(cursor)
-
-            alignments = self.__parse_alignments_new(results, start_coordinate, end_coordinate, sequence_type)
             
-            # print(alignments)
-            # rows = cursor.fetchall()
-
-        
+        alignments = self.__parse_alignments_new(results, start_coordinate, end_coordinate, sequence_type)
 
         return alignments
-            # cursor.execute(query, filter_params)
-            # data = fetchall()
-            
+
     def __parse_alignments_new(self, alignments, start_coordinate, end_coordinate, sequence_type):
         results= []
 

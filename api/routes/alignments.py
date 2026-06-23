@@ -53,7 +53,7 @@ def download_alignments(request):
             params[key] = value.split(',') if ',' in value else value
 
     sequences = Sequences(database=database, filters=params)
-    data = sequences.get_sequences_alignment(start_coordinate, end_coordinate, sequence_type)
+    data = sequences.get_sequences_alignment(start_coordinate, end_coordinate, sequence_type, region)
 
     
 

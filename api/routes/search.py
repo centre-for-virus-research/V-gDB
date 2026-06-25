@@ -94,3 +94,15 @@ def search_region(request):
         data = dictfetchall(cursor)
 
     return Response(data)
+
+@api_view(['GET'])
+def search_protein_name(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(protein_name) FROM mutation_catalog where protein_name IS NOT NULL")
+        data = dictfetchall(cursor)
+
+    return Response(data)

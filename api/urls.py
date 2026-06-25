@@ -120,6 +120,7 @@ urlpatterns = [
     path('filters/search_country/<str:query>', search.search_country, name='search_country'),
     path('filters/search_region/', search.search_region, name='search_region'),
     path('filters/search_phylum/', search.search_phylum, name='search_phylum'),
+    path('filters/search_protein_name/', search.search_protein_name, name='search_protein_name'),
 
 
 

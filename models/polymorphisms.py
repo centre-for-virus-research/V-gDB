@@ -25,11 +25,11 @@ class Polymorphisms:
         self.database = database  
         self.filters = filters
 
-    def get_polymorphisms(self):
+    def get_polymorphisms(self, params):
 
         
         with connections[self.database].cursor() as cursor:
-            result = ph._get_all_polymorphims(cursor)
+            result = ph._get_all_polymorphims(cursor, params)
 
         return result
     

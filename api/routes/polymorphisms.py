@@ -14,10 +14,10 @@ def get_polymorphisms(request):
 
     database = request.headers.get('database', 'default')
     
-
+    params = dict(request.GET.items())
     polymorphisms = Polymorphisms(database=database)
     try:
-        data = polymorphisms.get_polymorphisms()
+        data = polymorphisms.get_polymorphisms(params)
     except ValueError as e:
         print(f"Error: {e}")
         return Response(

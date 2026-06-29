@@ -1,14 +1,46 @@
 from .helpers import *
 from django.db import connections
 
-def _get_all_polymorphims(cursor):
+def _get_all_polymorphims(cursor, filters=None):
+    where_clauses = []
+    where_str = []
+    params = None
+    if filters:
+        params = []
+        # where_str, filter_params = self._add_filters()
+        print(filters.items())
+        for key, value in filters.items():
+            value = value.split(',')
+            print("VALUE", value)
+            if key.startswith("exclude_"): 
+                key=key[8:]
+            print("KEY ", key, "VALUE ", value)
+            if isinstance(value, list):
+                comparison = "IN"
+                if ("exclude_"+key in filters):
+                    comparison = "NOT IN"
+
+                placeholders = ', '.join(['%s'] * len(value))
+                where_clauses.append(f"{key} {comparison} ({placeholders})")
+                params.extend(value)
+            else:
+                comparison = "="
+                if ("exclude_"+key in filters):
+                    comparison = "!="
+                where_clauses.append(f"{key} {comparison} %s")
+                params.append(value)
+
+            # where_clauses.append(where_str)
+    print("WHERE clauses", where_clauses)
+    filter_where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+
 
     query = f"""
-                SELECT signature_id, signature_kind, protein_name, aa_position, mutation_type
-                FROM mutation_catalog 
-                GROUP BY signature_id;
+                SELECT signature_id, signature_kind, protein_name, aa_position, mutation_type, drug
+                FROM mutation_catalog
+                {filter_where_sql};
             """
-    results = fetch_all(cursor, query, params=None)
+    results = fetch_all(cursor, query, params)
 
     return results
 

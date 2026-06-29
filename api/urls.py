@@ -121,7 +121,7 @@ urlpatterns = [
     path('filters/search_region/', search.search_region, name='search_region'),
     path('filters/search_phylum/', search.search_phylum, name='search_phylum'),
     path('filters/search_protein_name/', search.search_protein_name, name='search_protein_name'),
-
+    path('filters/search_drug/', search.search_drug, name='search_drug'),
 
 
     path('check_db_connection', versions.check_db_connection, name='check_db_connection'),

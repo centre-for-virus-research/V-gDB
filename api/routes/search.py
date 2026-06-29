@@ -106,3 +106,16 @@ def search_protein_name(request):
         data = dictfetchall(cursor)
 
     return Response(data)
+
+
+@api_view(['GET'])
+def search_drug(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(drug) FROM mutation_catalog WHERE drug IS NOT NULL AND drug != ''")
+        data = dictfetchall(cursor)
+
+    return Response(data)

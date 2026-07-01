@@ -149,18 +149,30 @@ class Sequences:
                 filter_params.append(product)
             else:
                 query2 = f"""
-                        SELECT sa.*, f.*
+                        SELECT sa.*
                         FROM sequence_alignment sa
-                        JOIN features f ON f.accession = sa.sequence_id
                         WHERE sa.sequence_id IN ({query})
                         """
 
             cursor.execute(query2, filter_params)
             results = dictfetchall(cursor)
-            
-        alignments = self.__parse_alignments_new(results, start_coordinate, end_coordinate, sequence_type)
+
+            if product:
+                alignments = self.__parse_alignments_new(results, start_coordinate, end_coordinate, sequence_type)
+            else: 
+                print("RESULTS", results)
+                alignments = self.__build_alignment_file(results)
+                print("ALIGNMENTS", alignments)
 
         return alignments
+
+    def __build_alignment_file(self, alignments):
+        results = []
+        for a in alignments:
+            results.append(f">" + a["sequence_id"] + "\n" + a["alignment"] + "\n")
+
+
+        return results
 
     def __parse_alignments_new(self, alignments, start_coordinate, end_coordinate, sequence_type):
         results= []
@@ -368,7 +380,7 @@ class Sequences:
         
         taxonomy_filters = ['phylum', 'class', 'order_category', 'family', 'genus', 'species', 'host']
         standard_filters = ['primary_accession', 'isolate', 'exclusion_status', 'accession_type', 'country_validated']
-        clade_filters = ['EPA_major_clade']
+        clade_filters = ['EPA_major_clade', 'EPA_minor_clade']
         region_filters = ['country', 'm49_region_id', 'm49_sub_region_id', 'm49_intermediate_region_id', 'm49_code']
 
         where_clauses, params = [], []

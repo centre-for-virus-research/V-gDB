@@ -64,8 +64,8 @@ def search_hosts(request):
     database = request.headers.get('database', 'default')
 
     with connections[database].cursor() as cursor:
-
-        cursor.execute("SELECT DISTINCT(host) FROM meta_data where host IS NOT NULL;")
+        cursor.execute("SELECT DISTINCT(common_name) as host, taxa_id FROM host_taxa where common_name IS NOT NULL;")
+        # cursor.execute("SELECT DISTINCT(host) FROM meta_data where host IS NOT NULL;")
         data = dictfetchall(cursor)
 
     return Response(data)

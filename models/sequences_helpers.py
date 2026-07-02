@@ -126,6 +126,9 @@ def _add_exclude_clade_filters(key, major, minor=None, exclude=True):
 
     return where_clauses, params
 
+def _add_genome_coverage_filters():
+    return
+
 def _add_region_filters(clauses, comparison):
 
     region_where_str = ' AND '.join(clauses)

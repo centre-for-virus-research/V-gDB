@@ -35,7 +35,7 @@ class Sequences:
             where_clauses.append(where_str)
 
         filter_where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
-
+    
         count_query = f"""
             SELECT COUNT(primary_accession)
             FROM meta_data
@@ -415,10 +415,13 @@ class Sequences:
         standard_filters = ['primary_accession', 'isolate', 'exclusion_status', 'accession_type', 'country_validated']
         clade_filters = ['EPA_major_clade', 'EPA_minor_clade']
         region_filters = ['country', 'm49_region_id', 'm49_sub_region_id', 'm49_intermediate_region_id', 'm49_code']
+        genome_coverage_filters = ['full_genome', 'nucleoprotein', 'phosphoprotein', 'm2_protein', 'glycoprotein', 'l_protein']
+
 
         where_clauses, params = [], []
         taxonomy_clauses, taxonomy_params = [], []
         region_clauses, region_params = [], []
+        genome_coverage_clauses, genome_coverage_params = [], []
 
         for key, value in self.filters.items():
             exclude = False
@@ -428,6 +431,8 @@ class Sequences:
                 if key == 'taxa':
                     continue
                 if key == 'clades':
+                    continue
+                if key == 'coverage':
                     continue
 
             if key in comparison_filters:
@@ -447,11 +452,32 @@ class Sequences:
                 region_clauses.append(clause)
                 region_params.extend(param)
 
+            elif key in genome_coverage_filters:
+                if key == 'full_genome':
+                    clause, param = sh._add_standard_filters('calculated_genome_coverage', value, exclude)
+                    where_clauses.append(clause)
+                    params.extend(param)
+                else:
+                    if key=='nucleoprotein':
+                        product = 'nucleoprotein N'
+                    elif key=='phosphoprotein':
+                        product = 'phosphoprotein M1'
+                    elif key=='m2_protein':
+                        product = 'M2 protein'
+                    elif key=='glycoprotein':
+                        product = 'transmembrane glycoprotein G'
+                    else:
+                        product = 'L protein'
+
+                    # clause, param = sh._add_genome_coverage_filters('product', product, exclude)
+                    # genome_coverage_clauses.append(clause)
+                    # genome_coverage_params.extend(param)
+                    # clause, param = sh._add_genome_coverage_filters('genome_coverage', value, exclude)
+                    # genome_coverage_clauses.append(clause)
+                    # genome_coverage_params.extend(param)
 
             elif key in clade_filters:
-                print("FILTER ITEMS", self.filters.items())
                 if self.filters.get("exclude_clades"):
-                    print("WE ARE HERE")
                     exclude = True
                     clause, param = sh._add_exclude_clade_filters(key, self.filters.get("EPA_major_clade"), self.filters.get("EPA_minor_clade"), exclude)
                 else:
@@ -463,11 +489,6 @@ class Sequences:
                 clause, param = sh._add_standard_filters(key, value, exclude)
                 where_clauses.append(clause)
                 params.extend(param)
-
-            # elif key in region_filters:
-            #     clause, param = sh._add_region_filters(value, exclude)
-            #     where_clauses.append(clause)
-            #     params.extend(param)
 
         if taxonomy_clauses:
             
@@ -488,7 +509,6 @@ class Sequences:
             where_clauses.append(clause)
 
         if region_clauses:
-            print("WE ARE IN HERE")
             comparison = 'IN'
             if ("exclude_region" in self.filters.keys()):
                 comparison = 'NOT IN'
@@ -498,7 +518,7 @@ class Sequences:
                 
             where_clauses.append(clause)
 
-
+    
         where_str = ' AND '.join(where_clauses)
 
         print(where_str, params)

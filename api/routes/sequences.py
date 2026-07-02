@@ -138,7 +138,7 @@ def download_sequences_meta_data(request):
         if "items_per_page" in params:
             del params["items_per_page"]
 
-    data = sequences.get_sequences_download()
+    data = sequences.get_sequences_meta_data_download()
     
     
     file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_meta_data.csv'
@@ -151,7 +151,29 @@ def download_sequences_meta_data(request):
 
         return response
     
+@api_view(['GET'])
+def download_sequences(request):
 
+    database = request.headers.get('database', 'default')
+    params = dict(request.GET.items())
+
+    sequences = Sequences(database=database, filters=params)
+    if params:
+        if "items_per_page" in params:
+            del params["items_per_page"]
+
+    data = sequences.get_sequences_download()
+    
+    
+    file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_sequences.fasta'
+    build_fasta_file(data, file_name)
+
+    with open(file_name, 'r') as file:
+        response = HttpResponse(file, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename='+file_name
+        os.remove(file_name)
+
+        return response
 
     
 # THIS IS BEING USED IN THE MUTATION GUI

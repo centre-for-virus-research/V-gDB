@@ -90,7 +90,7 @@ class Sequences:
             "prev_cursor": results[0]["primary_accession"] if results else None,
         }
 
-    def get_sequences_download(self):
+    def get_sequences_meta_data_download(self):
         where_clauses = []
         params = []
         filter_params = []
@@ -118,6 +118,39 @@ class Sequences:
 
 
         return results
+    
+    def get_sequences_download(self):
+        where_clauses = []
+        params = []
+        filter_params = []
+        columns_str = '*'
+        print("FILTERS", self.filters)
+        if self.filters:
+            if ("metadata_columns" in self.filters.keys()):
+                columns_str = self.filters["metadata_columns"]
+                del self.filters["metadata_columns"]
+            if self.filters:
+                where_str, filter_params = self._add_filters_refactored()
+                where_clauses.append(where_str)
+
+        filter_where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+
+        count_query = f"""
+            SELECT header as sequence_id, sequence as alignment
+            FROM sequences
+            WHERE header IN (
+            SELECT primary_accession
+            FROM meta_data
+            {filter_where_sql})
+        """
+        print('DOWNLOAD QUERY', count_query, filter_params)
+        with connections[self.database].cursor() as cursor:
+            cursor.execute(count_query, filter_params)
+            results = dictfetchall(cursor)
+        print(results)
+        sequences = self.__build_alignment_file(results)
+
+        return sequences
 
 
     def get_sequences_alignment(self, start_coordinate, end_coordinate, sequence_type, product):

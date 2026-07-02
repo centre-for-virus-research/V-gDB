@@ -31,6 +31,7 @@ urlpatterns = [
 
     path('alignments/download', alignments.download_alignments, name='download_alignment'),
     path('sequences/download_sequences_meta_data/', sequences.download_sequences_meta_data, name='download_sequences_meta_data'),
+    path('sequences/download_sequences/', sequences.download_sequences, name='download_sequences'),
 
 
 

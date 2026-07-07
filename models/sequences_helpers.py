@@ -153,16 +153,17 @@ def _add_region_filters(clauses, comparison):
 def _add_taxonomy_host_filters(value, comparison):
     # taxa_where_str = ' AND '.join(clauses)
     params = []
-    common_clause, common_param = _add_standard_filters("host", value, False)
+    common_clause, common_param = _add_standard_filters("common_name", value, False)
 
-    common_sql = f""" SELECT host_taxa_id FROM meta_data WHERE {common_clause} """
+    common_sql = f""" SELECT taxa_id FROM host_taxa WHERE {common_clause} """
 
     sql = f""" ( host_taxa_id {comparison} ( {common_sql} ) 
                 )
             """
     
     params.extend(common_param)
-
+    print("COMMON ", common_sql, common_param)
+    print("-----")
     recursive_sql = f""" WITH RECURSIVE taxa_tree(id) AS (
                     SELECT parent_taxa_id
                     FROM host_children

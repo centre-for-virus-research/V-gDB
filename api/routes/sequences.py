@@ -138,7 +138,10 @@ def download_sequences_meta_data(request):
 
     if params:
         for key, value in params.items():
-            params[key] = value.split(',') if ',' in value else value
+            if key == "metadata_columns":
+                continue
+            else:
+                params[key] = value.split(',') if ',' in value else value
 
     sequences = Sequences(database=database, filters=params)
 

@@ -132,11 +132,15 @@ def download_sequences_meta_data(request):
     database = request.headers.get('database', 'default')
     params = dict(request.GET.items())
 
-
-    sequences = Sequences(database=database, filters=params)
     if params:
         if "items_per_page" in params:
             del params["items_per_page"]
+
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
 
     data = sequences.get_sequences_meta_data_download()
     
@@ -157,10 +161,15 @@ def download_sequences(request):
     database = request.headers.get('database', 'default')
     params = dict(request.GET.items())
 
-    sequences = Sequences(database=database, filters=params)
     if params:
         if "items_per_page" in params:
             del params["items_per_page"]
+
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
 
     data = sequences.get_sequences_download()
     

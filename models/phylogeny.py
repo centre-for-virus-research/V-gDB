@@ -3,7 +3,7 @@ import csv
 from models.helpers import *
 from collections import Counter
 from collections import defaultdict
-import phylotreelib as pt
+# import phylotreelib as pt
     
 from models import sequences_helpers as sh
 
@@ -67,11 +67,11 @@ class Phylogeny:
 
         return results
 
-    def reroot_tree(self):
+    # def reroot_tree(self):
         
-        with pt.Nexustreefile("mytreefile.nexus") as treefile:
-            tree = treefile.readtree()
-            tree.rootminvar()
-            for tip in sorted(tree.leaves):
-                dist = tree.nodedist(tree.root, tip)
-                print(f"{tip:<12s} {dist:.3f}")
+    #     with pt.Nexustreefile("mytreefile.nexus") as treefile:
+    #         tree = treefile.readtree()
+    #         tree.rootminvar()
+    #         for tip in sorted(tree.leaves):
+    #             dist = tree.nodedist(tree.root, tip)
+    #             print(f"{tip:<12s} {dist:.3f}")

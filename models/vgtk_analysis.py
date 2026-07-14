@@ -12,7 +12,7 @@ from models.clade_assignment.clade_assignment import CladeAssignment
 from rest_framework import status
 from Bio import SeqIO
 from pathlib import Path
-
+from models import sequences_helpers as sh
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent # goes up from api/
@@ -22,7 +22,7 @@ RESOURCES_DIR = BASE_DIR / "resources"
 
 def blastn(tmp_dir, query_path, results_path, db_path):
     
-    if not os.path.exists(f"{db_path}.fa"):
+    if not os.path.exists(f"{db_path}"):
         raise ValueError("BLAST database not found, please message site administrator")
         
     db_file_name = os.path.basename(db_path)
@@ -74,7 +74,7 @@ def combine_query_and_ref(database, reference_accession, query_path):
         f.write(reference_alignment.strip() + "\n")
 
 
-def parse_query_tophits(query_tophits_file):
+def parse_query_tophits(database, query_tophits_file):
 
     results = {}
     with open(query_tophits_file, newline='') as file:
@@ -82,9 +82,14 @@ def parse_query_tophits(query_tophits_file):
         for row in reader:
             #query, ref, identity, strand,
             col1, col2, col3, col4 = row[0], row[1].split("|")[0], float(row[2]), row[3]
+            with connections[database].cursor() as cursor:
+                features = sh._get_features_from_primary_accession(cursor, col2)
+                reference_alignment_dict = sh._get_query_alignment_from_primary_accession(cursor, col2)
             results[col1] = {"blast_results":{
                                                 "ref":col2,
                                                 "identity":col3,
+                                                "features":features,
+                                                "reference_alignment": reference_alignment_dict["alignment"]
                                             }
                             }
 
@@ -139,7 +144,7 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
     query_path = inputs_path / "input.fa"
     results_path = tmp_dir / "results"
 
-    blast_db_path = BASE_DIR / "db" / "blast" / "db" 
+    blast_db_path = BASE_DIR / "db" / "blast" / "db.fa"
     
     print("BLASTS_DB", blast_db_path)
 
@@ -152,7 +157,7 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
     if not os.path.exists(query_tophits_file):
         raise ValueError("BLAST did not run.")
     
-    blast_results = parse_query_tophits(query_tophits_file)
+    blast_results = parse_query_tophits(database, query_tophits_file)
 
     # parse_blast_results(database=database, query_tophits=query_tophits_file, tmp_dir_input=inputs_path)
 
@@ -164,6 +169,7 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
 
 
     aligned_out = str(results_path) + "/input_seqs_with_ref_alignment.fa"
+    query_aligned_out = str(results_path) + "/input_seqs_alignment.fa"
 
 
     "ref_aln == reference sequences for all the reference sequences"
@@ -174,6 +180,7 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
                             taxon_minor=taxon_minor,
                             meta_data=meta_data,
                             aligned_out=aligned_out,
+                            query_aligned_out=query_aligned_out,
                             output_dir=results_path
                             )
 

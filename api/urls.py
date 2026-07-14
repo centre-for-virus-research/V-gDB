@@ -62,7 +62,7 @@ urlpatterns = [
     
     
     # MUTATIONS 
-    path('adaptive_mutations/', mutations.get_adaptive_mutations, name='get_adaptive_mutations'),
+    path('adaptive_mutations/', mutations.get_adaptive_mutations_chart, name='get_adaptive_mutations_chart'),
 
     path('adaptive_mutations_chart/<str:segment>', mutations.get_adaptive_mutations_chart, name='get_adaptive_mutations_chart'),
 

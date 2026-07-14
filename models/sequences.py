@@ -469,12 +469,10 @@ class Sequences:
                     else:
                         product = 'L protein'
 
-                    # clause, param = sh._add_genome_coverage_filters('product', product, exclude)
-                    # genome_coverage_clauses.append(clause)
-                    # genome_coverage_params.extend(param)
-                    # clause, param = sh._add_genome_coverage_filters('genome_coverage', value, exclude)
-                    # genome_coverage_clauses.append(clause)
-                    # genome_coverage_params.extend(param)
+                    clause, param = sh._add_genome_coverage_filters(product, value)
+                    genome_coverage_clauses = clause
+                    genome_coverage_params.extend(param)
+                    
 
             elif key in clade_filters:
                 if self.filters.get("exclude_clades"):
@@ -489,6 +487,17 @@ class Sequences:
                 clause, param = sh._add_standard_filters(key, value, exclude)
                 where_clauses.append(clause)
                 params.extend(param)
+
+        if genome_coverage_clauses:
+            comparison = 'IN'
+            if ("exclude_genome" in self.filters.keys()):
+                comparison = 'NOT IN'
+            
+            clause = sh._add_genome_filter(genome_coverage_clauses, comparison)
+            params.extend(genome_coverage_params)
+                
+            where_clauses.append(clause)
+            
 
         if taxonomy_clauses:
             

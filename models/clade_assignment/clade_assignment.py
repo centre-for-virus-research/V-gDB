@@ -6,7 +6,7 @@ import subprocess
 import pandas as pd
 from os.path import join
 import json
-
+from Bio import SeqIO
 
 
 class CladeAssignment:
@@ -31,6 +31,7 @@ class CladeAssignment:
         mafft_anysymbol=True,
         mafft_extra="",
         aligned_out="",
+        query_aligned_out="",
         # epa opts
         epa_model="TVM+F+R5",
         epa_redo=True,
@@ -111,6 +112,7 @@ class CladeAssignment:
 
         # derived outputs (inside outdir by default)
         self.aligned_out = os.path.abspath(aligned_out.strip() or join(self.outdir, "input_seqs_with_ref_alignment.fa"))
+        self.query_aligned_out = os.path.abspath(aligned_out.strip() or join(self.outdir, "input_seqs_alignment.fa"))
         self.epa_workdir = os.path.abspath(epa_workdir.strip() or join(self.outdir, "epa-ng"))
         self.jplace = os.path.abspath(jplace.strip() or join(self.epa_workdir, "epa_result.jplace"))
 
@@ -179,6 +181,29 @@ class CladeAssignment:
         self._check_file(self.meta_data, "Meta/matrix file (--meta-data)")
         self._ensure_dir(self.outdir)
 
+    def extract_queries(self):
+        refs = []
+
+        with open(self.ref_aln) as f:
+            for line in f:
+                if line.startswith(">"):
+                    refs.append(line[1:].strip().split()[0])
+
+        keep = False
+        name = None
+        seq = []
+        outputs = []
+        for record in SeqIO.parse(self.aligned_out, "fasta"):
+            name = record.description
+            header = ">" + record.description
+            sequence = str(record.seq)
+            if record.description is not None and name not in refs:
+                outputs.append({'header':record.description, 'seq':record.seq})
+        with open(self.query_aligned_out, "w") as out:
+            for line in outputs:
+                out.write(f">{line['header']}\n")
+                out.write(str(line["seq"]) + "\n")
+
     # ----------------------
     # Steps 1..4
     # ----------------------
@@ -196,14 +221,13 @@ class CladeAssignment:
             cmd += self.mafft_extra.strip().split()
 
         print("[mafft] writing:", self.aligned_out, file=sys.stderr)
-
         if self.dry_run:
             print("[cmd]", " ".join(cmd), ">", self.aligned_out, file=sys.stderr)
             return
         
         with open(self.aligned_out, "w") as fh:
             subprocess.run(cmd, stdout=fh, stderr=subprocess.DEVNULL, check=True)
-        print("FINISHED MAFFT")
+
 
     def run_epa_ng(self):
         print("STARTING EPA NG", self.aligned_out)
@@ -224,7 +248,8 @@ class CladeAssignment:
             "-s",
             self.ref_aln,    # now absolute
             "-q",
-            self.aligned_out,
+            # self.aligned_out,
+            self.query_aligned_out,
             "-T",
             str(self.threads),
         ]
@@ -392,6 +417,7 @@ class CladeAssignment:
 
         if self.steps in ("all", "mafft"):
             self.run_mafft()
+            self.extract_queries()
 
         if self.steps in ("all", "epa"):
             if (not self.dry_run) and (not os.path.exists(self.aligned_out)):
@@ -413,7 +439,7 @@ class CladeAssignment:
             if not self.dry_run:
                 self._check_file(self.major_per_query, "Major per_query.tsv")
                 self._check_file(self.minor_per_query, "Minor per_query.tsv")
-            self.update_matrix()
+            # self.update_matrix()
 
         print("[done] ok", file=sys.stderr)
         print("[outdir]", self.outdir, file=sys.stderr)

@@ -34,7 +34,6 @@ class Mutations:
             else:
                 where_clauses.append(f"hl.{key} = %s")
                 where_params.append(value)
-        print(where_clauses, where_params)
 
         where_str = ' AND '.join(where_clauses)
         columns_str = ', '.join(columns_picked)
@@ -56,12 +55,8 @@ class Mutations:
             where_str, filter_params, columns_str = self._add_filters(params)
             where_clauses.append(where_str)
 
-        # query = 'SELECT DISTINCT(class) FROM host_lineage WHERE  ORDER BY class ASC'
         where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
-        
-        # print(query, filter_params)
-        print("COLUMNS", columns_str)
-        print("SQL", where_sql)
+
 
         with connections[self.database].cursor() as cursor:
             
@@ -98,7 +93,7 @@ class Mutations:
 
             if alignment is None:
                 continue
-            sub_seq = alignment[int(cds_start): int(cds_end)+1]
+            sub_seq = alignment[cds_start: cds_end+1]
 
             cds_seq = sub_seq.replace("-", "")
             if len(cds_seq) < 3:
@@ -125,11 +120,23 @@ class Mutations:
 
             if alignment is None:
                 continue
-            sub_seq = alignment[int(cds_start): int(cds_end)+1]
-            cds_seq = sub_seq.replace("-", "")
-            if len(cds_seq) < 3:
-                continue
-            protein = str(Seq(cds_seq).translate(to_stop=False))
+            print(cds_start, cds_end)
+            if cds_start is None or cds_end is None:
+                sub_seq = ''
+            else:
+                sub_seq = alignment[cds_start: cds_end+1]
+            # cds_seq = sub_seq.replace("-", "")
+            # if len(sub_seq) < 3:
+            #     continue
+            # protein = str(Seq(sub_seq).translate(to_stop=False))
+
+            codons = [sub_seq[i:i+3] for i in range(0, len(sub_seq), 3)]
+            protein = ''
+            for codon in codons:
+                protein += translateCodon(codon)
+                
+
+            
             
             translated_results.append({
                 "primary_accession": primary_accession,
@@ -137,11 +144,14 @@ class Mutations:
                 "protein": protein,
                 "region":product
             })
+        print(translated_results)
 
         results = {"reference_protein": translated_ref_results, "translated_sequences": translated_results}
         # print(translated_results)
         return results
     
+
+    # THIS ONE IS FOR FLU
     def get_adaptive_mutations_chart(self, segment):
         
         pb2_ref_seq = "ATGGAAAGAATAAAAGAACTAAGAGATCTAATGTCGCAGTCCCGCACTCGCGAGATACTAACAAAAACCACTGTGGATCATATGGCCATAATCAAGAAATACACATCAGGAAGACAAGAGAAGAACCCTGCTCTCAGAATGAAATGGATGATGGCAATGAAATATCCAATCACAGCAGACAAGAGAATAATGGAGATGATTCCTGAAAGGAATGAGCAAGGACAAACGCTTTGGAGCAAGACAAATGATGCTGGGTCGGACAGAGTGATGGTGTCTCCCCTAGCTGTAACTTGGTGGAACAGGAATGGGCCGACAACAAGTACAGTCCATTATCCAAAGGTTTACAAAACATACTTTGAGAAGGTTGAAAGGTTAAAACATGGAACCTTCGGTCCCGTTCATTTCCGAAACCAAGTTAAAATACGTCGCCGGGTGGATATAAACCCGGGCCATGCAGATCTCAGTGCTAAAGAAGCACAAGATGTTATCATGGAGGTCGTTTTCCCAAATGAAGTGGGAGCTAGAATATTGACATCAGAGTCGCAATTGACAATAACAAAAGAGAAGAAAGAAGAGCTCCAGGATTGTAAAATTGCTCCTTTAATGGTGGCATACATGTTGGAAAGAGAACTGGTCCGCAAAACCAGATTTCTACCGGTAGCAGGCGGAACAAGCAGTGTGTACATTGAGGTATTGCATTTGACTCAAGGGACCTGTTGGGAACAGATGTACACTCCCGGCGGAGAAGTAAGAAATGATGATGTTGACCAGAGTTTGATCATCGCTGCCAGAAACATTGTTAGGAGAGCAACAGTATCAGCGGACCCACTGGCATCACTCTTGGAGATGTGTCACAGCACACAAATTGGGGGAATAAGGATGGTGGACATCCTTAGGCAAAACCCAACTGAGGAGCAAGCTGTGGATATATGCAAAGCAGCAATGGGTTTGAGGATCAGTTCATCCTTTAGCTTTGGAGGCTTCACTTTCAAAAGAACAAATGGATCATCCGTCAAGAAGGAAGAGGAAGTGCTTACAGGCAACCTCCAAACATTGAAAATAAAAGTACATGAGGGGTATGAAGAATTCACAATGGTTGGGCGGAGAGCAACAGCTATCCTGAGGAAAGCAACTAGAAGGCTGATTCAGTTGATAGTAAGTGGAAGAGATGAACAATCAATCGCTGAAGCGATCATTGTAGCAATGGTGTTCTCACAGGAGGATTGCATGATAAAGGCAGTCCGAGGCGATCTGAATTTCGTGAACAGAGCAAACCAAAGATTGAACCCCATGCATCAACTCCTGAGGCACTTCCAAAAAGATGCAAAAGTGCTGTTTCAGAACTGGGGAATTGAACCTATTGACAATGTCATGGGGATGATCGGAATATTACCTGACATGACTCCAAGCGCAGAGATGTCACTGAGAGGAGTGAGAGTTAGTAAGATGGGAGTAGATGAATATTCCAGCACGGAGAGAGTGGTGGTGAGTATTGACCGTTTCTTGAGGGTCCGAGATCAGCAGGGGAACGTACTCTTATCTCCTGAAGAGGTTAGTGAAACACAGGGAACAGAGAAGTTGACAATAACATATTCATCCTCAATGATGTGGGAAATCAACGGTCCTGAGTCAGTGCTTGTTAACACTTATCAATGGATCATCAGGAATTGGGAGACTGTAAAGATTCAATGGTCTCAAGATCCCACAATGCTGTACAATAAGATGGAGTTTGAATCGTTCCAATCCTTGGTGCCAAAGGCTGCCAGAAGCCAATATAGTGGATTTGTGAGAACACTATTCCAACAGATGCGTGATGTTTTGGGGACATTTGATACTGTCCAAATAATCAAGCTGCTACCATTTGCAGCAGCCCCACCGGAGCCGAGCAGAATGCAGTTTTCTTCTCTAACTGTGAATGTGAGAGGCTCAGGAATGAGAATACTCGTGAGGGGTAACTCCCCCGTGTTCAACTACAACAAGGCAACCAAAAGGCTTACAGTCCTCGGAAAGGACGCAGGTGCATTAACAGAAGATCCAGACGAGGGAACAGCCGGGGTGGAATCTGCAGTATTGAGGGGATTCCTAATTCTAGGCAGAGAGGACAAAAGATATGGACCCGCATTGAGCATCAATGAACTGAGCAATCTTGCAAAAGGGGAGAAGGCTAATGTATTGATAATGCAAGGAGACGTGGTGTTGGTAATGAAACGGAAACGGGACTTTAGCATACTTACTGACAGCCAGACAGCGACCAAAAGAATTCGGATGGCCATCAAT---TAG"
@@ -216,13 +226,6 @@ class Mutations:
         self.codons = codons
         self.region = region
         alignments = self.__get_alignments()
-
-
-
-
-
-
-
 
         mutations = self.__parse_mutations(alignments)
         return mutations
@@ -308,28 +311,6 @@ class Mutations:
         print(alignments)
         return alignments
 
-    def __get_alignments2(self):
-        """
-        Fetch sequence alignments for the given hosts.
-
-        Returns:
-            list: List of alignment and metadata records.
-        """
-        formatted_hosts = ', '.join(['%s'] * len(self.hosts))
-        query = f'''
-            SELECT s.*, m.*, f.* 
-            FROM sequence_alignment s 
-            LEFT JOIN meta_data m ON s.sequence_id = m.primary_accession 
-            LEFT JOIN features f ON s.sequence_id = f.accession 
-            WHERE m.host IN ({formatted_hosts}) 
-            AND f.product = '{self.region}';
-        '''
-
-        with connections[self.database].cursor() as cursor:
-            cursor.execute(query, self.hosts)
-            alignments = dictfetchall(cursor)
-
-        return alignments
 
     def __get_master_reference(self):
         """

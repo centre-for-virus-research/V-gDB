@@ -45,6 +45,7 @@ def build_csv_file(data, file_name):
         data (list): List of dictionaries containing metadata to write.
         file_name (str): Path to the output CSV file.
     """
+    print("DATA", data)
     with open(file_name, "w", newline="") as f:
         writer = csv.writer(f)
         # Write header

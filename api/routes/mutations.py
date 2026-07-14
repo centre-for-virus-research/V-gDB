@@ -5,28 +5,48 @@ from models.mutations import Mutations
 
 @api_view(['GET'])
 def get_adaptive_mutations(request):
-
+    print("WE ARE IN HERE HELLO")
     database = request.headers.get('database', 'default')
+    params = dict(request.GET.items())
+    final_params = {}
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+        if "species" in params:
+            final_params = {"species":params["species"]}
+        if "genus" in params:
+            final_params = {"genus":params["genus"]}
+        if "family" in params:
+            final_params = {"family":params["family"]}
+        if "class" in params:
+            final_params = {"class":params["class"]}
+        if "phylum" in params:
+            final_params = {"phylum":params["phylum"]}
+
 
     mutations = Mutations(database=database)
-    data = mutations.get_adaptive_mutations()
+
+    if database == "RABV" or "default" and params:
+        data = mutations.get_adaptive_mutations_chart_RABV(final_params)
+    else :
+        data = mutations.get_adaptive_mutations_chart(segment)
 
     return Response(data)
 
+# @api_view(['GET'])
+# def get_adaptive_mutations_chart(request, segment):
+
+#     database = request.headers.get('database', 'default')
+
+#     mutations = Mutations(database=database)
+#     data = mutations.get_adaptive_mutations_chart(segment)
+
+#     return Response(data)
+
+
 @api_view(['GET'])
 def get_adaptive_mutations_chart(request, segment):
-
-    database = request.headers.get('database', 'default')
-
-    mutations = Mutations(database=database)
-    data = mutations.get_adaptive_mutations_chart(segment)
-
-    return Response(data)
-
-
-@api_view(['GET'])
-def get_adaptive_mutations_chart(request, segment):
-
+    print("WE ARE IN HERE HELLO")
     database = request.headers.get('database', 'default')
     params = dict(request.GET.items())
     final_params = {}

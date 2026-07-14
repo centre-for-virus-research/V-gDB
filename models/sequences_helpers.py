@@ -126,8 +126,16 @@ def _add_exclude_clade_filters(key, major, minor=None, exclude=True):
 
     return where_clauses, params
 
-def _add_genome_coverage_filters():
-    return
+def _add_genome_coverage_filters(product, coverage):
+
+    params, where_clauses = [], []
+    # where_clauses = f""" product = %s AND genome_coverage >= %s """
+    where_clauses.append("product = %s")
+    where_clauses.append("genome_coverage >= %s")
+    params.append(product)
+    params.append(coverage)
+
+    return where_clauses, params
 
 def _add_region_filters(clauses, comparison):
 
@@ -140,16 +148,19 @@ def _add_region_filters(clauses, comparison):
                 """
     return region_sql
 
-    # where_clauses, params = _add_standard_filters("display_name", value, exclude)
+def _add_genome_filter(clauses, comparison):
+    print(clauses)
+    where_str = ' AND '.join(clauses)
+    print(where_str)
+    sql = f"""
+            primary_accession {comparison} (
+                SELECT accession
+                FROM features
+                WHERE {where_str}
+            )
+            """
+    return sql
 
-    # region_sql = f"""
-    #             country_validated IN (
-    #                 SELECT m49_code
-    #                 FROM m49_country 
-    #                 WHERE {where_clauses})
-    #             """
-    
-    # return region_sql, params
 def _add_taxonomy_host_filters(value, comparison):
     # taxa_where_str = ' AND '.join(clauses)
     params = []

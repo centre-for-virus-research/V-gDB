@@ -88,7 +88,7 @@ def run_phylogenetic_clade_assignment_analysis(request):
     finally:
         # Clean up everything after analysis
         if job_dir.exists() and job_dir.is_dir():
-            # shutil.rmtree(job_dir)
+            shutil.rmtree(job_dir)
             print(f"Deleted temporary job folder: {job_dir}")
 
     # Return the response after successful analysis

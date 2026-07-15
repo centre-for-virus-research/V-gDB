@@ -176,16 +176,16 @@ def _add_taxonomy_host_filters(value, comparison):
     print("COMMON ", common_sql, common_param)
     print("-----")
     recursive_sql = f""" WITH RECURSIVE taxa_tree(id) AS (
-                    SELECT parent_taxa_id
-                    FROM host_children
-                    WHERE parent_taxa_id IN ({common_sql})
+                    SELECT lineage_taxa_id
+                    FROM host_lineage_lookup
+                    WHERE lineage_taxa_id IN ({common_sql})
 
                 UNION
 
-                    SELECT hc.child_taxa_id
-                    FROM host_children hc
+                    SELECT hll.desc_taxa_id
+                    FROM host_lineage_lookup hll
                     JOIN taxa_tree tt
-                    ON hc.parent_taxa_id = tt.id 
+                    ON hll.lineage_taxa_id = tt.id 
                 )
             SELECT DISTINCT id FROM taxa_tree;
             """
@@ -205,6 +205,51 @@ def _add_taxonomy_host_filters(value, comparison):
         clause, param = _add_standard_filters("host_taxa_id", ids, False)
 
     return clause, param
+
+# def _add_taxonomy_host_filters(value, comparison):
+#     # taxa_where_str = ' AND '.join(clauses)
+#     params = []
+#     common_clause, common_param = _add_standard_filters("common_name", value, False)
+
+#     common_sql = f""" SELECT taxa_id FROM host_taxa WHERE {common_clause} """
+
+#     sql = f""" ( host_taxa_id {comparison} ( {common_sql} ) 
+#                 )
+#             """
+    
+#     params.extend(common_param)
+#     print("COMMON ", common_sql, common_param)
+#     print("-----")
+#     recursive_sql = f""" WITH RECURSIVE taxa_tree(id) AS (
+#                     SELECT parent_taxa_id
+#                     FROM host_children
+#                     WHERE parent_taxa_id IN ({common_sql})
+
+#                 UNION
+
+#                     SELECT hc.child_taxa_id
+#                     FROM host_children hc
+#                     JOIN taxa_tree tt
+#                     ON hc.parent_taxa_id = tt.id 
+#                 )
+#             SELECT DISTINCT id FROM taxa_tree;
+#             """
+#     print(recursive_sql)
+#     with connections["RABV"].cursor() as cursor:
+#         cursor.execute(recursive_sql, params)
+#         rows = cursor.fetchall()
+#         ids = [row[0] for row in rows]
+
+#     print("IDS", ids)
+
+#     # return recursive_sql, params
+#     if len(ids) == 0:
+#         clause = sql 
+#         param = params
+#     else:
+#         clause, param = _add_standard_filters("host_taxa_id", ids, False)
+
+#     return clause, param
 
 def _add_taxonomy_species_filters(value, comparison):
     # taxa_where_str = ' AND '.join(clauses)

@@ -5,20 +5,6 @@ from django.db import connections
 from models.helpers import dictfetchall  # Ensure this function is imported
 
 
-
-@api_view(['GET'])
-def search_phylum(request):
-
-    database = request.headers.get('database', 'default')
-
-    with connections[database].cursor() as cursor:
-
-        cursor.execute("SELECT DISTINCT(phylum) FROM host_lineage WHERE phylum IS NOT NULL")
-        data = dictfetchall(cursor)
-
-    return Response(data)
-
-
 @api_view(['GET'])
 def search_primary_accession_ids(request, query):
 
@@ -60,13 +46,12 @@ def search_pubmed_ids(request, query):
 
 
 @api_view(['GET'])
-def search_hosts(request, query):
+def search_hosts(request):
 
     database = request.headers.get('database', 'default')
 
     with connections[database].cursor() as cursor:
-
-        cursor.execute("SELECT DISTINCT(host) FROM meta_data WHERE host LIKE %s;", [f"%{query}%"])
+        cursor.execute("SELECT DISTINCT(common_name) as host, taxa_id FROM host_taxa where common_name IS NOT NULL;")
         data = dictfetchall(cursor)
 
     return Response(data)
@@ -79,14 +64,7 @@ def search_country(request):
     with connections[database].cursor() as cursor:
 
         cursor.execute("SELECT DISTINCT(m49_code) as id, display_name FROM m49_country;")
-        
-        # if query == "null":
-            
-        # else:
-        #     cursor.execute("SELECT DISTINCT(m49_code), display_name FROM m49_country WHERE display_name LIKE %s;", [f"%{query}%"])
-        
         data = dictfetchall(cursor)
-
 
     return Response(data)
 
@@ -129,17 +107,6 @@ def search_m49_region(request):
 
     return Response(data)
 
-@api_view(['GET'])
-def search_region(request):
-
-    database = request.headers.get('database', 'default')
-
-    with connections[database].cursor() as cursor:
-
-        cursor.execute("SELECT DISTINCT(m49_region_id) as display_name FROM m49_country where m49_region_id IS NOT NULL")
-        data = dictfetchall(cursor)
-
-    return Response(data)
 
 @api_view(['GET'])
 def search_protein_name(request):

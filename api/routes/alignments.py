@@ -7,7 +7,7 @@ from models.helpers import *
 
 from urllib.parse import unquote
 
-from models.alignment import Alignment
+# from models.alignment import Alignment
 from models.sequences import Sequences
 
 

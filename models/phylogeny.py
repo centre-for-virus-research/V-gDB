@@ -30,7 +30,9 @@ def _get_meta_data_for_tree(cursor, segment):
         query = f"""SELECT md.primary_accession, md.EPA_major_clade, md.EPA_minor_clade, md.collection_year, c.display_name  as country
                     FROM meta_data md 
                     LEFT JOIN m49_country c ON c.m49_code = md.country_validated
+                    
                 """
+        # LEFT JOIN host_lineage h ON h.taxa_id = md.host_taxa_id
         params = None
     data = fetch_all(cursor, query, params)
 
@@ -43,7 +45,7 @@ class Phylogeny:
         self.database = database  
         self.filters = filters
 
-    def get_tree(self):
+    def get_trees(self):
 
         tree_type=None
         segment=None

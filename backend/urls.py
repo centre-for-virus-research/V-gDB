@@ -16,27 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .views import home, installation, schema, check_db_connection, api_manual, mutations, examples, python_tools, about, gui, api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    # path('api/', include('api.sequences.urls')),  
-    # path('api/', include('api.helpers.urls')),
-    # path('api/', include('api.filters.urls')),
-    # path('api/', include('api.routes.urls')),
-
     path('django-rq/', include('django_rq.urls')),
-    # path('api/', include('api.urls_hcv'))
-
-    path('', home, name='home'),
-    path('installation/', installation, name='installation'),
-    path('schema/', schema, name='schema'),
-    path('api_manual/', api_manual, name='api_manual'),
-    path('mutations/', mutations, name='mutations'),
-    path('examples', examples, name='examples'),
-    path('python_tools', python_tools, name='python_tools'),
-    path('about', about, name='about'),
-    path('gui', gui, name='gui'),
-    path('check-db-connection/', check_db_connection, name='check_db_connection'),
 ]

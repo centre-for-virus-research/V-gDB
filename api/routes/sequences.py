@@ -82,7 +82,7 @@ def get_global_distribution_of_sequences(request):
     if "EPA_minor_clade" in params:
         if params["EPA_minor_clade"] == "null":
             del params["EPA_minor_clade"]
-
+    
     if params:
         for key, value in params.items():
             params[key] = value.split(',') if ',' in value else value
@@ -131,13 +131,20 @@ def download_sequences_meta_data(request):
     database = request.headers.get('database', 'default')
     params = dict(request.GET.items())
 
-
-    sequences = Sequences(database=database, filters=params)
     if params:
         if "items_per_page" in params:
             del params["items_per_page"]
 
-        data = sequences.get_sequences_download()
+    if params:
+        for key, value in params.items():
+            if key == "metadata_columns":
+                continue
+            else:
+                params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
+
+    data = sequences.get_sequences_meta_data_download()
     
     
     file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_meta_data.csv'
@@ -150,31 +157,33 @@ def download_sequences_meta_data(request):
 
         return response
     
-
-
-    
-# THIS IS BEING USED IN THE MUTATION GUI
-# TODO: REMOVE this and use callback version to get host
 @api_view(['GET'])
-def get_host_species(request):
+def download_sequences(request):
+
     database = request.headers.get('database', 'default')
+    params = dict(request.GET.items())
+
+    if params:
+        if "items_per_page" in params:
+            del params["items_per_page"]
+
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
+
+    data = sequences.get_sequences_download()
     
-    with connections[database].cursor() as cursor:
-        cursor.execute('SELECT DISTINCT(host) FROM meta_data WHERE host IS NOT NULL;')
-        result = dictfetchall(cursor)
-    return Response(result)
+    
+    file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_sequences.fasta'
+    build_fasta_file(data, file_name)
 
+    with open(file_name, 'r') as file:
+        response = HttpResponse(file, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename='+file_name
+        os.remove(file_name)
 
-
-
-@api_view(['GET'])
-def advanced_filter(request, query):
-    database = request.headers.get('database', 'default')
-    query="SELECT * FROM meta_data WHERE"+query
-
-    with connections[database].cursor() as cursor:
-        cursor.execute(query)
-        result = dictfetchall(cursor)
-    return Response(result)
+        return response
 
 

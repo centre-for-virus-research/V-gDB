@@ -2,20 +2,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from models.helpers import *
-from django.http import HttpResponse
 from models.helpers import *
 from rest_framework import status
 from urllib.parse import unquote
 
-from models.alignment import Alignment
-from models.sequences import Sequences
 from io import StringIO
-import tempfile
 import uuid
 from pathlib import Path
-import datetime
-import os
-import json
 from Bio import SeqIO
 import shutil
 
@@ -37,6 +30,10 @@ def run_phylogenetic_clade_assignment_analysis(request):
     if not fasta_text:
         return Response({"error": "No FASTA provided"}, status=400)
 
+    fasta_text = "\n".join(
+        line.split()[0] if line.startswith(">") else line
+        for line in fasta_text.splitlines()
+    )
     # # # Unique job id
     # job_id = "d23a0b10-1335-4668-b351-2c954e7c55df"
     job_id = str(uuid.uuid4())

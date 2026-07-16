@@ -5,18 +5,6 @@ from django.db import connections
 from models.phylogeny import Phylogeny
 
 
-@api_view(['GET'])
-def get_tree(request):
-
-    database = request.headers.get('database', 'default')
-    params = dict(request.GET.items())
-    
-    phylogeny = Phylogeny(database=database, filters=params)
-
-    tree = phylogeny.get_tree()
-
-        
-    return Response(tree)
 
 @api_view(['GET'])
 def get_trees(request):

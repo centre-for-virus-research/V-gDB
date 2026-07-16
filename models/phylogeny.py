@@ -3,30 +3,21 @@ import csv
 from models.helpers import *
 from collections import Counter
 from collections import defaultdict
-
+# import phylotreelib as pt
     
 from models import sequences_helpers as sh
 
-def _get_trees(cursor):
-
-    query = "SELECT name FROM trees"
-    params = None
-    
-    data = fetch_all(cursor, query, params)
-    
-    return data
 
 def _get_tree_from_type(cursor, tree_type, segment):
-    print("TREE TYPE", tree_type)
-    if segment or tree_type:
-        query = "SELECT * FROM trees WHERE name = %s;"
-        params = [tree_type]
+
+    if segment:
+        query = "SELECT * FROM trees WHERE tree_type = %s AND segment = %s;"
+        params = [tree_type, segment]
     else:
-        query = "SELECT * FROM trees WHERE name = %s;"
+        query = "SELECT * FROM trees"
         params = None
-        # params = ["usher_AF009606.aligned_merged_MSA_dedup"]
     
-    data = fetch_one(cursor, query, params)
+    data = fetch_all(cursor, query, params)
     
     return data
 
@@ -34,18 +25,11 @@ def _get_meta_data_for_tree(cursor, segment):
     if segment:
         query = f"""SELECT Parsed_strain, host, serotype
                     FROM meta_data WHERE segment = %s;""" 
-
-        
-        params = [segment]    
+        params = [segment]
     else:
-        query = f"""SELECT md.primary_accession, md.EPA_major_clade, md.EPA_minor_clade, md.collection_year, c.display_name  as country, h.*
+        query = f"""SELECT md.primary_accession, md.EPA_major_clade, md.EPA_minor_clade, md.collection_year, c.display_name  as country
                     FROM meta_data md 
-                    JOIN m49_country c ON c.m49_code = md.country_validated
-                    JOIN host_lineage h ON h.taxa_id = md.host_taxa_id
-                """
-        query = f"""SELECT md.primary_accession, md.*, c.display_name  as country
-                    FROM meta_data md 
-                    JOIN m49_country c ON c.m49_code = md.country_validated
+                    LEFT JOIN m49_country c ON c.m49_code = md.country_validated
                 """
         params = None
     data = fetch_all(cursor, query, params)
@@ -66,7 +50,7 @@ class Phylogeny:
 
         if self.filters:
             tree_type = self.filters["tree_type"]
-            # segment = self.filters["segment"]
+            segment = self.filters["segment"]
 
         results = {}
         with connections[self.database].cursor() as cursor:
@@ -82,13 +66,11 @@ class Phylogeny:
 
         return results
 
-    def get_trees(self):
-
-        with connections[self.database].cursor() as cursor:
-
-            trees = _get_trees(cursor)
-            results = {
-                        "trees": trees
-                        }   
-
-        return results
+    # def reroot_tree(self):
+        
+    #     with pt.Nexustreefile("mytreefile.nexus") as treefile:
+    #         tree = treefile.readtree()
+    #         tree.rootminvar()
+    #         for tip in sorted(tree.leaves):
+    #             dist = tree.nodedist(tree.root, tip)
+    #             print(f"{tip:<12s} {dist:.3f}")

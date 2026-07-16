@@ -117,7 +117,12 @@ urlpatterns = [
     path('filters/search_pubmed_ids/<str:query>', search.search_pubmed_ids, name='search_pubmed_ids'),
     path('filters/search_hosts/<str:query>', search.search_hosts, name='search_hosts'),
     path('filters/search_primary_accession_ids/<str:query>', search.search_primary_accession_ids, name='search_primary_accession_ids'),
-    path('filters/search_country/<str:query>', search.search_country, name='search_country'),
+    path('filters/search_country/', search.search_country, name='search_country'),
+
+
+    path('filters/search_m49_intermediate/', search.search_m49_intermediate, name='search_m49_intermediate'),
+    path('filters/search_m49_region/', search.search_m49_region, name='search_m49_region'),
+    path('filters/search_m49_sub_region/', search.search_m49_sub_region, name='search_m49_sub_region'),
     path('filters/search_region/', search.search_region, name='search_region'),
     path('filters/search_phylum/', search.search_phylum, name='search_phylum'),
     path('filters/search_protein_name/', search.search_protein_name, name='search_protein_name'),

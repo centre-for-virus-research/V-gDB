@@ -31,6 +31,7 @@ class Sequences:
         params = []
         filter_params = []
         print('DATABASE', self.database)
+        print(self.filters)
 
         if self.filters:
             # where_str, filter_params = self._add_filters()
@@ -361,20 +362,6 @@ class Sequences:
 
         return metadata_countries
 
-# WITH RECURSIVE taxa_tree(id) AS (
-#     SELECT parent_taxa_id
-#     FROM host_children
-#     WHERE parent_taxa_id IN (9031)
-
-#     UNION
-
-#     SELECT hc.child_taxa_id
-#     FROM host_children hc
-#     JOIN taxa_tree tt
-#       ON hc.parent_taxa_id = tt.id
-# )
-# SELECT DISTINCT id FROM taxa_tree;
-
 
     def _add_filters_refactored(self):
         comparison_filters = {
@@ -386,20 +373,30 @@ class Sequences:
                 'creation_year_upper': ('create_date', '<=')
             }
         
-        taxonomy_filters = ['phylum', 'class', 'order_category', 'family', 'genus', 'species']
-        standard_filters = ['primary_accession', 'isolate', 'exclusion_status', 'EPA_major_clade', 'EPA_minor_clade', 'accession_type', 'country_validated']
-        region_filters = ['country']
+        taxonomy_filters = ['phylum', 'class', 'order_category', 'family', 'genus', 'species', 'host']
+        standard_filters = ['primary_accession', 'isolate', 'exclusion_status', 'accession_type', 'country_validated']
+        clade_filters = ['EPA_major_clade', 'EPA_minor_clade']
+        region_filters = ['country', 'm49_region_id', 'm49_sub_region_id', 'm49_intermediate_region_id', 'm49_code']
+        genome_coverage_filters = ['full_genome', 'nucleoprotein', 'phosphoprotein', 'm2_protein', 'glycoprotein', 'l_protein', 'coreprotein', 'envelope_protein_E1', 'envelope_protein_E2', 'protein_p7', 'NS2', 'NS3', 'NS4A', 'NS4B', 'NS5B']
+
 
         where_clauses, params = [], []
         taxonomy_clauses, taxonomy_params = [], []
+        region_clauses, region_params = [], []
+        genome_coverage_clauses, genome_coverage_params = [], []
 
         for key, value in self.filters.items():
             exclude = False
             if key.startswith("exclude_"): 
                 exclude = True
                 key=key[8:]
-                if key == 'exclude_taxa':
+                if key == 'taxa':
                     continue
+                if key == 'clades':
+                    continue
+                if key == 'coverage':
+                    continue
+
             if key in comparison_filters:
                 col, op = comparison_filters[key]
                 where_clauses.append(f"{col} {op} %s")
@@ -410,15 +407,68 @@ class Sequences:
                 taxonomy_clauses.append(clause)
                 taxonomy_params.extend(param)
 
+            elif key in region_filters:
+                if key=='country':
+                    key='display_name'
+                clause, param = sh._add_standard_filters(key, value, exclude)
+                region_clauses.append(clause)
+                region_params.extend(param)
+
+            elif key in genome_coverage_filters:
+                if key == 'full_genome':
+                    clause, param = sh._add_standard_filters('calculated_genome_coverage', value, exclude)
+                    where_clauses.append(clause)
+                    params.extend(param)
+                else:
+                    protein_map = {
+                        'nucleoprotein': 'nucleoprotein N',
+                        'phosphoprotein': 'phosphoprotein M1',
+                        'm2_protein': 'M2 protein',
+                        'glycoprotein': 'transmembrane glycoprotein G',
+                        'l_protein': 'L protein',
+                        'coreprotein': 'core protein',
+                        'envelope_protein_E1': 'envelope protein E1',
+                        'envelope_protein_E2': 'envelope protein E2',
+                        'protein_p7': 'protein p7',
+                        'NS2': 'nonstructural protein NS2',
+                        'NS3': 'protease/helicase protein NS3',
+                        'NS4A': 'nonstructural protein NS4A',
+                        'NS4B': 'nonstructural protein NS4B',
+                        'NS5B': 'RNA-dependent RNA polymerase NS5B'
+                    }
+
+                    product = protein_map.get(key)
+
+                    if product:
+                        clause, param = sh._add_genome_coverage_filters(product, value)
+                        genome_coverage_clauses = clause
+                        genome_coverage_params.extend(param)
+                            
+
+            elif key in clade_filters:
+                if self.filters.get("exclude_clades"):
+                    exclude = True
+                    clause, param = sh._add_exclude_clade_filters(key, self.filters.get("EPA_major_clade"), self.filters.get("EPA_minor_clade"), exclude)
+                else:
+                    clause, param = sh._add_standard_filters(key, value, exclude)
+                where_clauses.append(clause)
+                params.extend(param)
+
             elif key in standard_filters:
                 clause, param = sh._add_standard_filters(key, value, exclude)
                 where_clauses.append(clause)
                 params.extend(param)
 
-            elif key in region_filters:
-                clause, param = sh._add_region_filters(value, exclude)
-                where_clauses.append(clause)
-                params.extend(param)
+        if genome_coverage_clauses:
+            comparison = 'IN'
+            if ("exclude_genome" in self.filters.keys()):
+                comparison = 'NOT IN'
+            
+            clause = sh._add_genome_filter(genome_coverage_clauses, comparison)
+            params.extend(genome_coverage_params)
+                
+            where_clauses.append(clause)
+            
 
         if taxonomy_clauses:
             
@@ -429,109 +479,26 @@ class Sequences:
             if ("species" in self.filters.keys()):
                 clause, param = sh._add_taxonomy_species_filters(self.filters["species"], comparison)
                 params.extend(param)
+            elif ("host" in self.filters.keys()):
+                clause, param = sh._add_taxonomy_host_filters(self.filters["host"], comparison)
+                params.extend(param)
             else:
                 clause = sh._add_taxonomy_filters(taxonomy_clauses, comparison)
                 params.extend(taxonomy_params)
                 
             where_clauses.append(clause)
 
-        where_str = ' AND '.join(where_clauses)
-
-        print(where_str, params)
-
-        return where_str, params
+        if region_clauses:
+            comparison = 'IN'
+            if ("exclude_region" in self.filters.keys()):
+                comparison = 'NOT IN'
+            
+            clause = sh._add_region_filters(region_clauses, comparison)
+            params.extend(region_params)
                 
+            where_clauses.append(clause)
 
-
-
-    def _add_filters(self):
-        comparison_filters = {
-                'length_lower': ('real_length', '>='),
-                'length_upper': ('real_length', '<='),
-                'collection_year_lower': ('collection_year', '<='),
-                'collection_year_upper': ('collection_year', '>='),
-                'creation_year_lower': ('create_date', '>='),
-                'creation_year_upper': ('create_date', '<=')
-            }
-        
-        taxonomy_filters = ['phylum', 'class', 'order_category', 'family', 'genus', 'species']
-
-
-        where_clauses, params = [], []
-        taxonomy_clauses, taxonomy_params = [], []
-
-        for key, value in self.filters.items():
-            if key.startswith("exclude_"): 
-                if key == 'exclude_taxa':
-                    continue
-                key=key[8:]
-                # continue
-                
-
-            if key in comparison_filters:
-                col, op = comparison_filters[key]
-                where_clauses.append(f"{col} {op} %s")
-                params.append(int(value))
-                
-
-            elif key == 'region':
-                where_clauses.append(
-                    "primary_accession IN ("
-                    "SELECT m.primary_accession"
-                    "FROM m49_country r "
-                    "JOIN meta_data m ON m.country_validated = CAST(r.m49_code AS TEXT) "
-                    "WHERE r.m49_region_id = %s)"
-                )
-                params.append(value)
-
-            elif key in taxonomy_filters:
-                if isinstance(value, list):
-                    comparison = "IN"
-                    if ("exclude_taxa" in self.filters):
-                        comparison = "NOT IN"
-
-                    if (key == 'species'):
-                        taxonomy_clauses.append(f"({key} {comparison} ({placeholders}) OR ({key} {comparison} ({placeholders})")
-
-                    placeholders = ', '.join(['%s'] * len(value))
-                    taxonomy_clauses.append(f"{key} {comparison} ({placeholders})")
-                    taxonomy_params.extend(value)
-                else:
-                    comparison = "="
-                    if ("exclude_taxa" in self.filters):
-                        comparison = "!="
-                    taxonomy_clauses.append(f"{key} {comparison} %s")
-                    taxonomy_params.append(value)
-
-            else:
-
-                if isinstance(value, list):
-                    comparison = "IN"
-                    if ("exclude_"+key in self.filters):
-                        comparison = "NOT IN"
-
-                    placeholders = ', '.join(['%s'] * len(value))
-                    where_clauses.append(f"{key} {comparison} ({placeholders})")
-                    params.extend(value)
-                else:
-                    comparison = "="
-                    if ("exclude_"+key in self.filters):
-                        comparison = "!="
-                    where_clauses.append(f"{key} {comparison} %s")
-                    params.append(value)
-
-        if taxonomy_clauses:
-            taxa_where_str = ' AND '.join(taxonomy_clauses)
-            where_clauses.append(
-                f"""host_taxa_id IN (
-                        SELECT taxa_id
-                        FROM host_lineage
-                        WHERE {taxa_where_str}
-                    )"""
-            )
-            params.extend(taxonomy_params)
-
-
+    
         where_str = ' AND '.join(where_clauses)
 
         print(where_str, params)

@@ -103,7 +103,7 @@ def _get_mutation_prevalence(cursor, id):
                     """
 
     meta_data_query = f"""
-                    SELECT sa.sequence_id, sa.alignment, f.reference_accession, md.host, md.nearest_reference_genotype, md.nearest_reference_subtype, md.host_scientific_name, md.country
+                    SELECT sa.sequence_id, sa.alignment, f.reference_accession, md.host, md.EPA_major_clade, md.EPA_minor_clade, md.host_scientific_name, md.country
                     FROM sequence_alignment sa 
                     LEFT JOIN features f ON f.accession = sa.sequence_id
                     LEFT JOIN meta_data md ON md.primary_accession = sa.sequence_id
@@ -112,16 +112,16 @@ def _get_mutation_prevalence(cursor, id):
                 """
        
     genotype_count_query = f"""
-                        SELECT nearest_reference_genotype, COUNT(nearest_reference_genotype) as count
+                        SELECT EPA_major_clade, COUNT(EPA_major_clade) as count
                         FROM meta_data
                         WHERE exclusion_status = 0
-                        GROUP BY nearest_reference_genotype
+                        GROUP BY EPA_major_clade
                     """
     subtype_count_query = f"""
-                        SELECT nearest_reference_genotype, nearest_reference_subtype, COUNT(nearest_reference_subtype) as count
+                        SELECT EPA_major_clade, EPA_minor_clade, COUNT(EPA_minor_clade) as count
                         FROM meta_data
                         WHERE exclusion_status = 0
-                        GROUP BY nearest_reference_genotype, nearest_reference_subtype
+                        GROUP BY EPA_major_clade, EPA_minor_clade
                     """
     params_reference = [f"%{gene}%", id]
     params_md = [f"%{gene}%", id]
@@ -176,7 +176,7 @@ def _get_mutation_prevalence(cursor, id):
 # #                     )
 # #                         """
 #     # meta_data_query = f"""
-#     #         SELECT sa.header as sequence_id, sa.sequence as alignment, f.reference_accession, f.cds_start, f.cds_end, md.host, md.nearest_reference_genotype, md.nearest_reference_subtype, md.host_scientific_name, md.country
+#     #         SELECT sa.header as sequence_id, sa.sequence as alignment, f.reference_accession, f.cds_start, f.cds_end, md.host, md.EPA_major_clade, md.EPA_minor_clade, md.host_scientific_name, md.country
 #     #         FROM sequences sa 
 #     #         LEFT JOIN features f ON f.accession = sa.header
 #     #         LEFT JOIN meta_data md ON md.primary_accession = sa.header
@@ -184,7 +184,7 @@ def _get_mutation_prevalence(cursor, id):
 #     #         AND sa.header IN ({accession_query})
 #     #     """
 #     meta_data_query = f"""
-#                     SELECT sa.sequence_id, sa.alignment, f.reference_accession, f.cds_start, f.cds_end, md.host, md.nearest_reference_genotype, md.nearest_reference_subtype, md.host_scientific_name, md.country
+#                     SELECT sa.sequence_id, sa.alignment, f.reference_accession, f.cds_start, f.cds_end, md.host, md.EPA_major_clade, md.EPA_minor_clade, md.host_scientific_name, md.country
 #                     FROM sequence_alignment sa 
 #                     LEFT JOIN features f ON f.accession = sa.sequence_id
 #                     LEFT JOIN meta_data md ON md.primary_accession = sa.sequence_id
@@ -193,23 +193,23 @@ def _get_mutation_prevalence(cursor, id):
 #                 """
     
 #     clades_count_query = f"""
-#                         SELECT nearest_reference_genotype, COUNT(nearest_reference_genotype) 
+#                         SELECT EPA_major_clade, COUNT(EPA_major_clade) 
 #                         FROM meta_data
 #                         WHERE exclusion_status = 0
-#                         GROUP BY nearest_reference_genotype
+#                         GROUP BY EPA_major_clade
 #                     """
     
 #     genotype_count_query = f"""
-#                         SELECT nearest_reference_genotype, COUNT(nearest_reference_genotype) as count
+#                         SELECT EPA_major_clade, COUNT(EPA_major_clade) as count
 #                         FROM meta_data
 #                         WHERE exclusion_status = 0
-#                         GROUP BY nearest_reference_genotype
+#                         GROUP BY EPA_major_clade
 #                     """
 #     subtype_count_query = f"""
-#                         SELECT nearest_reference_genotype, nearest_reference_subtype, COUNT(nearest_reference_subtype) as count
+#                         SELECT EPA_major_clade, EPA_minor_clade, COUNT(EPA_minor_clade) as count
 #                         FROM meta_data
 #                         WHERE exclusion_status = 0
-#                         GROUP BY nearest_reference_genotype, nearest_reference_subtype
+#                         GROUP BY EPA_major_clade, EPA_minor_clade
 #                     """
        
 #     params_reference = [f"%NS3%", id]

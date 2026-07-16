@@ -43,7 +43,7 @@ def _get_features_from_primary_accession(cursor, primary_accession):
     return features
 
 def _get_insertions_from_primary_accession(cursor, primary_accession):
-    query = "SELECT * FROM insertions WHERE primary_accession = %s"
+    query = "SELECT * FROM insertions WHERE accession = %s"
     params = [primary_accession]
 
     insertions = fetch_all(cursor, query, params)
@@ -96,19 +96,115 @@ def _add_standard_filters(key, value, exclude):
 
     return where_clauses, params
 
+def _add_exclude_clade_filters(key, major, minor=None, exclude=True):
 
-def _add_region_filters(value, exclude):
+    params, where_clauses, placeholders_major, placeholders_minor = [], [], [], []
+    # comparison = get_comparison(value, exclude)
 
-    where_clauses, params = _add_standard_filters("display_name", value, exclude)
+    if isinstance(major, list):
+        placeholders_major = ', '.join(['%s'] * len(major))
+        where_clauses_major = f"EPA_major_clade IN ({placeholders_major})"
+        params.extend(major)
+    else:
+        where_clauses_major = f"EPA_major_clade = %s"
+        params.append(major)
 
+    if minor:
+        if isinstance(minor, list):
+            placeholders_minor = ', '.join(['%s'] * len(minor))
+            where_clauses_minor = f"EPA_minor_clade IN ({placeholders_minor})"
+            params.extend(minor)
+        else:
+            where_clauses_minor = f"EPA_minor_clade = %s"
+            params.append(minor)
+
+    if minor:
+        where_clauses = f"NOT ({where_clauses_major} AND {where_clauses_minor})"
+    else:
+        where_clauses = f"NOT ({where_clauses_major})"
+        
+
+    return where_clauses, params
+
+def _add_genome_coverage_filters(product, coverage):
+
+    params, where_clauses = [], []
+    # where_clauses = f""" product = %s AND genome_coverage >= %s """
+    where_clauses.append("product = %s")
+    where_clauses.append("genome_coverage >= %s")
+    params.append(product)
+    params.append(coverage)
+
+    return where_clauses, params
+
+def _add_region_filters(clauses, comparison):
+
+    region_where_str = ' AND '.join(clauses)
     region_sql = f"""
-                country_validated IN (
+                country_validated {comparison} (
                     SELECT m49_code
                     FROM m49_country 
-                    WHERE {where_clauses})
+                    WHERE {region_where_str})
                 """
+    return region_sql
+
+def _add_genome_filter(clauses, comparison):
+    print(clauses)
+    where_str = ' AND '.join(clauses)
+    print(where_str)
+    sql = f"""
+            primary_accession {comparison} (
+                SELECT accession
+                FROM features
+                WHERE {where_str}
+            )
+            """
+    return sql
+
+def _add_taxonomy_host_filters(value, comparison):
+    # taxa_where_str = ' AND '.join(clauses)
+    params = []
+    common_clause, common_param = _add_standard_filters("common_name", value, False)
+
+    common_sql = f""" SELECT taxa_id FROM host_taxa WHERE {common_clause} """
+
+    sql = f""" ( host_taxa_id {comparison} ( {common_sql} ) 
+                )
+            """
     
-    return region_sql, params
+    params.extend(common_param)
+    print("COMMON ", common_sql, common_param)
+    print("-----")
+    recursive_sql = f""" WITH RECURSIVE taxa_tree(id) AS (
+                    SELECT parent_taxa_id
+                    FROM host_children
+                    WHERE parent_taxa_id IN ({common_sql})
+
+                UNION
+
+                    SELECT hc.child_taxa_id
+                    FROM host_children hc
+                    JOIN taxa_tree tt
+                    ON hc.parent_taxa_id = tt.id 
+                )
+            SELECT DISTINCT id FROM taxa_tree;
+            """
+    print(recursive_sql)
+    with connections["RABV"].cursor() as cursor:
+        cursor.execute(recursive_sql, params)
+        rows = cursor.fetchall()
+        ids = [row[0] for row in rows]
+
+    print("IDS", ids)
+
+    # return recursive_sql, params
+    if len(ids) == 0:
+        clause = sql 
+        param = params
+    else:
+        clause, param = _add_standard_filters("host_taxa_id", ids, False)
+
+    return clause, param
 
 def _add_taxonomy_species_filters(value, comparison):
     # taxa_where_str = ' AND '.join(clauses)

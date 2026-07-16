@@ -72,13 +72,59 @@ def search_hosts(request, query):
     return Response(data)
 
 @api_view(['GET'])
-def search_country(request, query):
+def search_country(request):
 
     database = request.headers.get('database', 'default')
 
     with connections[database].cursor() as cursor:
 
-        cursor.execute("SELECT DISTINCT(m49_code), display_name FROM m49_country WHERE display_name LIKE %s;", [f"%{query}%"])
+        cursor.execute("SELECT DISTINCT(m49_code) as id, display_name FROM m49_country;")
+        
+        # if query == "null":
+            
+        # else:
+        #     cursor.execute("SELECT DISTINCT(m49_code), display_name FROM m49_country WHERE display_name LIKE %s;", [f"%{query}%"])
+        
+        data = dictfetchall(cursor)
+
+
+    return Response(data)
+
+@api_view(['GET'])
+def search_m49_intermediate(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(id), display_name FROM m49_intermediate;")
+
+        data = dictfetchall(cursor)
+
+    return Response(data)
+
+@api_view(['GET'])
+def search_m49_sub_region(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(id), display_name FROM m49_sub_regions;")
+
+        data = dictfetchall(cursor)
+
+    return Response(data)
+
+@api_view(['GET'])
+def search_m49_region(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(id), display_name FROM m49_regions;")
+
         data = dictfetchall(cursor)
 
     return Response(data)

@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/HCV/HCV_OM_test_full.db")
+conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/HCV/HCV_full.db")
 conn.row_factory = sqlite3.Row  
 cur = conn.cursor()
 
@@ -56,6 +56,15 @@ for key in major_clade_map.keys():
               key,
               minor_clade,
           ))
+    
+cur.execute(f"""
+            ALTER TABLE meta_data
+            RENAME COLUMN nearest_reference_subtype TO EPA_minor_clade;"""
+            )
+cur.execute(f"""
+            ALTER TABLE meta_data
+            RENAME COLUMN nearest_reference_genotype TO EPA_major_clade;"""
+            )
   
 conn.commit()
 conn.close()

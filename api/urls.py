@@ -48,23 +48,10 @@ urlpatterns = [
 
 
 
-    # NOT FINISHED STUFF
-
-
 
     path('analysis/clade_assignment/', analysis.run_phylogenetic_clade_assignment_analysis, name='run_phylogenetic_clade_assignment_analysis'),
 
     
-    # API paths to get data for primary accession
-    
-    
-    
-
-
-
-    # ALIGNMENTS - DONE (documentation API)
-    path('alignments/download_alignments/', alignments.download_alignments, name='download_alignments'),
-
     
     # FILTERS
     path('filters/search_isolate_ids/<str:query>', search.search_isolate_ids, name='search_isolate_ids'),

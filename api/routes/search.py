@@ -10,7 +10,7 @@ def search_primary_accession_ids(request, query):
 
     database = request.headers.get('database', 'default')
     print(query)
-    print("Database", database)
+    print("Database ------->", database)
     with connections[database].cursor() as cursor:
 
         cursor.execute("SELECT DISTINCT(primary_accession) FROM meta_data WHERE primary_accession LIKE %s;", [f"%{query}%"])

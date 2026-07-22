@@ -24,5 +24,13 @@ cur.execute("CREATE INDEX IF NOT EXISTS idx_features_reference_accession ON feat
 
 # cur.execute("CREATE INDEX IF NOT EXISTS idx_cluster_members_primary_accession ON cluster_members (primary_accession)")
 
+cur.execute("CREATE INDEX IF NOT EXISTS idx_signature_id ON completed_signatures_only (signature_id)")
+cur.execute("CREATE INDEX IF NOT EXISTS idx_EPA_major_clade ON meta_data (EPA_major_clade)")
+cur.execute("CREATE INDEX IF NOT EXISTS idx_EPA_minor_clade ON meta_data (EPA_minor_clade)")
+# cur.execute("CREATE INDEX IF NOT EXISTS idx_")
+# cur.execute("CREATE INDEX IF NOT EXISTS idx_")
+# cur.execute("CREATE INDEX IF NOT EXISTS idx_")
+
+
 conn.commit()
 conn.close()

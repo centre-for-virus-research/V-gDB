@@ -262,8 +262,13 @@ class Sequences:
             if query_alignment_dict:
 
                 reference_accession = query_alignment_dict["alignment_name"]
+                
                 query_alignment_sequence = query_alignment_dict["alignment"]
-                result["insertions"] = [query_alignment_dict["insertion"]]
+                if self.database == 'HCV':
+                    insertions = sh._get_insertions_from_primary_accession(cursor, primary_accession)
+                    result["insertions"] = insertions
+                else:
+                    result["insertions"] = [query_alignment_dict["insertion"]]
 
                 # Get aligned reference sequence
                 reference_alignment_dict = sh._get_query_alignment_from_primary_accession(cursor, reference_accession)

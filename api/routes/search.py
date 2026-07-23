@@ -132,3 +132,15 @@ def search_drug(request):
         data = dictfetchall(cursor)
 
     return Response(data)
+
+@api_view(['GET'])
+def search_segments(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(segment) FROM meta_data WHERE segment IS NOT NULL")
+        data = dictfetchall(cursor)
+
+    return Response(data)

@@ -60,6 +60,8 @@ urlpatterns = [
     path('filters/search_primary_accession_ids/<str:query>', search.search_primary_accession_ids, name='search_primary_accession_ids'),
     path('filters/search_country/', search.search_country, name='search_country'),
 
+    path('filters/search_segment/', search.search_segments, name='search_segments'),
+
 
     path('filters/search_m49_intermediate/', search.search_m49_intermediate, name='search_m49_intermediate'),
     path('filters/search_m49_region/', search.search_m49_region, name='search_m49_region'),

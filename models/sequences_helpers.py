@@ -65,6 +65,7 @@ def _get_region_from_country_code(cursor, country_code):
     return regions
 
 def _get_taxa_from_host_taxa_id(cursor, host_taxa_id):
+    
     query = "SELECT * FROM host_lineage WHERE taxa_id=%s"
     params = [host_taxa_id]
     data = fetch_one(cursor, query, params)

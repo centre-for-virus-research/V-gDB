@@ -252,7 +252,10 @@ class Sequences:
             # Add hose data
             if meta_data["host_taxa_id"]:
                 host_taxa_id = meta_data["host_taxa_id"]
-                taxanomic_info = sh._get_taxa_from_host_taxa_id(cursor, host_taxa_id)
+                if self.database == 'FLU':
+                    taxanomic_info = None
+                else:
+                    taxanomic_info = sh._get_taxa_from_host_taxa_id(cursor, host_taxa_id)
 
                 if taxanomic_info:
                     result["taxanomic_info"] = taxanomic_info
@@ -263,8 +266,8 @@ class Sequences:
 
                 reference_accession = query_alignment_dict["alignment_name"]
                 
-                query_alignment_sequence = query_alignment_dict["alignment"]
-                if self.database == 'HCV':
+                query_alignment_sequence = query_alignment_dict["alignment"].upper()
+                if self.database == 'HCV' or self.database == 'FLU':
                     insertions = sh._get_insertions_from_primary_accession(cursor, primary_accession)
                     result["insertions"] = insertions
                 else:

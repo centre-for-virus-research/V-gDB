@@ -19,8 +19,8 @@ RESOURCES_DIR = BASE_DIR / "resources"
 
 def blastn(tmp_dir, query_path, results_path, db_path):
     
-    if not os.path.exists(f"{db_path}"):
-        raise ValueError("BLAST database not found, please message site administrator")
+    # if not os.path.exists(f"{db_path}"):
+        # raise ValueError("BLAST database not found, please message site administrator")
         
     db_file_name = os.path.basename(db_path)
 
@@ -141,7 +141,10 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
     query_path = inputs_path / "input.fa"
     results_path = tmp_dir / "results"
 
-    blast_db_path = BASE_DIR / "db" / "blast" / "db.fa"
+    
+
+    # blast_db_path = BASE_DIR / "db" / "blast" / "db.fa"
+    blast_db_path = BASE_DIR / "db" / database / "db"
     
     print("BLASTS_DB", blast_db_path)
 
@@ -158,11 +161,11 @@ def phylogenetic_clade_assignment_analysis(database, job_id):
 
     # parse_blast_results(database=database, query_tophits=query_tophits_file, tmp_dir_input=inputs_path)
 
-    ref_aln = RESOURCES_DIR / "reference_alignment.fa"
-    ref_tree = RESOURCES_DIR / "taxon" / "ref_tree.treefile"
-    taxon_major = RESOURCES_DIR / "taxon" / "taxon_major.tsv"
-    taxon_minor = RESOURCES_DIR / "taxon" / "taxon_minor.tsv"
-    meta_data = RESOURCES_DIR / "meta_data.tsv"
+    ref_aln = RESOURCES_DIR / database / "reference_alignment.fa"
+    ref_tree = RESOURCES_DIR / database / "taxon" / "ref_tree.treefile"
+    taxon_major = RESOURCES_DIR / database / "taxon" / "taxon_major.tsv"
+    taxon_minor = RESOURCES_DIR / database / "taxon" / "taxon_minor.tsv"
+    meta_data = RESOURCES_DIR / database / "meta_data.tsv"
 
 
     aligned_out = str(results_path) + "/input_seqs_with_ref_alignment.fa"

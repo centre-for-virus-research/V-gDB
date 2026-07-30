@@ -1,8 +1,19 @@
 import sqlite3
 
-conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/RABV/rabv-gDB_15072026.db")
+conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/HCV/HCV_full_new_Usher.db")
 conn.row_factory = sqlite3.Row  
 cur = conn.cursor()
+
+cur.execute(f"""
+            ALTER TABLE meta_data
+            RENAME COLUMN nearest_reference_subtype TO EPA_minor_clade;"""
+            )
+cur.execute(f"""
+            ALTER TABLE meta_data
+            RENAME COLUMN nearest_reference_genotype TO EPA_major_clade;"""
+            )
+  
+conn.commit()
 
 # # Drop old table if it exists
 cur.execute("DROP TABLE IF EXISTS genotypes;")

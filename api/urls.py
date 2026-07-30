@@ -50,7 +50,7 @@ urlpatterns = [
 
 
     path('analysis/clade_assignment/', analysis.run_phylogenetic_clade_assignment_analysis, name='run_phylogenetic_clade_assignment_analysis'),
-
+    path('analysis/drug_analysis/', analysis.run_drug_analysis, name='run_drug_analysis'),
     
     
     # FILTERS

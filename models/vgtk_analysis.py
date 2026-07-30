@@ -10,7 +10,7 @@ from rest_framework import status
 from Bio import SeqIO
 from pathlib import Path
 from models import sequences_helpers as sh
-
+from models.vgtk_drug_analysis import drug_analysis
 
 BASE_DIR = Path(__file__).resolve().parent.parent # goes up from api/
 TASKS_DIR = BASE_DIR / "tasks"
@@ -124,6 +124,7 @@ def parse_clade_assignment_results(queries, results_dir):
                 # print(f"Sequence: {record.seq}")
                 queries[accession]["aligned_sequence"] = str(record.seq)
                 break
+        drug_data = drug_analysis(alignment=queries[accession]["aligned_sequence"], features=queries[accession]["blast_results"]["features"])
         # else:
             # print("ID not found in FASTA.")
 

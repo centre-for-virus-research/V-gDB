@@ -13,6 +13,7 @@ from Bio import SeqIO
 import shutil
 
 from models.vgtk_analysis import phylogenetic_clade_assignment_analysis
+from models.vgtk_drug_analysis import drug_analysis
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent  # goes up from api/
 TASKS_DIR = BASE_DIR / "tasks"
@@ -71,6 +72,7 @@ def run_phylogenetic_clade_assignment_analysis(request):
     try:
         # Run your analysis
         data = phylogenetic_clade_assignment_analysis(database=database, job_id=job_id)
+        
 
     except ValueError as e:
         print(f"Error: {e}")
@@ -90,5 +92,15 @@ def run_phylogenetic_clade_assignment_analysis(request):
         "job_id": job_id,
         "results": data
     })
+
+
+@api_view(['GET'])
+def run_drug_analysis(request):
+    # database = request.headers.get('database')
+
+    data = drug_analysis()
+
+    return Response(data)
+
 
 

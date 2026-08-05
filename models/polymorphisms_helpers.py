@@ -35,7 +35,7 @@ def _get_all_polymorphims(cursor, filters=None):
 
 
     query = f"""
-                SELECT signature_id, signature_kind, protein_name, aa_position, mutation_type, drug
+                SELECT signature_id, signature_kind, protein_name, aa_position, mutation_type, drug, alignment_name
                 FROM mutation_catalog
                 {filter_where_sql};
             """
@@ -47,8 +47,9 @@ def _get_polymorphim(cursor, id):
 
     query = f"""
                 SELECT *
-                FROM mutation_catalog 
+                FROM mutation_catalog
                 WHERE signature_id=%s;
+
             """
     params = [id]
     results = fetch_all(cursor, query, params)

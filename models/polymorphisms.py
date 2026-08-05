@@ -43,6 +43,7 @@ class Polymorphisms:
             sequences = ph._get_polymorphim_sequences(cursor, id)
             chart_data = ph._get_mutation_prevalence(cursor, id)
 
+
         result = {
                     "polymorphism": polymorphism,
                     "sequences": sequences,

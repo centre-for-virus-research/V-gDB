@@ -54,7 +54,19 @@ def _get_polymorphim(cursor, id):
     params = [id]
     results = fetch_all(cursor, query, params)
 
-    return results
+    phdr_alignment_ras_ids = [item["id"] for item in results]
+    placeholders = ', '.join(['%s'] * len(phdr_alignment_ras_ids))
+    query = f""" SELECT dr.id, dr.phdr_alignment_ras_drug_id, rr.phdr_regimen_id, rt.phdr_clinical_trial_id, rt.trial_display_name, rt.trial_nct_id
+                FROM drug_regimen dr
+                LEFT JOIN result_regimen rr on rr.phdr_in_vivo_result_id = dr.id
+                LEFT JOIN result_trial rt ON rt.phdr_in_vivo_result_id = dr.id
+                WHERE dr.phdr_alignment_ras_drug_id IN ({placeholders})
+            """
+
+    drug_regimen_results = fetch_all(cursor, query, phdr_alignment_ras_ids)
+
+
+    return {"polymorphism": results, "drug_regimen_results":drug_regimen_results}
 
 def _get_polymorphim_sequences(cursor, id):
 

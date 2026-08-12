@@ -2,6 +2,7 @@ from django.db import connections
 import csv
 from models.helpers import *
 from collections import Counter
+from collections import defaultdict
 class Sequences:
     """
     A class to handle operations related to sequence metadata, alignments, 
@@ -54,27 +55,92 @@ class Sequences:
 
         return result
 
-    def get_sequences_meta_data(self):
-        """
-        Retrieve all sequence metadata records from the database.
+    # def get_sequences_meta_data(self):
+    #     """
+    #     Retrieve all sequence metadata records from the database.
 
-        Returns:
-            list: A list of dictionaries containing metadata records.
-        """
+    #     Returns:
+    #         list: A list of dictionaries containing metadata records.
+    #     """
+    #     if not self.filters:
+    #         with connections[self.database].cursor() as cursor:
+    #             cursor.execute('SELECT * FROM meta_data ORDER BY create_date DESC LIMIT 20;')
+    #             result = dictfetchall(cursor)
+    #     else:
+
+    #         where_str, params = self.__add_filters()
+    #         query = f"SELECT * FROM meta_data WHERE {where_str} ORDER BY create_date DESC;"
+
+    #         with connections[self.database].cursor() as cursor:
+    #             cursor.execute(query, params)
+    #             result = dictfetchall(cursor)
+
+    #     return result
+
+    def get_sequences_meta_data(self, next_cursor, prev_cursor, items_per_page):
+        # Base query (with filters if any)
         if not self.filters:
-            with connections[self.database].cursor() as cursor:
-                cursor.execute('SELECT * FROM meta_data ORDER BY create_date DESC;')
-                result = dictfetchall(cursor)
+            if next_cursor:
+                base_query = "SELECT * FROM meta_data WHERE primary_accession > %s ORDER BY primary_accession LIMIT %s;"
+                params = [next_cursor, items_per_page]
+
+            elif prev_cursor:
+                if prev_cursor == '0':
+                    base_query = 'SELECT * FROM meta_data ORDER BY primary_accession DESC LIMIT %s;'
+                    params = [items_per_page]
+                else:
+                  base_query = 'SELECT * FROM meta_data WHERE primary_accession < %s ORDER BY primary_accession DESC LIMIT %s;'
+                  params = [prev_cursor, items_per_page]
+            else: 
+                base_query = "SELECT * FROM meta_data ORDER BY primary_accession LIMIT %s;"
+                params = [items_per_page]
         else:
-
             where_str, params = self.__add_filters()
-            query = f"SELECT * FROM meta_data WHERE {where_str} ORDER BY create_date DESC;"
+            # base_query = f"SELECT * FROM meta_data WHERE {where_str}"
+            if next_cursor:
+                and_str = "AND primary_accession > %s ORDER BY primary_accession LIMIT %s;"
+                # base_query = f"SELECT * FROM meta_data WHERE {where_str} AND primary_accession > %s ORDER BY primary_accession LIMIT %s;"
+                # base_query = "SELECT * FROM meta_data WHERE primary_accession > %s ORDER BY primary_accession LIMIT %s;"
+                # params = [next_cursor, items_per_page]
+                params.append(next_cursor)
+                params.append(items_per_page)
+            elif prev_cursor: 
+                if prev_cursor == '0':
+                    and_str = "ORDER BY primary_accession DESC LIMIT %s;"
+                    # base_query = 'SELECT * FROM meta_data ORDER BY primary_accession DESC LIMIT %s;'
+                    params.append(items_per_page)
+                    # params = [items_per_page]
+                else:
+                    and_str = "AND primary_accession < %s ORDER BY primary_accession DESC LIMIT %s;"
+                    # base_query = "SELECT * FROM meta_data WHERE primary_accession < %s ORDER BY primary_accession DESC LIMIT %s;"
+                    # params = [prev_cursor, items_per_page]
+                    params.append(prev_cursor)
+                    params.append(items_per_page)
+            else:
+                and_str = "ORDER BY primary_accession LIMIT %s;"
+                # base_query = 'SELECT * FROM meta_data ORDER BY primary_accession LIMIT %s;'
+                # params = [items_per_page]
+                params.append(items_per_page)
 
-            with connections[self.database].cursor() as cursor:
-                cursor.execute(query, params)
-                result = dictfetchall(cursor)
+            base_query = f"SELECT * FROM meta_data WHERE {where_str} {and_str}"
 
-        return result
+            
+        print(base_query, params)
+        with connections[self.database].cursor() as cursor:
+            cursor.execute(base_query, params)
+            results = dictfetchall(cursor)
+            
+
+        if prev_cursor:
+            results.reverse()
+
+        next_cursor = results[-1]["primary_accession"] if results else None
+        prev_cursor = results[0]["primary_accession"] if results else None
+
+            
+
+        return {"data":results, "next_cursor":next_cursor, "prev_cursor":prev_cursor}
+
 
     def get_sequences_alignment(self):
         """
@@ -214,11 +280,72 @@ class Sequences:
         return sequence
 
 
+    def get_strains(self):
+        # if not self.filters:
+        #     with connections[self.database].cursor() as cursor:
+        #         cursor.execute(' SELECT isolate, country, host, segment, collection_date, primary_accession FROM meta_data ORDER BY isolate, segment;')
+        #         rows = cursor.fetchall()
+        # # Structure data by isolate
+        # data_by_isolate = defaultdict(lambda: {"host": None, "segments": {}})
 
+        # for isolate, country, host, segment, collection_date, accession in rows:
+        #     if data_by_isolate[isolate]["host"] is None:
+        #         data_by_isolate[isolate]["host"] = host
+        #         data_by_isolate[isolate]["country"] = country
+        #         data_by_isolate[isolate]["collection_date"] = collection_date
+        #     data_by_isolate[isolate]["segments"][segment] = accession
 
+        # # Convert to a nice list/dict if needed
+        # result = []
+        # for isolate, data in data_by_isolate.items():
+        #     entry = {
+        #         "isolate": isolate,
+        #         "country": data["country"],
+        #         "collection_date": data["collection_date"],
+        #         "host": data["host"],
+        #         "segments": data["segments"]  # dict like {1: 'ACC001', 2: 'ACC002', ...}
+        #     }
+        #     result.append(entry)
+        with connections[self.database].cursor() as cursor:
+                cursor.execute(' SELECT * FROM isolates')
+                result = dictfetchall(cursor)
 
+        return result
 
+    def get_strain(self, isolate):
+        if isolate:
+            with connections[self.database].cursor() as cursor:
+                cursor.execute('SELECT * FROM meta_data where isolate=%s ORDER BY segment', [isolate])
+                result = dictfetchall(cursor)
+                # print(result)
+                for l in result:
+                    print(l["primary_accession"])
+                    print("here0")
+                    cursor.execute("SELECT * FROM sequence_alignment WHERE sequence_id=%s", [l["primary_accession"]])
+                    alignment = dictfetchall(cursor)
+                    print("here4")
+                    if alignment:
+                        l["alignment"] = alignment[0]
+                        print("here")
+                        # Add insertions
+                        cursor.execute("SELECT * FROM insertions WHERE accession = %s", [l["primary_accession"]])
+                        l["alignment"]["insertions"] = dictfetchall(cursor)
+                        print("here2")
+                        # Add features
+                        print(l["alignment"]["alignment_name"])
+                        cursor.execute("SELECT * FROM features WHERE accession=%s and reference_accession = %s ORDER BY cds_start", [l["primary_accession"], l["alignment"]["alignment_name"]])
+                        l["alignment"]["features"] = dictfetchall(cursor)
+                        print("here3")
 
+                        # Add reference sequence
+                        cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [l["alignment"]["alignment_name"]])
+                        l["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
+
+                # print(result)
+                
+        
+        
+        return result
 
     def get_sequence_meta_data(self, primary_accession):
         """
@@ -269,6 +396,12 @@ class Sequences:
                 # Add reference sequence
                 cursor.execute("SELECT alignment FROM sequence_alignment WHERE sequence_id = %s", [result["alignment"]["alignment_name"]])
                 result["alignment"]["ref_seq"] = dictfetchall(cursor)[0]["alignment"]
+            
+            if result["meta_data"]["host_taxa_id"]:
+                cursor.execute("SELECT * FROM host_lineage WHERE taxa_id = %s", [result["meta_data"]["host_taxa_id"]])
+                lineage = dictfetchall(cursor)
+                if lineage:
+                    result["meta_data"]["lineage"] = lineage
 
             # Get regional info if country exists
             if result["meta_data"].get("country"):

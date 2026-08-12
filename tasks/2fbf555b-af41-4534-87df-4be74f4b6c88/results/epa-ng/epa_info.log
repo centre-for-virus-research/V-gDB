@@ -1,0 +1,22 @@
+INFO Selected: Output dir: ./
+INFO Selected: Query file: /Users/danaallen/CVR/gdb/web-resources/V-gDB/tasks/2fbf555b-af41-4534-87df-4be74f4b6c88/results/input_seqs_with_ref_alignment.fa
+INFO Selected: Tree file: /Users/danaallen/CVR/gdb/web-resources/V-gDB/resources/HCV/taxon/ref_tree.treefile
+INFO Selected: Reference MSA: /Users/danaallen/CVR/gdb/web-resources/V-gDB/resources/HCV/reference_alignment.fa
+INFO Selected: Automatic switching of use of per rate scalers
+INFO Selected: Preserving the root of the input tree
+INFO Selected: Specified model: TVM+F+R5
+INFO Selected: Using threads: 6
+INFO     ______ ____   ___           _   __ ______
+        / ____// __ \ /   |         / | / // ____/
+       / __/  / /_/ // /| | ______ /  |/ // / __  
+      / /___ / ____// ___ |/_____// /|  // /_/ /  
+     /_____//_/    /_/  |_|      /_/ |_/ \____/ (v0.3.8)
+WARN The reference MSA and tree have differing number of taxa! 237 vs. 225
+INFO Using model parameters:
+INFO    Rate heterogeneity: FREE (5 cats, mean),  weights&rates: (0.2,0.107426) (0.2,0.360097) (0.2,0.699895) (0.2,1.22314) (0.2,2.60944) 
+        Base frequencies (empirical): 0.200842 0.291885 0.274723 0.232549 
+        Substitution rates (ML): 0.5 0.5 0.5 0.5 0.5 1
+INFO Output file: ./epa_result.jplace
+INFO 1 Sequences done!
+INFO Time spent placing: 0s
+INFO Elapsed Time: 0s

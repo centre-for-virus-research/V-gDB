@@ -20,6 +20,19 @@ class Mutations:
         self.reference_sequence = reference_sequence or 'NC_001542'
 
 
+    def get_adaptive_mutations(self):
+
+        query = "SELECT * FROM adaptive_mutations;"
+
+        with connections[self.database].cursor() as cursor:
+            cursor.execute(query)
+            mutations = dictfetchall(cursor)
+
+        return mutations
+
+
+
+
     def get_mutations(self, codons, region, include_metadata=True, sequence_ids=None, hosts=None):
         """
         Fetch mutations for specific codons in a given genomic region across host samples.

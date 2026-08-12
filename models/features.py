@@ -25,7 +25,7 @@ class Features:
 
     def get_clades_tree(self):
         with connections[self.database].cursor() as cursor:
-            cursor.execute('SELECT * FROM genotypes')
+            cursor.execute('SELECT major_clade, minor_clade FROM genotypes ORDER BY major_clade ASC, minor_clade ASC;')
 
             features = dictfetchall(cursor)
 
@@ -43,13 +43,14 @@ class Features:
                         'nodes':[]
                     }
                 if minor != None:
-                    nodes[major]['nodes'].append({
-                        'name':minor,
-                        'text':minor,
-                        'parent':major
-                    })
+                    if minor not in nodes[major]['nodes']:
+                        nodes[major]['nodes'].append({
+                            'name':minor,
+                            'text':minor,
+                            'parent':major
+                        })
         
-        tree = []
+        # tree = []
         for clade in nodes.values():
             if len(clade['nodes']) == 0:
                 clade['nodes'] = None

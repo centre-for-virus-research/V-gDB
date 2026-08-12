@@ -24,7 +24,7 @@ def get_vgt_version(request):
 @api_view(['GET'])
 def get_meta_data_columns(request):
     database = request.headers.get('database', 'default')
-
+    print(database)
     with connections[database].cursor() as cursor:
         cursor.execute('PRAGMA table_info(meta_data);')
         result = dictfetchall(cursor)

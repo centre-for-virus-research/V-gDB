@@ -6,5 +6,6 @@ models/alignment/gB_matrix_raw.tsv
 dump.rdb
 V_gDB
 tests/
+tasks/
 db/
 backend/settings.py

@@ -16,9 +16,6 @@ V-gDB/
 │   ├── settings.py
 │   ├── views.py
 │   └── urls.py
-├── frontend/       # HTML scripts for V-gDB frontend
-│   ├── example_code_scripts/
-│   └── static/
 ├── models/         # Main model logic (including queries)
 ├── tests/
 ├── manage.py     

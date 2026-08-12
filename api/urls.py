@@ -1,129 +1,76 @@
 from django.urls import path
 from api.routes import sequences
 from api.routes import alignments
-from api.routes import versions
 from api.routes import mutations
-from api.routes import statistics
-from api.routes import features
-from api.routes import genes
-from api.routes import tasks
 from api.routes import search
 from api.routes import phylogeny
-# MAIN API endpoints! 
-# Virus Web Resource GUI will 
+from api.routes import lineage
+from api.routes import taxonomy
+from api.routes import analysis
+from api.routes import polymorphisms
 
 urlpatterns = [
     
     # SEQUENCES
-    # API paths to get all of the data with various filters
-    path('sequences/', sequences.get_sequences, name='get_sequences'), 
-    path('sequences/metadata/', sequences.get_sequences_meta_data, name='get_sequences_meta_data'),
-    path('sequences/alignment/', sequences.get_sequences_alignment, name='get_sequences_alignment'),
-    path('sequences/reference/metadata/', sequences.get_reference_sequences_meta_data, name='get_reference_sequences_meta_data'),
-
-
-    path('sequences/metadata/map/', sequences.get_map_metadata, name='get_map_metadata'),
-    
-    # API paths to get data for primary accession
-    path('sequence/metadata/<str:primary_accession>', sequences.get_sequence_meta_data, name='get_sequence_meta_data'), #done
-    path('sequence/alignment/<str:primary_accession>', sequences.get_sequence_alignment, name='get_sequence_alignment'),  #done
+    path('sequences/', sequences.get_sequences, name='get_sequences'), #DONE
+    path('sequence/<str:primary_accession>', sequences.get_sequence, name='get_sequence'), #done
     path('sequence/reference/<str:primary_accession>', sequences.get_reference_sequence, name='get_reference_sequence'), #done
+    path('sequences/global/', sequences.get_global_distribution_of_sequences, name='get_global_distribution_of_sequences'),
+    path('sequences/download_sequences_meta_data/', sequences.download_sequences_meta_data, name='download_sequences_meta_data'),
+    path('sequences/download_sequences/', sequences.download_sequences, name='download_sequences'),
 
+    # PHYLOGENY
+    path("phylogeny/trees/", phylogeny.get_trees, name='get_trees'),
 
+    # POLYMORPHISMS
+    path('polymorphisms/', polymorphisms.get_polymorphisms, name='get_polymorphisms'), 
+    path('polymorphism/<str:id>', polymorphisms.get_polymorphism, name='get_polymorphism'), 
 
-
-    path('sequences/strains/', sequences.get_strains, name='get_strains'), 
-    path('sequence/strain/<path:isolate>', sequences.get_strain, name='get_strain'), #done
-
-
-    path('phylogeny/tree/', phylogeny.get_tree, name='get_tree'),
-
-
-
-
-
+    # TAXANOMY
+    path('taxonomy/phylum', taxonomy.get_phylum, name='get_phylum'), 
+    path('taxonomy/class', taxonomy.get_class, name='get_class'), 
+    path('taxonomy/order_category', taxonomy.get_order, name='get_order'), 
+    path('taxonomy/family', taxonomy.get_family, name='get_family'),
+    path('taxonomy/genus', taxonomy.get_genus, name='get_genus'),
+    path('taxonomy/species', taxonomy.get_species, name='get_species'),
 
 
 
     # MUTATIONS 
-    path('adaptive_mutations/', mutations.get_adaptive_mutations, name='get_adaptive_mutations'),
+    path('mutations/host_adaptation', mutations.get_host_adaptations, name='get_host_adaptations'),
 
-    path('analysis/mutations/', mutations.get_mutations, name='get_mutations'),
 
-    path('alignments/get_reference_sequence/<str:primary_accession>', sequences.get_reference_sequence, name='get_reference_sequence'),
+    path('lineages/', lineage.get_lineage, name='get_lineage'),
+
+
+
+    path('alignments/download', alignments.download_alignments, name='download_alignment'),
+
+
+
+
+    path('analysis/clade_assignment/', analysis.run_phylogenetic_clade_assignment_analysis, name='run_phylogenetic_clade_assignment_analysis'),
+    path('analysis/drug_analysis/', analysis.run_drug_analysis, name='run_drug_analysis'),
     
     
-    path('sequences/download_sequences_meta_data/', sequences.download_sequences_meta_data, name='download_sequences_meta_data'),
-
-
-    path('get_host_species/', sequences.get_host_species, name='get_host_species'),
-
-    # ALIGNMENTS - DONE (documentation API)
-    path('alignments/download_alignments/', alignments.download_alignments, name='download_alignments'),
-
-
-    # MUTATIONS - DONE (documentation API)
-    path('mutations/get_mutations/', mutations.get_mutations, name='get_mutations'),
-    path('mutations/get_mutation_regions_and_codons', mutations.get_mutation_regions_and_codons, name='get_mutations_regions_and_codons'),
-    
-
-
-    
-    # TASKS
-    path('tasks/run_sequence_alignment/', tasks.run_sequence_alignment, name='run_sequence_alignment'),
-    path('tasks/get_blast_results/<str:job_id>', tasks.get_blast_results, name='get_blast_results'),
-    
-    
-    path('tasks/get_alignment_results/<str:job_id>', tasks.get_alignment_results, name='get_alignment_results'),
-    
-    
-    
-    path('tasks/get_job_logs/<str:job_id>', tasks.get_job_logs, name='get_job_logs'),
-
-
-
-
-
-
-
-    # STATISTICS - DONE (documentation API)
-    path('statistics/get_global_distribution_of_sequences/', statistics.get_global_distribution_of_sequences, name='get_global_distribution_of_sequences'),
-    path('statistics/get_statistics/', statistics.get_statistics, name='get_statistics'),
-
-    
-
-
-
-
-
-    # Features
-    path('features/get_features/', features.get_features, name='get_features'),
-
-    # Genes
-    path('genes/get_genes_tree/', genes.get_genes_tree, name='get_genes_tree'),
-
-    path('features/get_clades_tree/', features.get_clades_tree, name='get_clades_tree'),
-
-
     # FILTERS
     path('filters/search_isolate_ids/<str:query>', search.search_isolate_ids, name='search_isolate_ids'),
     path('filters/search_pubmed_ids/<str:query>', search.search_pubmed_ids, name='search_pubmed_ids'),
-    path('filters/search_hosts/<str:query>', search.search_hosts, name='search_hosts'),
+    path('filters/search_hosts/', search.search_hosts, name='search_hosts'),
     path('filters/search_primary_accession_ids/<str:query>', search.search_primary_accession_ids, name='search_primary_accession_ids'),
-    path('filters/search_country/<str:query>', search.search_country, name='search_country'),
-    path('filters/search_region/', search.search_region, name='search_region'),
+    path('filters/search_country/', search.search_country, name='search_country'),
+
+    path('filters/search_segment/', search.search_segments, name='search_segments'),
+
+
+    path('filters/search_m49_intermediate/', search.search_m49_intermediate, name='search_m49_intermediate'),
+    path('filters/search_m49_region/', search.search_m49_region, name='search_m49_region'),
+    path('filters/search_m49_sub_region/', search.search_m49_sub_region, name='search_m49_sub_region'),
 
 
 
-    path('check_db_connection', versions.check_db_connection, name='check_db_connection'),
+    path('filters/search_protein_name/', search.search_protein_name, name='search_protein_name'),
+    path('filters/search_drug/', search.search_drug, name='search_drug'),
 
-    
-    
-    path('advanced_filter/<str:query>', sequences.advanced_filter, name='advanced_filter'),
-
-
-
-    path('get_vgt_version/', versions.get_vgt_version, name='get_vgt_version'),
-    path('get_meta_data_columns/', versions.get_meta_data_columns, name='get_meta_data_columns')
     
 ]

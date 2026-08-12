@@ -10,6 +10,7 @@ def search_primary_accession_ids(request, query):
 
     database = request.headers.get('database', 'default')
     print(query)
+    print("Database ------->", database)
     with connections[database].cursor() as cursor:
 
         cursor.execute("SELECT DISTINCT(primary_accession) FROM meta_data WHERE primary_accession LIKE %s;", [f"%{query}%"])
@@ -45,37 +46,101 @@ def search_pubmed_ids(request, query):
 
 
 @api_view(['GET'])
-def search_hosts(request, query):
+def search_hosts(request):
 
     database = request.headers.get('database', 'default')
 
     with connections[database].cursor() as cursor:
-
-        cursor.execute("SELECT DISTINCT(host) FROM meta_data WHERE host LIKE %s;", [f"%{query}%"])
+        cursor.execute("SELECT DISTINCT(common_name) as host, taxa_id FROM host_taxa where common_name IS NOT NULL;")
         data = dictfetchall(cursor)
 
     return Response(data)
 
 @api_view(['GET'])
-def search_country(request, query):
+def search_country(request):
 
     database = request.headers.get('database', 'default')
 
     with connections[database].cursor() as cursor:
 
-        cursor.execute("SELECT DISTINCT(m49_code), display_name FROM m49_country WHERE display_name LIKE %s;", [f"%{query}%"])
+        cursor.execute("SELECT DISTINCT(m49_code) as id, display_name FROM m49_country;")
         data = dictfetchall(cursor)
 
     return Response(data)
 
 @api_view(['GET'])
-def search_region(request):
+def search_m49_intermediate(request):
 
     database = request.headers.get('database', 'default')
 
     with connections[database].cursor() as cursor:
 
-        cursor.execute("SELECT DISTINCT(m49_region_id) as display_name FROM m49_country where m49_region_id IS NOT NULL")
+        cursor.execute("SELECT DISTINCT(id), display_name FROM m49_intermediate;")
+
+        data = dictfetchall(cursor)
+
+    return Response(data)
+
+@api_view(['GET'])
+def search_m49_sub_region(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(id), display_name FROM m49_sub_regions;")
+
+        data = dictfetchall(cursor)
+
+    return Response(data)
+
+@api_view(['GET'])
+def search_m49_region(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(id), display_name FROM m49_regions;")
+
+        data = dictfetchall(cursor)
+
+    return Response(data)
+
+
+@api_view(['GET'])
+def search_protein_name(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(protein_name) FROM mutation_catalog where protein_name IS NOT NULL")
+        data = dictfetchall(cursor)
+
+    return Response(data)
+
+
+@api_view(['GET'])
+def search_drug(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(drug) FROM mutation_catalog WHERE drug IS NOT NULL AND drug != ''")
+        data = dictfetchall(cursor)
+
+    return Response(data)
+
+@api_view(['GET'])
+def search_segments(request):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        cursor.execute("SELECT DISTINCT(segment) FROM meta_data WHERE segment IS NOT NULL")
         data = dictfetchall(cursor)
 
     return Response(data)

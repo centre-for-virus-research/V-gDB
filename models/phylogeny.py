@@ -1,0 +1,78 @@
+from django.db import connections
+import csv
+from models.helpers import *
+from collections import Counter
+from collections import defaultdict
+# import phylotreelib as pt
+    
+from models import sequences_helpers as sh
+
+
+def _get_tree_from_type(cursor, tree_type, segment):
+
+    if segment:
+        query = "SELECT * FROM trees WHERE tree_type = %s AND segment = %s;"
+        params = [tree_type, segment]
+    else:
+        query = "SELECT * FROM trees"
+        params = None
+    
+    data = fetch_all(cursor, query, params)
+    
+    return data
+
+def _get_meta_data_for_tree(cursor, segment):
+    if segment:
+        query = f"""SELECT Parsed_strain, host, serotype
+                    FROM meta_data WHERE segment = %s;""" 
+        params = [segment]
+    else:
+        query = f"""SELECT md.primary_accession, md.EPA_major_clade, md.EPA_minor_clade, md.collection_year, c.display_name  as country
+                    FROM meta_data md 
+                    LEFT JOIN m49_country c ON c.m49_code = md.country_validated
+                    
+                """
+        # LEFT JOIN host_lineage h ON h.taxa_id = md.host_taxa_id
+        params = None
+    data = fetch_all(cursor, query, params)
+
+    return data
+
+class Phylogeny:
+
+    def __init__(self, database, filters=None):
+
+        self.database = database  
+        self.filters = filters
+
+    def get_trees(self):
+
+        tree_type=None
+        segment=None
+
+        if self.filters:
+            tree_type = self.filters["tree_type"]
+            segment = self.filters["segment"]
+
+        results = {}
+        with connections[self.database].cursor() as cursor:
+
+            tree = _get_tree_from_type(cursor, tree_type, segment)
+            meta_data = _get_meta_data_for_tree(cursor, segment)
+
+            
+            results = {
+                        "tree": tree,
+                        "meta_data": meta_data
+                        }   
+
+        return results
+
+    # def reroot_tree(self):
+        
+    #     with pt.Nexustreefile("mytreefile.nexus") as treefile:
+    #         tree = treefile.readtree()
+    #         tree.rootminvar()
+    #         for tip in sorted(tree.leaves):
+    #             dist = tree.nodedist(tree.root, tip)
+    #             print(f"{tip:<12s} {dist:.3f}")

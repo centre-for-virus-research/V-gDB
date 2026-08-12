@@ -1,14 +1,21 @@
 import csv
 
 def get_codon_labeling(refStart, refEnd):
-    
-    condonStart = None
-    codonEnd = None
-    if ( refStart - (refEnd + 1) ) % 3 == 0:
-        condonStart = 1
-        codonEnd = round(((refEnd+1) - (refStart )) / 3,0)
 
-    return [condonStart, codonEnd]
+    codonStart = None
+    codonEnd = None
+
+    try:
+        refStart = int(refStart)
+        refEnd = int(refEnd)
+    except (TypeError, ValueError):
+        return [None, None]
+
+    if (refStart - (refEnd + 1)) % 3 == 0:
+        codonStart = 1
+        codonEnd = (refEnd + 1 - refStart) // 3
+
+    return [codonStart, codonEnd]
 
 
 def dictfetchall(cursor):
@@ -19,6 +26,24 @@ def dictfetchall(cursor):
         for row in cursor.fetchall()
     ]
 
+
+def fetch_one(cursor, query, params):
+    print(query, params)
+    cursor.execute(query, params)
+    results = dictfetchall(cursor)
+
+    if len(results) > 0:
+        results = results[0]
+    return results
+
+
+
+def fetch_all(cursor, query, params):
+    print(query, params)
+    cursor.execute(query, params)
+    return dictfetchall(cursor)
+
+
 def build_csv_file(data, file_name):
     """
     Export metadata to a CSV file.
@@ -27,6 +52,7 @@ def build_csv_file(data, file_name):
         data (list): List of dictionaries containing metadata to write.
         file_name (str): Path to the output CSV file.
     """
+    print("DATA", data)
     with open(file_name, "w", newline="") as f:
         writer = csv.writer(f)
         # Write header
@@ -76,76 +102,3 @@ def translateCodon(codon):
         'TGC':'C', 'TGT':'C', 'TGA':'_', 'TGG':'W'
     }
     return table.get(codon, "-")
-
-def build_clade_tree(clades):
-    nodes = {}
-    
-    for clade in clades:
-        major = clade['major_clade']
-        minor = clade['minor_clade']
-        if major not in nodes:
-            nodes[major] = {
-                'name':major,
-                'text':major,
-                'parent':None,
-                'nodes':[]
-            }
-        if minor != None:
-            nodes[major]['nodes'].append({
-                'name':minor,
-                'text':minor,
-                'parent':major
-            })
-    
-    tree = []
-    for clade in nodes.values():
-        if len(clade['nodes']) == 0:
-            clade['nodes'] = None
-    
-    tree = list(nodes.values())
-
-    return(tree)
-
-
-
-def build_feature_tree(features):
-
-    tree = []
-    nodes = {}
-
-    for feature in features:
-        name = feature['name']
-        if name == 'whole_genome,NULL':
-            name = 'whole_genome'
-        display_name = feature['description'] if feature['description'] is not None else name
-        parent_name = feature['parent_name']
-        nodes[name] = {
-            'name': name,
-            'text': display_name,
-            'parent': parent_name,
-            'nodes': []
-        }
-    for feature in features:
-        name = feature['name']
-        if name == 'whole_genome,NULL':
-            name = 'whole_genome'
-        parent_name = feature['parent_name']
-        display_name = feature['description']
-
-        if parent_name is None:
-            tree.append(nodes[name])
-        else:
-            nodes[parent_name]['nodes'].append(nodes[name])
-
-    def clean_tree(node):
-        if len(node['nodes']) == 0:
-            node['nodes'] = None
-        else:
-            for child in node['nodes']:
-                clean_tree(child)
-
-    for root in tree:
-        clean_tree(root)
-    
-
-    return(tree)

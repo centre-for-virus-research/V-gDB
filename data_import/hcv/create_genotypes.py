@@ -1,8 +1,19 @@
 import sqlite3
 
-conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/HCV/HCV_full.db")
+conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/HCV/HCV_full_new_Usher.db")
 conn.row_factory = sqlite3.Row  
 cur = conn.cursor()
+
+cur.execute(f"""
+            ALTER TABLE meta_data
+            RENAME COLUMN nearest_reference_subtype TO EPA_minor_clade;"""
+            )
+cur.execute(f"""
+            ALTER TABLE meta_data
+            RENAME COLUMN nearest_reference_genotype TO EPA_major_clade;"""
+            )
+  
+conn.commit()
 
 # # Drop old table if it exists
 cur.execute("DROP TABLE IF EXISTS genotypes;")
@@ -17,7 +28,7 @@ cur.execute("""CREATE TABLE genotypes
 conn.commit()
 
 
-cur.execute("SELECT nearest_reference_genotype AS EPA_major_clade, nearest_reference_subtype AS EPA_minor_clade from meta_data WHERE nearest_reference_genotype IS NOT NULL;")
+cur.execute("SELECT EPA_major_clade, EPA_minor_clade from meta_data WHERE EPA_major_clade IS NOT NULL;")
 rows = cur.fetchall()
 # conn.close()
 
@@ -31,6 +42,7 @@ for row in rows:
     if minor_clade:
       if minor_clade not in major_clade_map[major_clade]:
         major_clade_map[major_clade].append(minor_clade)
+
 for key in major_clade_map.keys():
   minor_clades = major_clade_map[key]
   if len(minor_clades) == 0:
@@ -55,6 +67,15 @@ for key in major_clade_map.keys():
               key,
               minor_clade,
           ))
+    
+# cur.execute(f"""
+#             ALTER TABLE meta_data
+#             RENAME COLUMN nearest_reference_subtype TO EPA_minor_clade;"""
+#             )
+# cur.execute(f"""
+#             ALTER TABLE meta_data
+#             RENAME COLUMN nearest_reference_genotype TO EPA_major_clade;"""
+#             )
   
 conn.commit()
 conn.close()

@@ -8,6 +8,7 @@ from api.routes import lineage
 from api.routes import taxonomy
 from api.routes import analysis
 from api.routes import polymorphisms
+from api.routes import version
 
 urlpatterns = [
     
@@ -71,6 +72,8 @@ urlpatterns = [
 
     path('filters/search_protein_name/', search.search_protein_name, name='search_protein_name'),
     path('filters/search_drug/', search.search_drug, name='search_drug'),
+
+    path('version/', version.get_version, name='get_version'),
 
     
 ]

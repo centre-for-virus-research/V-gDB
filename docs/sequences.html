@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="Python" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API &mdash; V-gDB 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8eae9801"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Building Rabies(RABV) resource" href="rabv-resource.html" />
+    <link rel="prev" title="Prerequisite" href="prerequisite.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            V-gDB
+          </a>
+          <div role="search">
+            <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+              <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+              <input type="hidden" name="check_keywords" value="yes" />
+              <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+          <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+          <ul class="current">
+          <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+          <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+          <li class="toctree-l1"><a class="reference internal" href="prerequisite.html">Prerequisite</a></li>
+          <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a>
+            <ul>
+              <li class="toctree-l2"><a class="reference internal" href="sequences.html">Sequences</a>
+                <ul>
+                  <li class="toctree-l3"><a class="reference internal" href="sequences.html#sequences">sequences</a></li>
+                  <li class="toctree-l3"><a class="reference internal" href="sequences.html#sequence">sequence/&lt;str:seq_id&gt;</a></li>
+                  <li class="toctree-l3"><a class="reference internal" href="sequences.html#sequence-reference">sequence/reference/&lt;str:seq_id&gt;</a></li>
+                  <li class="toctree-l3"><a class="reference internal" href="sequences.html#sequences-global">sequences/global</a></li>
+                </ul>
+                <!-- <ul>
+                  <li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a></li>
+                  <li class="toctree-l3"><a class="reference internal" href="#arguments">Arguments</a></li>
+                  <li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+                </ul> -->
+              </li>
+              <li class="toctree-l2"><a class="reference internal" href="phylogeny.html">Phylogeny</a>
+                <ul>
+                  <li class="toctree-l3"><a class="reference internal" href="phylogeny.html#trees">phylogeny/trees</a></li>
+                </ul>
+              </li>
+              <li class="toctree-l2"><a class="reference internal" href="analysis.html">Analysis</a>
+                <ul>
+                  <li class="toctree-l3"><a class="reference internal" href="analysis.html#clade_assignment">analysis/clade_assignment/</a></li>
+                </ul>
+              </li>
+          </ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">V-gDB</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+            <ul class="wy-breadcrumbs">
+                <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+                <li class="breadcrumb-item active">Functions</li>
+                <li class="wy-breadcrumbs-aside">
+                  <a href="_sources/sequences.rst.txt" rel="nofollow"> View page source</a>
+                </li>
+            </ul>
+            <hr/>
+          </div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+            <section id="functions">
+              <h1>API - Sequences<a class="headerlink" href="#functions" title="Link to this heading"></a></h1>
+              <li class="toctree-l2"><a class="reference internal" href="sequences.html"></a>
+                <ul>
+                  <li class="toctree-l3"><a class="reference internal" href="sequences.html#sequences">sequences</a></li>
+                  <li class="toctree-l3"><a class="reference internal" href="sequences.html#sequence">sequence/&lt;str:seq_id&gt;</a></li>
+                  <li class="toctree-l3"><a class="reference internal" href="sequences.html#sequence-reference">sequence/reference/&lt;str:seq_id&gt;</a></li>
+                  <li class="toctree-l3"><a class="reference internal" href="sequences.html#sequences-global">sequences/global</a></li>
+                </ul>
+              </li>
+              <section id="sequences">
+                <h2>sequences<a class="headerlink" href="#sequences" title="Link to this heading"></a></h2>
+                <p>This api requences will return a list of all the meta-data and sequence information for the corresponding filters. If no filters are added, it will return a list of every sequence available in the database.</p>
+                <section id="usage-sequences">
+                  <h3>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h3>
+                  <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>/api/sequences/?[arguments]
+                  </pre></div>
+                  </div>
+                </section>
+                <section id="arguments-sequences">
+                  <h3>Arguments<a class="headerlink" href="#arguments-sequences" title="Link to this heading"></a></h3>
+                  <dl class="std option">
+                    <dt class="sig sig-object std" id="cmdoption-isolate">
+                      <span class="sig-name descname"><span class="pre">isolate</span></span> 
+                    </dt>
+                    <dd>
+                      <p><strong>(Optional)</strong> Isolate ID of the sequence.
+                        Example: <code class="docutils literal notranslate"><span class="pre">11292</span></code>
+                      </p>
+                    </dd>
+                  </dl>
+                  <dl class="std option">
+                    <dt class="sig sig-object std" id="cmdoption-pa">
+                      <span class="sig-name descname"><span class="pre">primary_accession</span></span> 
+                    </dt>
+                    <dd>
+                      <p><strong>(Optional)</strong> NCBI accession of the sequence.
+                        Example: <code class="docutils literal notranslate"><span class="pre">AB009601</span></code>
+                      </p>
+                    </dd>
+                  </dl>
+                  <dl class="std option">
+                    <dt class="sig sig-object std" id="cmdoption-pmed">
+                      <span class="sig-name descname"><span class="pre">pubmed_id</span></span> 
+                    </dt>
+                    <dd>
+                      <p><strong>(Optional)</strong> PubMed id number that is used as a reference for the sequence.
+                        Example: <code class="docutils literal notranslate"><span class="pre">11270607</span></code>
+                      </p>
+                    </dd>
+                  </dl>
+                  <dl class="std option">
+                    <dt class="sig sig-object std" id="cmdoption-pmed">
+                      <span class="sig-name descname"><span class="pre">exclusion_status</span></span> 
+                    </dt>
+                    <dd>
+                      <p><strong>(Optional)</strong> Some sequences are automatically excluded do to various reasons. To exclude these, set the exclusion_status to 0. If you only want excluded sequences, set the exclusion_status to 1.
+                        Example: <code class="docutils literal notranslate"><span class="pre">0, 1</span></code>
+                      </p>
+                    </dd>
+                  </dl>
+                  
+                  <dl class="std option">
+                    <dt class="sig sig-object std" id="cmdoption-pmed">
+                      <span class="sig-name descname"><span class="pre">full_genome</span></span> 
+                    </dt>
+                    <dd>
+                      <p><strong>(Optional)</strong> This filter will find all the sequences that have a genome coverage greater than the percentage specified. 
+                        Example: <code class="docutils literal notranslate"><span class="pre">90</span></code>
+                      </p>
+                    </dd>
+                    
+                  </dl>
+                  <dl class="std option">
+                    <dt class="sig sig-object std" id="cmdoption-pmed">
+                      <span class="sig-name descname"><span class="pre">EPA_major_clade</span></span> 
+                    </dt>
+                    <dd>
+                      <p><strong>(Optional)</strong> This filter will find all the sequences that have the major clade. This can be a singular value or a list
+                        Examples: <code class="docutils literal notranslate"><span class="pre">Bats</span></code>, <code class="docutils literal notranslate"><span class="pre">[Bats, Africa-2]</span></code>
+                      </p>
+                      <p><strong>(Required)</strong> If the EPA_minor_clade filter is included.
+                      </p>
+                    </dd>
+                    
+                  </dl>
+                  <dl class="std option">
+                    <dt class="sig sig-object std" id="cmdoption-pmed">
+                      <span class="sig-name descname"><span class="pre">EPA_minor_clade</span></span> 
+                    </dt>
+                    <dd>
+                      <p><strong>(Optional)</strong> This filter will find all the sequences that have the minor clade. This can be a singular value or a list.
+                        If you are using the EPA_minor_clade, then you must specify the EPA_major_clade filter as well.
+                        Example: <code class="docutils literal notranslate"><span class="pre">SEA1a</span></code>, <code class="docutils literal notranslate"><span class="pre">[SEA1a, SEA2a]</span></code>
+                      </p>
+                    </dd>
+                    
+                  </dl>
+
+
+                </section>
+                <section id="example-1-sequences">
+                  <h3>Example<a class="headerlink" href="#example-1-sequences" title="Link to this heading"></a></h3>
+                  <p>This will return are the non-exlucded sequences from the Asian SEA1b clade.</p>
+                  <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>https://localhost:8000/api/sequences/?EPA_major_clade=Asian&EPA_minor_clade=SEA1b&exclusion_status=0
+                  </pre></div>
+                  </div>
+                  </section>
+                  <section id="example-2-sequences">
+                  <h3>Example<a class="headerlink" href="#example-2-sequences" title="Link to this heading"></a></h3>
+                  <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>https://localhost:8000/
+                  </pre></div>
+                  </div>
+                </section>
+              </section>
+
+              <section id="sequence">
+                <h2>sequence<a class="headerlink" href="#sequence" title="Link to this heading"></a></h2>
+                <p>This will return raw and aligned sequence, and corresponding meta-data for the requested sequence.</p>
+                <section id="usage-sequence">
+                  <h3>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h3>
+                  <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>api/sequence/&lt;str:seq_id&gt;
+                  </pre></div>
+                  </div>
+                </section>
+                <section id="arguments-sequence">
+                  <h3>Arguments<a class="headerlink" href="#arguments-sequence" title="Link to this heading"></a></h3>
+                  <dl class="std option">
+                    <dt class="sig sig-object std" id="cmdoption-isolate">
+                      <span class="sig-name descname"><span class="pre">seq_id</span></span> 
+                    </dt>
+                    <dd>
+                      <p><strong>(Required)</strong> The NCBI accession of the sequence
+                        Example: <code class="docutils literal notranslate"><span class="pre">AB009601</span></code>
+                      </p>
+                    </dd>
+                  </dl>
+
+
+
+                </section>
+                <section id="example-1-sequence">
+                  <h3>Example<a class="headerlink" href="#example-1-sequence" title="Link to this heading"></a></h3>
+                  <div class="highlight-bash notranslate">
+                    <div class="highlight"><pre><span></span>https://localhost:8000/api/sequence/AB009601</pre>
+                    </div>
+                  </div>
+                </section>
+                
+              </section>
+
+              <section id="sequence-reference">
+                <h2>sequence reference<a class="headerlink" href="#sequence-reference" title="Link to this heading"></a></h2>
+                <p>This will return the reference sequence information and a list of all the sequences aligned to the reference sequence.</p>
+                <section id="usage-sequence-reference">
+                  <h3>Usage<a class="headerlink" href="#usage-sequence-reference" title="Link to this heading"></a></h3>
+                  <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>api/sequence/reference/&lt;str:seq_id&gt;
+                  </pre></div>
+                  </div>
+                </section>
+                <section id="arguments-sequence-reference">
+                  <h3>Arguments<a class="headerlink" href="#arguments-sequence-reference" title="Link to this heading"></a></h3>
+                  <dl class="std option">
+                    <dt class="sig sig-object std" id="cmdoption-isolate">
+                      <span class="sig-name descname"><span class="pre">seq_id</span></span> 
+                    </dt>
+                    <dd>
+                      <p><strong>(Required)</strong> The NCBI accession of the reference sequence.
+                        Example: <code class="docutils literal notranslate"><span class="pre">AB041966</span></code>
+                      </p>
+                    </dd>
+                  </dl>
+
+
+
+                </section>
+                <section id="example-1-sequence-reference">
+                <h3>Example<a class="headerlink" href="#example-1-sequence-reference" title="Link to this heading"></a></h3>
+                <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>https://localhost:8000/api/sequence/reference/AB041966
+                </pre></div>
+                </div>
+                </section>
+                
+              </section>
+
+              <section id="sequences-global">
+                <h2>sequences global<a class="headerlink" href="#sequences-global" title="Link to this heading"></a></h2>
+                <p>This will return a list of all the countries and their meta-data and a count of how many sequences are from that country.</p>
+                <section id="usage-sequences-global">
+                  <h3>Usage<a class="headerlink" href="#usage-sequences-global" title="Link to this heading"></a></h3>
+                  <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>api/sequences/global
+                  </pre></div>
+                  </div>
+                </section>
+                <section id="arguments-sequences-global">
+                  <h3>Arguments<a class="headerlink" href="#arguments-sequences-global" title="Link to this heading"></a></h3>
+                  <p>None</p>
+                </section>
+                <section id="example-1-sequences-global">
+                  <h3>Example<a class="headerlink" href="#example-1-sequences-global" title="Link to this heading"></a></h3>
+                  <div class="highlight-bash notranslate">
+                    <div class="highlight"><pre><span></span>https://localhost:8000/api/sequences/global</pre></div>
+                  </div>
+                </section>
+                
+              </section>
+            </section>
+
+    </section>
+
+
+  </div>
+  <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+      <a href="prerequisite.html" class="btn btn-neutral float-left" title="Prerequisite" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      <a href="rabv-resource.html" class="btn btn-neutral float-right" title="Building Rabies(RABV) resource" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Dana Allen.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+  <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+  provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+  </footer>
+
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

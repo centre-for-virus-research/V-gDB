@@ -252,7 +252,7 @@ class Sequences:
             # Add hose data
             if meta_data["host_taxa_id"]:
                 host_taxa_id = meta_data["host_taxa_id"]
-                if self.database == 'FLU':
+                if self.database == 'FLU' or self.database == 'HCV':
                     taxanomic_info = None
                 else:
                     taxanomic_info = sh._get_taxa_from_host_taxa_id(cursor, host_taxa_id)

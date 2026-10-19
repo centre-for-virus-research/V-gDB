@@ -50,6 +50,37 @@ class Polymorphisms:
                     "chart_data": chart_data
                 }
         return result
+
+    def get_polymorphisms_regions(self):
+
+        
+        with connections[self.database].cursor() as cursor:
+            query = f"""
+                SELECT *
+                FROM features
+                WHERE accession = 'NC_004102'
+                AND product IN (%s, %s, %s);
+            """
+        
+            features = fetch_all(cursor, query, ['nonstructural protein NS5A', 'protease/helicase protein NS3', 'RNA-dependent RNA polymerase NS5B'])
+
+            query = f"""
+                    SELECT sequence
+                    FROM sequences
+                    WHERE header = %s;
+                """
+            
+            reference_sequence = fetch_one(cursor, query, ['NC_004102'])
+
+
+
+        print(reference_sequence)
+
+        result = {
+                    "features": features,
+                    "reference_sequence": reference_sequence['sequence']
+                }
+        return result
     
     
 

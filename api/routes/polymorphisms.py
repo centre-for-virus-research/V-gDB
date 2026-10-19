@@ -45,3 +45,21 @@ def get_polymorphism(request, id):
         )
         
     return Response(data)
+
+@api_view(['GET'])
+def get_polymorphisms_regions(request):
+
+    database = request.headers.get('database', 'default')
+    
+
+    polymorphisms = Polymorphisms(database=database)
+    try:
+        data = polymorphisms.get_polymorphisms_regions()
+    except ValueError as e:
+        print(f"Error: {e}")
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+        
+    return Response(data)

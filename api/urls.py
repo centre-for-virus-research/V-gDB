@@ -24,6 +24,7 @@ urlpatterns = [
 
     # POLYMORPHISMS
     path('polymorphisms/', polymorphisms.get_polymorphisms, name='get_polymorphisms'), 
+    path('polymorphisms/get_regions', polymorphisms.get_polymorphisms_regions, name='get_polymorphisms_regions'), 
     path('polymorphism/<str:id>', polymorphisms.get_polymorphism, name='get_polymorphism'), 
 
     # TAXANOMY

@@ -33,7 +33,7 @@ def _get_all_polymorphims(cursor, filters=None):
 
 
     query = f"""
-                SELECT signature_id, signature_kind, protein_name, aa_position, mutation_type, drug, alignment_name
+                SELECT signature_id, signature_kind, protein_name, aa_position, mutation_type, drug, genotype
                 FROM mutation_catalog
                 {filter_where_sql};
             """

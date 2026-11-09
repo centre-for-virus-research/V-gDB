@@ -81,3 +81,10 @@ conn.commit()
 conn.close()
 
 
+
+
+
+
+# CREATE INDEX IF NOT EXISTS idx_meta_data_exclusion_accession
+# ON meta_data (exclusion_status, primary_accession);
+

@@ -41,7 +41,7 @@ class Polymorphisms:
             polymorphism = ph._get_polymorphim(cursor, id)
 
             sequences = ph._get_polymorphim_sequences(cursor, id)
-            chart_data = ph._get_mutation_prevalence(cursor, id)
+            chart_data = ph._get_mutation_prevalence(cursor, id, sequences)
 
 
         result = {
@@ -71,10 +71,6 @@ class Polymorphisms:
                 """
             
             reference_sequence = fetch_one(cursor, query, ['NC_004102'])
-
-
-
-        print(reference_sequence)
 
         result = {
                     "features": features,

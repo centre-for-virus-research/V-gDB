@@ -33,7 +33,7 @@ def _get_all_polymorphims(cursor, filters=None):
 
 
     query = f"""
-                SELECT signature_id, signature_kind, protein_name, aa_position, mutation_type, drug, genotype
+                SELECT signature_id, signature_kind, protein_name, aa_position, mutation_type, drug, relevant_genotypes
                 FROM mutation_catalog
                 {filter_where_sql};
             """
@@ -98,52 +98,16 @@ def _get_polymorphim_sequence(cursor, id):
     return results
 
 
-def _get_mutation_prevalence(cursor, id):
-    gene = id.split(":")[0]
-
-    accession_query = f""" 
-                            SELECT cso.primary_accession
-                            FROM completed_signatures_only cso
-                            WHERE cso.signature_id = %s
-                        """
-
-    # reference_query = f"""
-    #                     SELECT accession, cds_start, cds_end
-    #                     FROM features
-    #                     WHERE product LIKE %s
-    #                     AND accession IN (
-    #                         SELECT DISTINCT reference_accession
-    #                         FROM features
-    #                         WHERE accession IN  ({accession_query}))
-    #                 """
-
-    # meta_data_query = f"""
-    #                 SELECT sa.sequence_id, sa.alignment, f.reference_accession, md.host, md.EPA_major_clade, md.EPA_minor_clade, md.host_scientific_name, md.country
-    #                 FROM sequence_alignment sa 
-    #                 LEFT JOIN features f ON f.accession = sa.sequence_id
-    #                 LEFT JOIN meta_data md ON md.primary_accession = sa.sequence_id
-    #                 WHERE f.product LIKE %s
-    #                 AND sa.sequence_id IN ({accession_query})
-    #             """
+def _get_mutation_prevalence(cursor, id, sequences):
+    # gene = id.split(":")[0]
+    primary_accessions = [item["primary_accession"] for item in sequences]
+    placeholders = ', '.join(['%s'] * len(primary_accessions))
 
     meta_data_query = f"""
-                        SELECT md.primary_accession, md.host, md.EPA_major_clade, md.EPA_minor_clade, md.host_scientific_name, md.country
-                        FROM meta_data md
-                        WHERE md.primary_accession IN ({accession_query})
-                        """
-       
-    # genotype_count_query = f"""
-    #                     SELECT EPA_major_clade, COUNT(EPA_major_clade) as count
-    #                     FROM meta_data
-    #                     WHERE exclusion_status = 0
-    #                     GROUP BY EPA_major_clade
-    #                 """
-    # subtype_count_query = f"""
-    #                     SELECT EPA_major_clade, EPA_minor_clade, COUNT(EPA_minor_clade) as count
-    #                     FROM meta_data
-    #                     WHERE exclusion_status = 0
-    #                     GROUP BY EPA_major_clade, EPA_minor_clade
-    #                 """
+                            SELECT md.primary_accession, md.host, md.EPA_major_clade, md.EPA_minor_clade, md.host_scientific_name, md.country
+                            FROM meta_data md
+                            WHERE md.primary_accession IN ({placeholders})
+                            """
 
     tmp_query = f"""
 
@@ -156,14 +120,12 @@ def _get_mutation_prevalence(cursor, id):
                     GROUP BY EPA_major_clade, EPA_minor_clade;
 
                 """
-    # params_reference = [f"%{gene}%", id]
-    # params_md = [f"%{gene}%", id]
+
     params_md = [id]
-    # results_reference = fetch_all(cursor, reference_query, params_reference)
-    results_meta_data = fetch_all(cursor, meta_data_query, params_md)
-    # results_genotype_count = fetch_all(cursor, genotype_count_query, params=None)
+    params_md.extend(primary_accessions)
+
+    results_meta_data = fetch_all(cursor, meta_data_query, primary_accessions)
     results_tmp = fetch_all(cursor, tmp_query, params=None)
-    # results_subtype_count = fetch_all(cursor, subtype_count_query, params=None)
 
     results_subtype_count = []
     genotype_totals = {}
@@ -183,10 +145,8 @@ def _get_mutation_prevalence(cursor, id):
         for major_clade, count in genotype_totals.items()
     ]
 
-    # print(results_genotype_count, results_subtype_count)
     return {
 
-            # "reference":results_reference, 
             "meta_data":results_meta_data,
             "genotype_count": results_genotype_count, 
             "subtype_count": results_subtype_count

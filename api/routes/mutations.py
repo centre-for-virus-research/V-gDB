@@ -10,7 +10,7 @@ def get_host_adaptations(request):
     params = dict(request.GET.items())
 
     final_params = {}
-    master_accession = ""
+    master_accession = "NC_001542"
     if params:
         for key, value in params.items():
             params[key] = value.split(',') if ',' in value else value

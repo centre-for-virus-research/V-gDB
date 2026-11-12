@@ -23,24 +23,6 @@ class Mutations:
         self.database = database
         self.reference_sequence = reference_sequence or REFERENCE_SEQUENCES_MAP[self.database]
 
-    # def _add_filters(self, params):
-
-    #     where_clauses = []
-    #     where_params = []
-    #     columns_picked = []
-    #     for key, value in params.items():
-    #         columns_picked.append(f"hl.{key} as host")
-    #         if isinstance(value, list):
-    #             placeholders = ', '.join(['%s'] * len(value))
-    #             where_clauses.append(f"hl.{key} IN ({placeholders})")
-    #             where_params.extend(value)
-    #         else:
-    #             where_clauses.append(f"hl.{key} = %s")
-    #             where_params.append(value)
-
-    #     where_str = ' AND '.join(where_clauses)
-    #     columns_str = ', '.join(columns_picked)
-    #     return where_str, where_params, columns_str
 
     def _parse_and_translate_results(self, row):
 
@@ -105,6 +87,7 @@ class Mutations:
         
     def get_host_adaptations(self, params, master_accession):
         where_clauses = []
+        print("params", params)
         if params:
             filterHelper = FilterHelper(filters=params, database=self.database)
             where_str, filter_params, columns_str = filterHelper.add_filters_host_mutations()

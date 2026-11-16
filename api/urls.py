@@ -42,6 +42,7 @@ urlpatterns = [
 
 
     path('lineages/', lineage.get_lineage, name='get_lineage'),
+    path('lineages/maddog', lineage.get_maddog_lineage, name='get_maddog_lineages'),
 
 
 

@@ -1,6 +1,8 @@
 from django.db import connections
 from models.helpers import * 
 from Bio.Seq import Seq
+from Bio import Phylo
+from .maddog.plot_reference_tree import build_maddog_tree
 
 def _build_lineages_tree(clades):
     nodes = {}
@@ -62,4 +64,17 @@ class Lineages:
 
         return lineages_tree
 
-   
+    def get_maddog_lineages(self):
+
+        query = 'SELECT newick FROM trees WHERE name="full_tree_midpoint_rooted"'
+      
+
+        with connections[self.database].cursor() as cursor:
+            cursor.execute(query)
+            maddog_tree = dictfetchall(cursor)
+
+            maddog_tree = build_maddog_tree(maddog_tree[0]["newick"], self.database)
+
+        return maddog_tree
+
+

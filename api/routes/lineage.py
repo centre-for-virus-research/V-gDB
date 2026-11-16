@@ -12,3 +12,15 @@ def get_lineage(request):
     data = lineages.get_lineages()
 
     return Response(data)
+
+@api_view(['GET'])
+def get_maddog_lineage(request):
+
+    database = request.headers.get('database', 'default')
+
+    lineages = Lineages(database=database)
+    data = lineages.get_maddog_lineages()
+
+    return Response(data)
+
+

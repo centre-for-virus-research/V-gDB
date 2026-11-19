@@ -49,8 +49,6 @@ urlpatterns = [
     path('alignments/download', alignments.download_alignments, name='download_alignment'),
 
 
-
-
     path('analysis/clade_assignment/', analysis.run_phylogenetic_clade_assignment_analysis, name='run_phylogenetic_clade_assignment_analysis'),
     path('analysis/drug_analysis/', analysis.run_drug_analysis, name='run_drug_analysis'),
     
@@ -73,6 +71,7 @@ urlpatterns = [
 
     path('filters/search_protein_name/', search.search_protein_name, name='search_protein_name'),
     path('filters/search_drug/', search.search_drug, name='search_drug'),
+    path('filters/search_polymorphisms/<str:query>', search.search_polymorphisms, name='search_polymorphisms'),
 
     
 ]

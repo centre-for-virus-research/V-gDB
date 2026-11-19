@@ -43,10 +43,11 @@ def drug_analysis(alignment, features):
         cds_start = int(feature["cds_start"])
         cds_end = int(feature["cds_end"])
         
-        print(clean_feature)
-        sub_seq = alignment[cds_start-1: cds_end-1]
+        
+        sub_seq = alignment[cds_start-1: cds_end-1].upper()
+        
         protein_seq = translate_sequence(sub_seq)
-        # print("PROTEIN ", protein)
+        
         with connections["HCV"].cursor() as cursor:
             cursor.execute("""SELECT distinct (signature_id) 
                                 FROM mutation_catalog
@@ -54,7 +55,7 @@ def drug_analysis(alignment, features):
                             """, [clean_feature])
 
             mutations = dictfetchall(cursor)
-            # print(mutations)
+        
 
         for mutation in mutations:
             signature_id = mutation["signature_id"]
@@ -91,8 +92,8 @@ def drug_analysis(alignment, features):
         if len(present_mutations) > 0:
             
             placeholders = ', '.join(['%s'] * len(present_mutations))
-            query = f""" SELECT * FROM mutation_catalog WHERE signature_id IN ({placeholders})
-                    """
+            query = f""" SELECT * FROM mutation_catalog WHERE signature_id IN ({placeholders})"""
+            
             with connections["HCV"].cursor() as cursor:
                 final_mutations.extend(fetch_all(cursor, query, present_mutations))
                 

@@ -4,7 +4,6 @@ from models.helpers import *
 from collections import Counter
 from collections import defaultdict
 
-    
 from models import polymorphisms_helpers as ph
 
 class Polymorphisms:
@@ -78,6 +77,4 @@ class Polymorphisms:
                 }
         return result
     
-    
-
     

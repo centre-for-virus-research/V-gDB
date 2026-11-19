@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from django.db import connections
 from models.helpers import *
@@ -94,16 +95,85 @@ def run_phylogenetic_clade_assignment_analysis(request):
     })
 
 
-@api_view(['GET'])
+
+
+@api_view(["POST"])
+@parser_classes([MultiPartParser, FormParser])
 def run_drug_analysis(request):
-    params = dict(request.GET.items())
-    alignment = params["alignment"]
-    reference_accession = params["reference_accession"]
+
+    database = request.headers.get("database")
+    print("DATABASE:", database)
+
+    # Retrieve form fields
+    reference_accession = request.data.get("reference_accession")
+    
+
+    # Retrieve uploaded alignment file
+    alignment_file = request.FILES.get("alignment")
+
+    if not reference_accession:
+        return Response(
+            {"error": "Missing reference_accession"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not alignment_file:
+        return Response(
+            {"error": "Missing alignment file"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not database:
+        return Response(
+            {"error": "Missing database header"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Read alignment file
+    try:
+        alignment = alignment_file.read().decode("utf-8")
+    except UnicodeDecodeError:
+        return Response(
+            {"error": "Alignment file must be UTF-8 encoded"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Existing analysis logic
     features = None
+
     with connections[database].cursor() as cursor:
-        features = sh._get_features_from_primary_accession(cursor, reference_accession)
+        features = sh._get_features_from_primary_accession(
+            cursor,
+            reference_accession
+        )
+
     data = drug_analysis(alignment, features)
+
     return Response(data)
 
+# @api_view(['GET'])
+# def run_drug_analysis(request):
+#     params = dict(request.GET.items())
+#     database = request.headers.get('database')
+#     print("DATABASE ", database)
+#     alignment = params["alignment"]
+#     job_id = params["job_id"]
 
+#     job_dir = TASKS_DIR / job_id
+#     job_dir.mkdir(parents=True, exist_ok=True)
 
+#     results_dir = job_dir / "results"
+#     fasta_file = results_dir / "input_seqs_with_ref_alignment.fa"
+#     for record in SeqIO.parse(fasta_file, "fasta"):
+#         if record.id == accession:
+#             # print(f"ID: {record.id}")
+#             # print(f"Sequence: {record.seq}")
+#             queries[accession]["aligned_sequence"] = str(record.seq)
+
+#     reference_accession = params["reference_accession"]
+#     features = None
+#     with connections[database].cursor() as cursor:
+#         features = sh._get_features_from_primary_accession(cursor, reference_accession)
+#     data = drug_analysis(alignment, features)
+    
+#     return Response(data)

@@ -124,7 +124,7 @@ def parse_clade_assignment_results(queries, results_dir):
                 # print(f"Sequence: {record.seq}")
                 queries[accession]["aligned_sequence"] = str(record.seq)
                 break
-        drug_data = drug_analysis(alignment=queries[accession]["aligned_sequence"], features=queries[accession]["blast_results"]["features"])
+        
         # else:
             # print("ID not found in FASTA.")
 

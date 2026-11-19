@@ -134,6 +134,19 @@ def search_drug(request):
     return Response(data)
 
 @api_view(['GET'])
+def search_polymorphisms(request, query):
+
+    database = request.headers.get('database', 'default')
+
+    with connections[database].cursor() as cursor:
+
+        # cursor.execute("SELECT DISTINCT(signature_id) FROM mutation_catalog WHERE signatured_id IS NOT NULL AND signature_id != ''")
+        cursor.execute("SELECT DISTINCT(signature_id) FROM mutation_catalog WHERE signature_id LIKE %s;", [f"%{query}%"])
+        data = dictfetchall(cursor)
+
+    return Response(data)
+
+@api_view(['GET'])
 def search_segments(request):
 
     database = request.headers.get('database', 'default')

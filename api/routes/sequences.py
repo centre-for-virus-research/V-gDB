@@ -8,6 +8,7 @@ import os
 
 from models.helpers import *
 from models.sequences import Sequences
+from django.http import StreamingHttpResponse
 
 @api_view(['GET'])
 def get_sequences(request):
@@ -124,6 +125,10 @@ def get_reference_sequence(request, primary_accession):
     return Response(data)
 
 
+class Echo:
+    def write(self, value):
+        return value
+
 
 @api_view(['GET'])
 def download_sequences_meta_data(request):
@@ -131,31 +136,85 @@ def download_sequences_meta_data(request):
     database = request.headers.get('database', 'default')
     params = dict(request.GET.items())
 
-    if params:
-        if "items_per_page" in params:
-            del params["items_per_page"]
+    if "items_per_page" in params:
+        del params["items_per_page"]
 
-    if params:
-        for key, value in params.items():
-            if key == "metadata_columns":
-                continue
-            else:
-                params[key] = value.split(',') if ',' in value else value
+    for key, value in params.items():
+        if key != "metadata_columns":
+            params[key] = value.split(',') if ',' in value else value
 
-    sequences = Sequences(database=database, filters=params)
+    sequences = Sequences(
+        database=database,
+        filters=params
+    )
 
     data = sequences.get_sequences_meta_data_download()
+
+    file_name = (
+        datetime.datetime.now().strftime('%Y-%m-%d')
+        + '_meta_data.csv'
+    )
+
+    def generate_csv():
+
+        pseudo_buffer = Echo()
+        writer = csv.writer(pseudo_buffer)
+
+        data_iterator = iter(data)
+
+        try:
+            first_row = next(data_iterator)
+        except StopIteration:
+            return
+
+        yield writer.writerow(first_row.keys())
+        yield writer.writerow(first_row.values())
+
+        for row in data_iterator:
+            yield writer.writerow(row.values())
+
+    response = StreamingHttpResponse(
+        generate_csv(),
+        content_type='text/csv'
+    )
+
+    response['Content-Disposition'] = (
+        f'attachment; filename="{file_name}"'
+    )
+
+    return response
+
+# @api_view(['GET'])
+# def download_sequences_meta_data(request):
+
+#     database = request.headers.get('database', 'default')
+#     params = dict(request.GET.items())
+
+#     if params:
+#         if "items_per_page" in params:
+#             del params["items_per_page"]
+
+#     if params:
+#         for key, value in params.items():
+#             if key == "metadata_columns":
+#                 continue
+#             else:
+#                 params[key] = value.split(',') if ',' in value else value
+
+#     sequences = Sequences(database=database, filters=params)
+
+#     data = sequences.get_sequences_meta_data_download()
     
     
-    file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_meta_data.csv'
-    build_csv_file(data, file_name)
+#     file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_meta_data.csv'
+#     build_csv_file(data, file_name)
 
-    with open(file_name, 'r') as file:
-        response = HttpResponse(file, content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename='+file_name
-        os.remove(file_name)
+#     with open(file_name, 'r') as file:
+#         response = HttpResponse(file, content_type='text/csv')
+#         response['Content-Disposition'] = 'attachment; filename='+file_name
+#         os.remove(file_name)
 
-        return response
+#         return response
     
 @api_view(['GET'])
 def download_sequences(request):

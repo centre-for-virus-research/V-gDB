@@ -131,11 +131,11 @@ class Echo:
 
 
 @api_view(['GET'])
-def download_sequences_meta_data(request):
+def download_sequences_meta_data_HCV(request):
 
     database = request.headers.get('database', 'default')
     params = dict(request.GET.items())
-
+    print("PARAMS", params)
     if "items_per_page" in params:
         del params["items_per_page"]
 
@@ -147,7 +147,7 @@ def download_sequences_meta_data(request):
         database=database,
         filters=params
     )
-
+    # return
     data = sequences.get_sequences_meta_data_download()
 
     file_name = (
@@ -184,37 +184,36 @@ def download_sequences_meta_data(request):
 
     return response
 
-# @api_view(['GET'])
-# def download_sequences_meta_data(request):
+@api_view(['GET'])
+def download_sequences_meta_data(request):
 
-#     database = request.headers.get('database', 'default')
-#     params = dict(request.GET.items())
+    database = request.headers.get('database', 'default')
+    params = dict(request.GET.items())
+    print("PARAMS", params)
+    if params:
+        if "items_per_page" in params:
+            del params["items_per_page"]
 
-#     if params:
-#         if "items_per_page" in params:
-#             del params["items_per_page"]
+    if params:
+        for key, value in params.items():
+            if key == "metadata_columns":
+                continue
+            else:
+                params[key] = value.split(',') if ',' in value else value
+    sequences = Sequences(database=database, filters=params)
 
-#     if params:
-#         for key, value in params.items():
-#             if key == "metadata_columns":
-#                 continue
-#             else:
-#                 params[key] = value.split(',') if ',' in value else value
-
-#     sequences = Sequences(database=database, filters=params)
-
-#     data = sequences.get_sequences_meta_data_download()
+    data = sequences.get_sequences_meta_data_download()
     
     
-#     file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_meta_data.csv'
-#     build_csv_file(data, file_name)
+    file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_meta_data.csv'
+    build_csv_file(data, file_name)
 
-#     with open(file_name, 'r') as file:
-#         response = HttpResponse(file, content_type='text/csv')
-#         response['Content-Disposition'] = 'attachment; filename='+file_name
-#         os.remove(file_name)
+    with open(file_name, 'r') as file:
+        response = HttpResponse(file, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename='+file_name
+        os.remove(file_name)
 
-#         return response
+        return response
     
 @api_view(['GET'])
 def download_sequences(request):
@@ -245,4 +244,32 @@ def download_sequences(request):
 
         return response
 
+@api_view(['GET'])
+def download_sequences_HCV(request):
 
+    database = request.headers.get('database', 'default')
+    params = dict(request.GET.items())
+    print(params)
+
+    if params:
+        if "items_per_page" in params:
+            del params["items_per_page"]
+
+    if params:
+        for key, value in params.items():
+            params[key] = value.split(',') if ',' in value else value
+
+    sequences = Sequences(database=database, filters=params)
+
+    data = sequences.get_sequences_download()
+    
+    
+    file_name = str(datetime.datetime.now().strftime('%Y-%m-%d')) + '_sequences.fasta'
+    build_fasta_file(data, file_name)
+
+    with open(file_name, 'r') as file:
+        response = HttpResponse(file, content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename='+file_name
+        os.remove(file_name)
+
+        return response

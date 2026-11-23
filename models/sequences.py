@@ -148,18 +148,24 @@ class Sequences:
             filterHelper = FilterHelper(filters = self.filters, database=self.database)
             where_str, filter_params = filterHelper.add_filters()
             where_clauses.append(where_str)
-        filter_where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+            filter_where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
         #############
 
-        query = f"""
-                    SELECT header as sequence_id, sequence as alignment
-                    FROM sequences
-                    WHERE header IN (
-                                        SELECT primary_accession
-                                        FROM meta_data
-                                        {filter_where_sql}
-                                    )
-                """
+            query = f"""
+                        SELECT header as sequence_id, sequence as alignment
+                        FROM sequences
+                        WHERE header IN (
+                                            SELECT primary_accession
+                                            FROM meta_data
+                                            {filter_where_sql}
+                                        )
+                    """
+            print(query)
+        else: 
+            query = f"""
+                        SELECT header as sequence_id, sequence as alignment
+                        FROM sequences
+                    """
 
         with connections[self.database].cursor() as cursor:
             cursor.execute(query, filter_params)
@@ -197,22 +203,112 @@ class Sequences:
                     WHERE sa.sequence_id IN ({filtered_primary_accession_query}) AND f.product = %s
                     """
                 filter_params.append(product)
+            elif self.filters:
+                alignment_query = f"""
+                    SELECT sa.*
+                    FROM sequence_alignment sa
+                    WHERE sa.sequence_id IN (
+                        {filtered_primary_accession_query}
+                    )
+                """
             else:
                 alignment_query = f"""
-                        SELECT sa.*
-                        FROM sequence_alignment sa
-                        WHERE sa.sequence_id IN ({filtered_primary_accession_query})
-                        """
+                    SELECT sa.*
+                    FROM sequence_alignment sa
+                """
 
             cursor.execute(alignment_query, filter_params)
             results = dictfetchall(cursor)
-
+            print("done")
             if product:
                 alignments = self.__parse_alignments(results, start_coordinate, end_coordinate, sequence_type)
             else: 
                 alignments = self.__build_alignment_file(results)
+            print("done build")
 
         return alignments
+
+    def get_sequences_alignment_download(self, start_coordinate, end_coordinate, sequence_type, product):
+
+        where_clauses, filter_params = [], []
+
+        if self.filters:
+            filterHelper = FilterHelper(
+                filters=self.filters,
+                database=self.database
+            )
+
+            where_str, filter_params = filterHelper.add_filters()
+            where_clauses.append(where_str)
+
+        filter_where_sql = (
+            f"WHERE {' AND '.join(where_clauses)}"
+            if where_clauses else ""
+        )
+
+        filtered_primary_accession_query = f"""
+            SELECT primary_accession
+            FROM meta_data
+            {filter_where_sql}
+        """
+
+        if product:
+            alignment_query = f"""
+                SELECT sa.*, f.*
+                FROM sequence_alignment sa
+                JOIN features f
+                    ON f.accession = sa.sequence_id
+                WHERE sa.sequence_id IN (
+                    {filtered_primary_accession_query}
+                )
+                AND f.product = %s
+            """
+
+            filter_params.append(product)
+
+        # elif self.filters:
+        #     alignment_query = f"""
+        #         SELECT sa.*
+        #         FROM sequence_alignment sa
+        #         WHERE sa.sequence_id IN (
+        #             {filtered_primary_accession_query}
+        #         )
+        #     """
+        # else:
+
+        def generate_alignments():
+
+            with connections[self.database].cursor() as cursor:
+
+                cursor.execute(alignment_query, filter_params)
+
+                columns = [col[0] for col in cursor.description]
+
+                while True:
+
+                    rows = cursor.fetchmany(5000)
+
+                    if not rows:
+                        break
+
+                    results = [
+                        dict(zip(columns, row))
+                        for row in rows
+                    ]
+
+                    if product:
+                        alignments = self.__parse_alignments(
+                            results,
+                            start_coordinate,
+                            end_coordinate,
+                            sequence_type
+                        )
+                    else:
+                        alignments = self.__build_alignment_file(results)
+
+                    yield from alignments
+
+        return generate_alignments()
 
 
         

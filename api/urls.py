@@ -18,6 +18,8 @@ urlpatterns = [
     path('sequences/global/', sequences.get_global_distribution_of_sequences, name='get_global_distribution_of_sequences'),
     path('sequences/download_sequences_meta_data/', sequences.download_sequences_meta_data, name='download_sequences_meta_data'),
     path('sequences/download_sequences/', sequences.download_sequences, name='download_sequences'),
+    path('sequences/download_sequences_HCV/', sequences.download_sequences_HCV, name='download_sequences_HCV'),
+    path('sequences/download_sequences_meta_data_HCV/', sequences.download_sequences_meta_data_HCV, name='download_sequences_meta_data_HCV'),
 
     # PHYLOGENY
     path("phylogeny/trees/", phylogeny.get_trees, name='get_trees'),
@@ -47,6 +49,7 @@ urlpatterns = [
 
 
     path('alignments/download', alignments.download_alignments, name='download_alignment'),
+    path('alignments/download_HCV', alignments.download_alignments_HCV, name='download_alignment_HCV'),
 
 
     path('analysis/clade_assignment/', analysis.run_phylogenetic_clade_assignment_analysis, name='run_phylogenetic_clade_assignment_analysis'),

@@ -51,15 +51,15 @@ def to_int_if_float(value):
   except (ValueError, TypeError):
       return None 
 
-conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/Flu/flu-gDB_dec02.db")
+conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/HCV/iav-db.db")
 conn.row_factory = sqlite3.Row  
 cur = conn.cursor()
 
 # # Drop old table if it exists
-cur.execute("DROP TABLE IF EXISTS isolates;")
+cur.execute("DROP TABLE IF EXISTS strains;")
 
 # Create new genotypes table
-cur.execute("""CREATE TABLE isolates 
+cur.execute("""CREATE TABLE strains 
             (
               strain TEXT,
               seg_1 TEXT,
@@ -76,7 +76,7 @@ cur.execute("""CREATE TABLE isolates
 conn.commit()
 
 
-cur.execute("SELECT Parsed_strain, primary_accession, segment from meta_data where strain IS NOT NULL;")
+cur.execute("SELECT Parsed_strain, primary_accession, segment from meta_data where Parsed_strain IS NOT NULL;")
 rows = cur.fetchall()
 # conn.close()
 
@@ -95,7 +95,7 @@ print("inserting")
 for key in isolates_map.keys():
   isolates = isolates_map[key]
   cur.execute("""
-            INSERT INTO isolates (
+            INSERT INTO strains (
               strain, 
               seg_1,
               seg_2,

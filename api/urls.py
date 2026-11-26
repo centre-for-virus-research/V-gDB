@@ -8,6 +8,7 @@ from api.routes import lineage
 from api.routes import taxonomy
 from api.routes import analysis
 from api.routes import polymorphisms
+from api.routes import strains
 
 urlpatterns = [
     
@@ -20,6 +21,11 @@ urlpatterns = [
     path('sequences/download_sequences/', sequences.download_sequences, name='download_sequences'),
     path('sequences/download_sequences_HCV/', sequences.download_sequences_HCV, name='download_sequences_HCV'),
     path('sequences/download_sequences_meta_data_HCV/', sequences.download_sequences_meta_data_HCV, name='download_sequences_meta_data_HCV'),
+
+
+    # STRAINS
+    path('strains/', strains.get_strains, name='get_strains'),
+    path('strain/', strains.get_strain, name='get_strain'),
 
     # PHYLOGENY
     path("phylogeny/trees/", phylogeny.get_trees, name='get_trees'),

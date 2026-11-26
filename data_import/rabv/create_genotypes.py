@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect("/Volumes/My Passport/CVR/gdb/HCV/HCV_full.db")
+conn = sqlite3.connect("/Users/dana/rabv.db")
 conn.row_factory = sqlite3.Row  
 cur = conn.cursor()
 
@@ -17,7 +17,7 @@ cur.execute("""CREATE TABLE genotypes
 conn.commit()
 
 
-cur.execute("SELECT nearest_reference_genotype AS EPA_major_clade, nearest_reference_subtype AS EPA_minor_clade from meta_data WHERE nearest_reference_genotype IS NOT NULL;")
+cur.execute("SELECT EPA_major_clade, EPA_minor_clade from meta_data WHERE EPA_major_clade IS NOT NULL;")
 rows = cur.fetchall()
 # conn.close()
 
